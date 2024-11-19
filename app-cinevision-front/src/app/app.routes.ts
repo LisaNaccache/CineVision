@@ -16,9 +16,7 @@ import {CinemaListComponent} from './Admin/Cinema/cinema-list/cinema-list.compon
 import {SessionFilmAddComponent} from './Admin/SessionFilm/session-film-add/session-film-add.component';
 import {SessionFilmEditComponent} from './Admin/SessionFilm/session-film-edit/session-film-edit.component';
 import {SessionFilmListComponent} from './Admin/SessionFilm/session-film-list/session-film-list.component';
-import {UtilisateurAddComponent} from './Admin/Utilisateur/utilisateur-add/utilisateur-add.component';
-import {UtilisateurEditComponent} from './Admin/Utilisateur/utilisateur-edit/utilisateur-edit.component';
-import {UtilisateurListComponent} from './Admin/Utilisateur/utilisateur-list/utilisateur-list.component';
+import {ReviewListComponent} from './Admin/Review/review-list/review-list.component';
 
 export const routes: Routes = [
   {path: 'inscription', component: InscriptionComponent},
@@ -35,10 +33,8 @@ export const routes: Routes = [
   {path: 'admin/cinema/add', component: CinemaAddComponent},
   {path: 'admin/cinema/edit:id', component: CinemaEditComponent},
   {path: 'admin/cinema', component: CinemaListComponent},
+  {path: 'admin/review', component: ReviewListComponent},
   {path: 'admin/session-film/add', component: SessionFilmAddComponent},
   {path: 'admin/session-film/edit:id', component: SessionFilmEditComponent},
   {path: 'admin/session-film', component: SessionFilmListComponent},
-  {path: 'admin/utilisateur/add', component: UtilisateurAddComponent},
-  {path: 'admin/utilisateur/edit:id', component: UtilisateurEditComponent},
-  {path: 'admin/utilisateur', component: UtilisateurListComponent},
 ];
