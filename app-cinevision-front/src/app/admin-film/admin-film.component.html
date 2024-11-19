@@ -10,7 +10,6 @@
     <table class="table table-bordered mt-3">
       <thead>
       <tr>
-        <th>Photo</th>
         <th>Titre</th>
         <th>Est Visible ?</th>
         <th>Catégories</th>
@@ -19,15 +18,12 @@
       </thead>
       <tbody>
       <tr *ngFor="let film of films">
-        <td>
-          <img [src]="film.photo" alt="{{ film.titre }}" style="height: 100px; width: auto;">
-        </td>
         <td>{{ film.titre }}</td>
         <td>Oui</td>
         <td>
-            <!--<span class="badge bg-secondary me-2" *ngFor="let category of film.categories || []">
-              {{ category }}
-            </span>-->
+          <!--<span class="badge bg-secondary me-2" *ngFor="let category of film.categories || []">
+            {{ category }}
+          </span>-->
         </td>
         <td>
           <!--<a class="btn btn-light me-2" [routerLink]="['/admin/film', film.id]">Modifier</a>
