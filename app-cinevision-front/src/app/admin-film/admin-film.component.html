@@ -6,8 +6,7 @@
     <!--<a [routerLink]="['/admin/film/add']" class="btn btn-primary">Ajouter un film</a>-->
   </div>
 
-  <!--*ngIf="films && films.length > 0; else noFilms"-->
-  <ng-container >
+  <ng-container *ngIf="films && films.length > 0; else noFilms">
     <table class="table table-bordered mt-3">
       <thead>
       <tr>

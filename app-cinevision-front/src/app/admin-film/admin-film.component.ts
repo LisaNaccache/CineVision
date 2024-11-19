@@ -1,10 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {Film} from '../Models/film';
+import {NgForOf, NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-admin-film',
   standalone: true,
-  imports: [],
+  imports: [
+    NgForOf,
+    NgIf
+  ],
   templateUrl: './admin-film.component.html',
   styleUrl: './admin-film.component.css'
 })
