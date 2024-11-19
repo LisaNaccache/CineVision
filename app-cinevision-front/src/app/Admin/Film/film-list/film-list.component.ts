@@ -1,18 +1,18 @@
 import {Component, OnInit} from '@angular/core';
-import {Film} from '../Models/film';
 import {NgFor, NgIf} from '@angular/common';
+import {Film} from '../../../Models/film';
 
 @Component({
-  selector: 'app-admin-film',
+  selector: 'app-film-list',
   standalone: true,
   imports: [
     NgFor,
     NgIf
   ],
-  templateUrl: './admin-film.component.html',
-  styleUrl: './admin-film.component.css'
+  templateUrl: './film-list.component.html',
+  styleUrl: './film-list.component.css'
 })
-export class AdminFilmComponent implements OnInit {
+export class FilmListComponent implements OnInit {
 
   films: Film[] = [];
 
