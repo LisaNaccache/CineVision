@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0701633d-1a33-402e-9850-25182403767c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-edit/film-edit.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-edit/film-edit.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-edit/film-edit.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-edit/film-edit.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-list/film-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-list/film-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-list/film-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app-cinevision-front/src/app/Admin/Film/film-list/film-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app-cinevision-front/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app-cinevision-front/src/app/app.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app-cinevision.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app-cinevision.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,7 +50,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1734192154551</updated>
-      <workItem from="1734192156209" duration="3050000" />
+      <workItem from="1734192156209" duration="4013000" />
     </task>
     <servers />
   </component>
@@ -60,7 +60,6 @@
       <list>
         <option value="$PROJECT_DIR$/backend/models/LearningPackage.js" />
         <option value="$PROJECT_DIR$/backend/models/LearningFact.js" />
-        <option value="$PROJECT_DIR$/backend/app-cinevision.js" />
       </list>
     </option>
   </component>
