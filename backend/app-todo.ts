@@ -263,7 +263,7 @@ interface UserLearningFact {
  *            $ref: '#/components/schemas/Todo'
  */
 app.get('/api/todos', (req: Request, res: Response) => {
-    console.log('handle http GET /api/todos');
+    console.log('handle http GET : /api/todos');
     res.send(todos);
 });
 
