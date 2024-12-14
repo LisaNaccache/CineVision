@@ -19,22 +19,22 @@ import {SessionFilmListComponent} from './Admin/SessionFilm/session-film-list/se
 import {ReviewListComponent} from './Admin/Review/review-list/review-list.component';
 
 export const routes: Routes = [
-  {path: 'inscription', component: InscriptionComponent},
-  {path: 'connection', component: ConnectionComponent},
-  {path: 'admin/film/add', component: FilmAddComponent},
-  {path: 'admin/film/edit:id', component: FilmEditComponent},
-  {path: 'admin/film', component: FilmListComponent},
-  {path: 'admin/acteur/add', component: ActeurAddComponent},
-  {path: 'admin/acteur/edit:id', component: ActeurEditComponent},
-  {path: 'admin/acteur', component: ActeurListComponent},
-  {path: 'admin/categorie/add', component: CategorieAddComponent},
-  {path: 'admin/categorie/edit:id', component: CategorieEditComponent},
-  {path: 'admin/categorie', component: CategorieListComponent},
-  {path: 'admin/cinema/add', component: CinemaAddComponent},
-  {path: 'admin/cinema/edit:id', component: CinemaEditComponent},
-  {path: 'admin/cinema', component: CinemaListComponent},
-  {path: 'admin/review', component: ReviewListComponent},
-  {path: 'admin/session-film/add', component: SessionFilmAddComponent},
-  {path: 'admin/session-film/edit:id', component: SessionFilmEditComponent},
-  {path: 'admin/session-film', component: SessionFilmListComponent},
+  { path: 'inscription', component: InscriptionComponent },
+  { path: 'connection', component: ConnectionComponent },
+  { path: 'admin/film/add', component: FilmAddComponent },
+  { path: 'admin/film/edit/:id', component: FilmEditComponent }, // Correction ici
+  { path: 'admin/film', component: FilmListComponent },
+  { path: 'admin/acteur/add', component: ActeurAddComponent },
+  { path: 'admin/acteur/edit/:id', component: ActeurEditComponent }, // Correction ici
+  { path: 'admin/acteur', component: ActeurListComponent },
+  { path: 'admin/categorie/add', component: CategorieAddComponent },
+  { path: 'admin/categorie/edit/:id', component: CategorieEditComponent }, // Correction ici
+  { path: 'admin/categorie', component: CategorieListComponent },
+  { path: 'admin/cinema/add', component: CinemaAddComponent },
+  { path: 'admin/cinema/edit/:id', component: CinemaEditComponent }, // Correction ici
+  { path: 'admin/cinema', component: CinemaListComponent },
+  { path: 'admin/review', component: ReviewListComponent },
+  { path: 'admin/session-film/add', component: SessionFilmAddComponent },
+  { path: 'admin/session-film/edit/:id', component: SessionFilmEditComponent }, // Correction ici
+  { path: 'admin/session-film', component: SessionFilmListComponent },
 ];

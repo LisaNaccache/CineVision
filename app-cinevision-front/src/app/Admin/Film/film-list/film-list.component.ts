@@ -1,55 +1,75 @@
 import {Component, OnInit} from '@angular/core';
-import {NgFor, NgIf} from '@angular/common';
+import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {Film} from '../../../Models/film';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-film-list',
   standalone: true,
   imports: [
     NgFor,
-    NgIf
+    NgIf,
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
+    RouterLink
   ],
   templateUrl: './film-list.component.html',
   styleUrl: './film-list.component.css'
 })
 export class FilmListComponent implements OnInit {
 
-  films: Film[] = [];
+  //films: Film[] = [];
+  films = [
+    {
+      id: 1,
+      title: 'The Shawshank Redemption',
+      popularity: 9.7,
+      releaseDate: new Date('1994-09-23'),
+      voteCount: 10000,
+      voteAverage: 9.3
+    },
+    {
+      id: 2,
+      title: 'The Godfather',
+      popularity: 9.5,
+      releaseDate: new Date('1972-03-24'),
+      voteCount: 9500,
+      voteAverage: 9.2
+    },
+    {
+      id: 3,
+      title: 'The Dark Knight',
+      popularity: 9.8,
+      releaseDate: new Date('2008-07-18'),
+      voteCount: 12000,
+      voteAverage: 9.0
+    },
+    {
+      id: 4,
+      title: 'Pulp Fiction',
+      popularity: 8.9,
+      releaseDate: new Date('1994-10-14'),
+      voteCount: 8500,
+      voteAverage: 8.9
+    },
+    {
+      id: 5,
+      title: 'Forrest Gump',
+      popularity: 8.8,
+      releaseDate: new Date('1994-07-06'),
+      voteCount: 8000,
+      voteAverage: 8.8
+    }
+  ];
 
   constructor() {
   }
 
   ngOnInit(): void {
-    this.films = [
-      {
-        id: 1,
-        titre: "Inception",
-        synopsis: "Un voleur expérimenté manipule les rêves pour accomplir des missions impossibles.",
-        photo: "https://via.placeholder.com/150",
-        bandeAnnonce: "https://www.youtube.com/watch?v=YoHD9XEInc0",
-        anneeProduction: 2010,
-        auteur: "Christopher Nolan"
-      },
-      {
-        id: 2,
-        titre: "The Matrix",
-        synopsis: "Un programmeur découvre un monde caché qui contrôle la réalité.",
-        photo: "https://via.placeholder.com/150",
-        bandeAnnonce: "https://www.youtube.com/watch?v=vKQi3bBA1y8",
-        anneeProduction: 1999,
-        auteur: "Lana Wachowski, Lilly Wachowski"
-      },
-      {
-        id: 3,
-        titre: "Interstellar",
-        synopsis: "Des astronautes explorent un trou de ver pour sauver l'humanité.",
-        photo: "https://via.placeholder.com/150",
-        bandeAnnonce: "https://www.youtube.com/watch?v=zSWdZVtXT7E",
-        anneeProduction: 2014,
-        auteur: "Christopher Nolan"
-      }
-    ];
 
-    console.log(this.films);
+
+    //console.log(this.films);
   }
 }

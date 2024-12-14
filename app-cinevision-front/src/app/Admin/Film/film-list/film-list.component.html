@@ -1,5 +1,4 @@
 <div class="container">
-
   <h1 class="mt-3">Listes des films</h1>
 
   <div class="d-flex justify-content-end mt-3">
@@ -10,24 +9,24 @@
     <table class="table table-bordered mt-3">
       <thead>
       <tr>
-        <th>Titre</th>
-        <th>Est Visible ?</th>
-        <th>Catégories</th>
-        <th>Actions</th>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Popularity</th>
+        <th>Date</th>
+        <th>Number of Votes</th>
+        <th>Vote Average</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let film of films">
-        <td>{{ film.titre }}</td>
-        <td>Oui</td>
+        <td>{{ film.id }}</td>
+        <td>{{ film.title }}</td>
+        <td>{{ film.popularity }}</td>
+        <td>{{ film.releaseDate | date: 'shortDate' }}</td>
+        <td>{{ film.voteCount }}</td>
+        <td>{{ film.voteAverage }}</td>
         <td>
-          <!--<span class="badge bg-secondary me-2" *ngFor="let category of film.categories || []">
-            {{ category }}
-          </span>-->
-        </td>
-        <td>
-          <!--<a class="btn btn-light me-2" [routerLink]="['/admin/film', film.id]">Modifier</a>
-          <button class="btn btn-danger" (click)="deleteFilm(film.id)">Supprimer</button>-->
+          <a class="btn btn-light" [routerLink]="['/admin/film/edit', film.id]">Edit</a>
         </td>
       </tr>
       </tbody>
@@ -37,5 +36,4 @@
   <ng-template #noFilms>
     <p class="mt-3 text-center">Aucun film trouvé.</p>
   </ng-template>
-
 </div>
