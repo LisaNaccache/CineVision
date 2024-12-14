@@ -11,13 +11,14 @@ const app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
 app.use(cors())
 
+
 const jsDocOptions = {
     definition: {
         openapi: '3.0.0', // Specify the OpenAPI version
         info: {
-            title: 'Express API with Swagger',
+            title: 'Cinevision API',
             version: '1.0.0',
-            description: 'Documentation for Express API with Swagger',
+            description: 'API for managing movies in Cinevision',
         },
         components: {
             schemas: {
@@ -141,6 +142,26 @@ const jsDocOptions = {
                             type: 'string',
                             format: 'date'
                         },
+                    },
+                },
+
+
+
+
+
+                Film: {
+                    type: 'object',
+                    properties: {
+                        id_film: { type: 'integer' },
+                        title: { type: 'string' },
+                        original_language: { type: 'string' },
+                        overview: { type: 'string' },
+                        popularity: { type: 'number' },
+                        release_date: { type: 'string', format: 'date' },
+                        runtime: { type: 'number' },
+                        status: { type: 'string' },
+                        vote_count: { type: 'integer' },
+                        vote_average: { type: 'number' },
                     },
                 },
             },
@@ -361,7 +382,6 @@ app.get('/api/todos/:id', (req, res) => {
     }
 });
 
-
 /**
  * @openapi
  * /api/todos/{id}:
@@ -458,6 +478,7 @@ app.get('/api/package/:id', async (req: Request, res: Response) => {
         res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
+
 /*app.get('/api/package/:id', (req, res) => {
     const id = +req.params['id']
     console.log('handle http GET /api/package/:id', id);
@@ -496,6 +517,7 @@ app.post('/api/package', async (req: Request, res: Response) => {
         res.status(400).json({error: 'Erreur lors de la validation ou de la création.'});
     }
 });
+
 /*app.post('/api/package', (req: Request, res: Response) => {
     let item = <LearningPackage>req.body;
     console.log('handle http POST /api/package', item);
@@ -640,6 +662,236 @@ app.put('/api/package/:id', async (req: Request, res: Response) => {
         res.status(400).json({error: 'Erreur lors de la validation ou de la création.'});
     }
 });*/
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------
+
+
+// Mock data for testing
+interface Film {
+    id_film: number;
+    title: string;
+    original_language: string;
+    overview: string;
+    popularity: number;
+    release_date: string;
+    runtime: number;
+    status: string;
+    vote_count: number;
+    vote_average: number;
+}
+
+
+let films: Film[] = [
+    {
+        id_film: 1,
+        title: "Inception",
+        original_language: "en",
+        overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
+        popularity: 99.5,
+        release_date: "2010-07-16",
+        runtime: 148,
+        status: "Released",
+        vote_count: 12000,
+        vote_average: 8.8,
+    },
+    {
+        id_film: 2,
+        title: "The Dark Knight",
+        original_language: "en",
+        overview: "When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.",
+        popularity: 98.7,
+        release_date: "2008-07-18",
+        runtime: 152,
+        status: "Released",
+        vote_count: 15000,
+        vote_average: 9.0,
+    },
+];
+
+
+// CRUD Endpoints for Films
+
+/**
+ * @openapi
+ * /api/films:
+ *   get:
+ *     description: Get all films
+ *     responses:
+ *       200:
+ *         description: An array of Films
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Film'
+ */
+app.get('/api/films', (req: Request, res: Response) => {
+    console.log('handle http GET : /api/films');
+    res.send(films);
+});
+
+/**
+ * @openapi
+ * /api/films:
+ *   post:
+ *     description: Save a new Film
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       201:
+ *         description: The created Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ */
+app.post('/api/films', (req: Request, res: Response) => {
+    let film = req.body as Film;
+    console.log('handle http POST /api/films', film);
+    film.id_film = films.length ? films[films.length - 1].id_film + 1 : 1;
+    films.push(film);
+    res.status(201).send(film);
+});
+
+/**
+ * @openapi
+ * /api/films:
+ *   put:
+ *     description: Update an existing Film
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       200:
+ *         description: The updated Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ */
+app.put('/api/films', (req: Request, res: Response) => {
+    let film = req.body as Film;
+    console.log('handle http PUT /api/films', film);
+    const id = film.id_film;
+    const idx = films.findIndex((f) => f.id_film === id);
+    if (idx !== -1) {
+        films[idx] = { ...films[idx], ...film };
+        res.send(films[idx]);
+    } else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
+
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   get:
+ *     description: Get a Film by its ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to get
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: The Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.get('/api/films/:id', (req: Request, res: Response) => {
+    const id = +req.params['id'];
+    console.log('handle http GET /api/films/:id', id);
+    const film = films.find((f) => f.id_film === id);
+    if (film) {
+        res.send(film);
+    } else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
+
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   delete:
+ *     description: Delete a Film by its ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to delete
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: The deleted Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.delete('/api/films/:id', (req: Request, res: Response) => {
+    const id = +req.params['id'];
+    console.log('handle http DELETE /api/films/:id', id);
+    const idx = films.findIndex((f) => f.id_film === id);
+    if (idx !== -1) {
+        const deleted = films.splice(idx, 1)[0];
+        res.send(deleted);
+    } else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
+
+
+
+
+
+
 
 // app.patch()
 

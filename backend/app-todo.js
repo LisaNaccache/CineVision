@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -48,9 +59,9 @@ var jsDocOptions = {
     definition: {
         openapi: '3.0.0', // Specify the OpenAPI version
         info: {
-            title: 'Express API with Swagger',
+            title: 'Cinevision API',
             version: '1.0.0',
-            description: 'Documentation for Express API with Swagger',
+            description: 'API for managing movies in Cinevision',
         },
         components: {
             schemas: {
@@ -174,6 +185,21 @@ var jsDocOptions = {
                             type: 'string',
                             format: 'date'
                         },
+                    },
+                },
+                Film: {
+                    type: 'object',
+                    properties: {
+                        id_film: { type: 'integer' },
+                        title: { type: 'string' },
+                        original_language: { type: 'string' },
+                        overview: { type: 'string' },
+                        popularity: { type: 'number' },
+                        release_date: { type: 'string', format: 'date' },
+                        runtime: { type: 'number' },
+                        status: { type: 'string' },
+                        vote_count: { type: 'integer' },
+                        vote_average: { type: 'number' },
                     },
                 },
             },
@@ -598,69 +624,177 @@ app.put('/api/package/:id', function (req, res) { return __awaiter(void 0, void 
         }
     });
 }); });
-/*app.put('/api/package', (req: Request, res: Response) => {
-    let item = <LearningPackage>req.body;
-    console.log('handle http PUT /api/package', item);
-    const id = item.id;
-    const idx = learningPackages.findIndex((x) => x.id === id);
-    if (idx !== -1) {
-        const found = learningPackages[idx];
-        if (item.title) {
-            found.title = item.title;
-        }
-        if (item.description) {
-            found.description = item.description;
-        }
-        if (item.category) {
-            found.category = item.category;
-        }
-        if (item.targetAudience) {
-            found.targetAudience = item.targetAudience;
-        }
-        if (item.difficulty) {
-            found.difficulty = item.difficulty;
-        }
-        res.send(found);
-    } else {
-        res.status(404).send('Learning Package entity not found by id:' + id);
-    }
-});
-*/
+var films = [
+    {
+        id_film: 1,
+        title: "Inception",
+        original_language: "en",
+        overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
+        popularity: 99.5,
+        release_date: "2010-07-16",
+        runtime: 148,
+        status: "Released",
+        vote_count: 12000,
+        vote_average: 8.8,
+    },
+    {
+        id_film: 2,
+        title: "The Dark Knight",
+        original_language: "en",
+        overview: "When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.",
+        popularity: 98.7,
+        release_date: "2008-07-18",
+        runtime: 152,
+        status: "Released",
+        vote_count: 15000,
+        vote_average: 9.0,
+    },
+];
+// CRUD Endpoints for Films
 /**
  * @openapi
- * /api/package-summaries:
+ * /api/films:
  *   get:
- *     description: Get all learning packages with id and title fields only
+ *     description: Get all films
  *     responses:
  *       200:
- *         description: An array of LearningPackage
+ *         description: An array of Films
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/LearningPackage'
+ *                 $ref: '#/components/schemas/Film'
  */
-/*app.get('/api/package-summaries', (req, res) => {
-    const packageSummaries = learningPackages.map(item => ({
-        id: item.id,
-        title: item.title,
-    }));
-    res.status(200).json(packageSummaries);
-});*/
-// Endpoints Learningfact
-/*app.post('/api/package/:id/fact', async (req: Request, res: Response) => {
-    try {
-        const newFact = await LearningFact.create(req.body);
-        res.status(201).json(newFact);
-    } catch (err) {
-        console.error('Erreur lors de la création du fact :', err);
-        res.status(500).json({error: 'Erreur interne du serveur.'});
-
-        console.error('Erreur lors de la création du package :', err);
-        res.status(400).json({error: 'Erreur lors de la validation ou de la création.'});
+app.get('/api/films', function (req, res) {
+    console.log('handle http GET : /api/films');
+    res.send(films);
+});
+/**
+ * @openapi
+ * /api/films:
+ *   post:
+ *     description: Save a new Film
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       201:
+ *         description: The created Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ */
+app.post('/api/films', function (req, res) {
+    var film = req.body;
+    console.log('handle http POST /api/films', film);
+    film.id_film = films.length ? films[films.length - 1].id_film + 1 : 1;
+    films.push(film);
+    res.status(201).send(film);
+});
+/**
+ * @openapi
+ * /api/films:
+ *   put:
+ *     description: Update an existing Film
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       200:
+ *         description: The updated Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ */
+app.put('/api/films', function (req, res) {
+    var film = req.body;
+    console.log('handle http PUT /api/films', film);
+    var id = film.id_film;
+    var idx = films.findIndex(function (f) { return f.id_film === id; });
+    if (idx !== -1) {
+        films[idx] = __assign(__assign({}, films[idx]), film);
+        res.send(films[idx]);
     }
-});*/
+    else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   get:
+ *     description: Get a Film by its ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to get
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: The Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.get('/api/films/:id', function (req, res) {
+    var id = +req.params['id'];
+    console.log('handle http GET /api/films/:id', id);
+    var film = films.find(function (f) { return f.id_film === id; });
+    if (film) {
+        res.send(film);
+    }
+    else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   delete:
+ *     description: Delete a Film by its ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to delete
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: The deleted Film
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.delete('/api/films/:id', function (req, res) {
+    var id = +req.params['id'];
+    console.log('handle http DELETE /api/films/:id', id);
+    var idx = films.findIndex(function (f) { return f.id_film === id; });
+    if (idx !== -1) {
+        var deleted = films.splice(idx, 1)[0];
+        res.send(deleted);
+    }
+    else {
+        res.status(404).send('Film entity not found by id:' + id);
+    }
+});
 // app.patch()
 console.log('starting...');
 app.listen(3000, function () {
