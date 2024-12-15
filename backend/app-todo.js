@@ -37,16 +37,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
-var swaggerJsdoc = require("swagger-jsdoc"); // * as swaggerJsdoc from 'swagger-jsdoc'
+var swaggerJsdoc = require("swagger-jsdoc");
 var swaggerUi = require("swagger-ui-express");
-var database_1 = require("./database"); // import the helper from database.ts
+var database_1 = require("./database");
+var oracledb = require("oracledb");
 var cors = require('cors');
 var app = express();
-app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
+app.use(express.json());
 app.use(cors());
+// Swagger Documentation Configuration
 var jsDocOptions = {
     definition: {
-        openapi: '3.0.0', // Specify the OpenAPI version
+        openapi: '3.0.0',
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -54,31 +56,6 @@ var jsDocOptions = {
         },
         components: {
             schemas: {
-                Todo: {
-                    type: 'object',
-                    properties: {
-                        id: {
-                            type: 'integer',
-                        },
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                    },
-                },
-                TodoNoId: {
-                    type: 'object',
-                    properties: {
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                    },
-                },
                 Film: {
                     type: 'object',
                     properties: {
@@ -99,168 +76,13 @@ var jsDocOptions = {
             },
         },
     },
-    apis: ['app-todo.js'],
+    apis: ['./app.ts'], // Points to this file for documentation
 };
 var apiDoc = swaggerJsdoc(jsDocOptions);
-console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
-/*app.get('/swagger.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(apiDoc);
-});*/
+// Liveness Check Endpoint
 app.get('/api/liveness', function (req, res) {
     res.send('OK !!!');
-});
-var idGenerator = 1;
-function newId() {
-    return idGenerator++;
-}
-var todos = [
-    { id: newId(), title: 'Learn TypeScript' },
-    { id: newId(), title: 'Learn Angular' },
-    { id: newId(), title: 'Learn NodeJs' },
-    { id: newId(), title: 'Learn Express' },
-];
-/**
- * @openapi
- * /api/todos:
- *   get:
- *     description: Get all todos
- *     responses:
- *       200:
- *         description: An array of Todo
- *         schema:
- *          type: array
- *          items:
- *            $ref: '#/components/schemas/Todo'
- */
-app.get('/api/todos', function (req, res) {
-    console.log('handle http GET : /api/todos');
-    res.send(todos);
-});
-/**
- * @openapi
- * /api/todos:
- *   post:
- *     description: save a new Todo
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/TodoNoId'
- *     responses:
- *       200:
- *         description: An array of Todo
- *         schema:
- *           $ref: '#/components/schemas/Todo'
- */
-app.post('/api/todos', function (req, res) {
-    var item = req.body;
-    console.log('handle http POST /api/todos', item);
-    item.id = newId();
-    todos.push(item);
-    res.send(item);
-});
-/**
- * @openapi
- * /api/todos:
- *   put:
- *     description: update an existing todo
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Todo'
- *     responses:
- *       200:
- *         description: An array of Todo
- *         schema:
- *           $ref: '#/components/schemas/Todo'
- */
-app.put('/api/todos', function (req, res) {
-    var item = req.body;
-    console.log('handle http PUT /api/todos', item);
-    var id = item.id;
-    var idx = todos.findIndex(function (x) { return x.id === id; });
-    if (idx !== -1) {
-        var found = todos[idx];
-        if (item.title) {
-            found.title = item.title;
-        }
-        if (item.description) {
-            found.description = item.description;
-        }
-        res.send(found);
-    }
-    else {
-        res.status(404).send('Todo entity not found by id:' + id);
-    }
-});
-/**
- * @openapi
- * /api/todos/{id}:
- *   get:
- *     description: get a todo by its id
- *     parameters:
- *         - name: id
- *           in: path
- *           required: true
- *           description: The ID of the Todo to get
- *           schema:
- *             type: number
- *     responses:
- *       200:
- *         description: the todo
- *         schema:
- *           $ref: '#/components/schemas/Todo'
- *       404:
- *         description: Todo not found
- */
-app.get('/api/todos/:id', function (req, res) {
-    var id = +req.params['id'];
-    console.log('handle http GET /api/todos/:id', id);
-    var idx = todos.findIndex(function (x) { return x.id === id; });
-    if (idx !== -1) {
-        var found = todos[idx];
-        res.send(found);
-    }
-    else {
-        res.status(404).send('Todo entity not found by id:' + id);
-    }
-});
-/**
- * @openapi
- * /api/todos/{id}:
- *   delete:
- *     description: delete an existing Todo by its id
- *     parameters:
- *         - name: id
- *           in: path
- *           required: true
- *           description: The ID of the Todo to delete
- *           schema:
- *             type: number
- *     responses:
- *       200:
- *         description: the deleted Todo
- *         schema:
- *           $ref: '#/components/schemas/Todo'
- *       404:
- *         description: when the Todo was not found
- */
-app.delete('/api/todos/:id', function (req, res) {
-    var id = +req.params['id'];
-    console.log('handle http DELETE /api/todos/:id', id);
-    var idx = todos.findIndex(function (x) { return x.id === id; });
-    if (idx !== -1) {
-        var found = todos.splice(idx, 1)[0];
-        res.send(found);
-    }
-    else {
-        res.status(404).send('Todo entity not found by id:' + id);
-    }
 });
 // ---------------------------------------
 //              CRUD FILM
@@ -287,7 +109,7 @@ app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE FROM FILM')];
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM')];
             case 1:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -329,8 +151,9 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
+                console.log('start');
                 id = +req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY,\n                   RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE,\n                   LINK_POSTER, LINK_TAILER\n            FROM FILM\n            WHERE ID_FILM = :id\n        ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_FILM,\n                   TITLE,\n                   ORIGINAL_LANGUAGE,\n                   OVERVIEW,\n                   POPULARITY,\n                   RELEASE_DATE,\n                   RUNTIME,\n                   STATUS,\n                   VOTE_COUNT,\n                   VOTE_AVERAGE,\n                   LINK_POSTER,\n                   LINK_TRAILER\n            FROM FILM\n            WHERE ID_FILM = :id\n        ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rows.length > 0) {
@@ -349,18 +172,13 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// POST FILM BY ID (crée ou met à jour)
+// POST NEW FILM
 /**
  * @openapi
- * /api/films/{id}:
+ * /api/films:
  *   post:
- *     description: Add or update a film by ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: number
+ *     summary: Add a new film
+ *     description: Create a new film entry in the database.
  *     requestBody:
  *       required: true
  *       content:
@@ -369,77 +187,50 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       201:
- *         description: The created or updated Film object
+ *         description: The created film object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Film'
+ *       500:
+ *         description: Internal server error
  */
-app.post('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, film, check, insertResult, err_3;
+app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var newFilm, result, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 6, , 7]);
-                id = +req.params['id'];
-                film = req.body;
-                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM FROM FILM WHERE ID_FILM = :id', { id: id })];
-            case 1:
-                check = _a.sent();
-                if (!(check.rows.length === 0)) return [3 /*break*/, 3];
-                return [4 /*yield*/, (0, database_1.executeQuery)("INSERT INTO FILM (ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TAILER)\n                 VALUES (:id, :title, :original_language, :overview, :popularity, :release_date, :runtime, :status, :vote_count, :vote_average, :link_poster, :link_tailer)", {
-                        id: id,
-                        title: film.title,
-                        original_language: film.original_language || null,
-                        overview: film.overview || null,
-                        popularity: film.popularity || null,
-                        release_date: film.release_date || null,
-                        runtime: film.runtime || null,
-                        status: film.status || null,
-                        vote_count: film.vote_count || null,
-                        vote_average: film.vote_average || null,
-                        link_poster: film.link_poster || null,
-                        link_trailer: film.link_trailer || null
+                _a.trys.push([0, 2, , 3]);
+                newFilm = req.body;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            INSERT INTO FILM \n            (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)\n            VALUES \n            (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)\n            RETURNING ID_FILM INTO :id_film\n            ", {
+                        title: newFilm.title,
+                        original_language: newFilm.original_language || null,
+                        overview: newFilm.overview || null,
+                        popularity: newFilm.popularity || null,
+                        release_date: newFilm.release_date || null,
+                        runtime: newFilm.runtime || null,
+                        status: newFilm.status || null,
+                        vote_count: newFilm.vote_count || null,
+                        vote_average: newFilm.vote_average || null,
+                        link_poster: newFilm.link_poster || null,
+                        link_trailer: newFilm.link_trailer || null,
+                        id_film: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
                     })];
+            case 1:
+                result = _a.sent();
+                newFilm.id_film = result.outBinds.id_film[0];
+                res.status(201).json(newFilm);
+                return [3 /*break*/, 3];
             case 2:
-                insertResult = _a.sent();
-                film.id_film = id;
-                res.status(201).json(film);
-                return [3 /*break*/, 5];
-            case 3: 
-            // Mise à jour
-            return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE FILM SET \n                   TITLE = :title,\n                   ORIGINAL_LANGUAGE = :original_language,\n                   OVERVIEW = :overview,\n                   POPULARITY = :popularity,\n                   RELEASE_DATE = :release_date,\n                   RUNTIME = :runtime,\n                   STATUS = :status,\n                   VOTE_COUNT = :vote_count,\n                   VOTE_AVERAGE = :vote_average,\n                   LINK_POSTER = :link_poster,\n                   LINK_TAILER = :link_tailer\n                 WHERE ID_FILM = :id", {
-                    id: id,
-                    title: film.title,
-                    original_language: film.original_language || null,
-                    overview: film.overview || null,
-                    popularity: film.popularity || null,
-                    release_date: film.release_date || null,
-                    runtime: film.runtime || null,
-                    status: film.status || null,
-                    vote_count: film.vote_count || null,
-                    vote_average: film.vote_average || null,
-                    link_poster: film.link_poster || null,
-                    link_trailer: film.link_trailer || null
-                })];
-            case 4:
-                // Mise à jour
-                _a.sent();
-                film.id_film = id;
-                res.status(200).json(film);
-                _a.label = 5;
-            case 5: return [3 /*break*/, 7];
-            case 6:
                 err_3 = _a.sent();
-                console.error('Erreur lors de la création ou mise à jour du film :', err_3);
+                console.error('Erreur lors de la création du film :', err_3);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
         }
     });
 }); });
-// app.patch()
-console.log('starting...');
+// Initialize Database and Start Server
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_4;
     return __generator(this, function (_a) {
@@ -448,23 +239,17 @@ console.log('starting...');
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, (0, database_1.initDB)()];
             case 1:
-                _a.sent(); // Call initDB here
+                _a.sent();
                 app.listen(3000, function () {
-                    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
+                    console.log('Serveur démarré sur http://localhost:3000/swagger-ui');
                 });
                 return [3 /*break*/, 3];
             case 2:
                 err_4 = _a.sent();
-                console.error('Failed to initialize database:', err_4);
-                process.exit(1); // Exit if DB init fails
+                console.error('Erreur lors de l\'initialisation de la base de données :', err_4.message);
+                process.exit(1);
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); })();
-/*
-app.listen(3000, () => {
-    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
-});
-
-*/ 

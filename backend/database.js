@@ -46,14 +46,15 @@ function initDB() {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, oracledb.createPool({
                         user: 'SYSTEM',
-                        password: 'root',
+                        password: 'Poisson86+',
                         connectString: 'localhost:1521/XE',
                         poolMin: 1,
                         poolMax: 5,
-                        poolIncrement: 1
+                        poolIncrement: 1,
                     })];
                 case 1:
                     pool = _a.sent();
+                    console.log('Base de données initialisée.');
                     return [2 /*return*/];
             }
         });
@@ -61,25 +62,31 @@ function initDB() {
 }
 function executeQuery(query_1) {
     return __awaiter(this, arguments, void 0, function (query, params) {
-        var connection;
+        var connection, result, err_1;
         if (params === void 0) { params = {}; }
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, , 3, 6]);
+                    _a.trys.push([0, 3, 4, 7]);
                     return [4 /*yield*/, pool.getConnection()];
                 case 1:
                     connection = _a.sent();
-                    return [4 /*yield*/, connection.execute(query, params)];
-                case 2: return [2 /*return*/, _a.sent()];
+                    return [4 /*yield*/, connection.execute(query, params, { autoCommit: true })];
+                case 2:
+                    result = _a.sent();
+                    return [2 /*return*/, result];
                 case 3:
-                    if (!connection) return [3 /*break*/, 5];
-                    return [4 /*yield*/, connection.close()];
+                    err_1 = _a.sent();
+                    console.error('Erreur lors de l\'exécution de la requête :', err_1.message);
+                    throw err_1;
                 case 4:
+                    if (!connection) return [3 /*break*/, 6];
+                    return [4 /*yield*/, connection.close()];
+                case 5:
                     _a.sent();
-                    _a.label = 5;
-                case 5: return [7 /*endfinally*/];
-                case 6: return [2 /*return*/];
+                    _a.label = 6;
+                case 6: return [7 /*endfinally*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
