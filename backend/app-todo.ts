@@ -1,19 +1,19 @@
 import * as express from 'express';
-import { Request, Response } from 'express';
-import swaggerJsdoc = require('swagger-jsdoc');
+import {Request, Response} from 'express';
+import swaggerJsdoc = require('swagger-jsdoc'); // * as swaggerJsdoc from 'swagger-jsdoc'
 import swaggerUi = require('swagger-ui-express');
-import { executeQuery, initDB } from './database';
-import oracledb = require('oracledb');
+import { executeQuery, initDB } from './database'; // import the helper from database.ts
 
 const cors = require('cors');
-const app = express();
-app.use(express.json());
-app.use(cors());
 
-// Swagger Documentation Configuration
+const app = express();
+app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
+app.use(cors())
+
+
 const jsDocOptions = {
     definition: {
-        openapi: '3.0.0',
+        openapi: '3.0.0', // Specify the OpenAPI version
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -41,16 +41,20 @@ const jsDocOptions = {
             },
         },
     },
-    apis: ['./app.ts'], // Points to this file for documentation
+    apis: ['app-todo.js'],
 };
 
+
 const apiDoc = swaggerJsdoc(jsDocOptions);
+console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
+
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
 
-// Liveness Check Endpoint
 app.get('/api/liveness', (req: Request, res: Response) => {
     res.send('OK !!!');
 });
+
+
 
 interface Film {
     id_film?: number;
@@ -153,13 +157,13 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
     }
 });
 
-// POST NEW FILM
+
+// POST NEW FILM (sans ID, génération via séquence)
 /**
  * @openapi
  * /api/films:
  *   post:
- *     summary: Add a new film
- *     description: Create a new film entry in the database.
+ *     description: Add a new film
  *     requestBody:
  *       required: true
  *       content:
@@ -168,25 +172,24 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       201:
- *         description: The created film object
+ *         description: The created Film object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Film'
- *       500:
- *         description: Internal server error
  */
 app.post('/api/films', async (req: Request, res: Response) => {
     try {
         const newFilm: Film = req.body;
 
-        const result = await executeQuery(
+        // Exécutez la requête
+        const insertResult = await executeQuery(
             `
-            INSERT INTO FILM 
-            (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)
-            VALUES 
-            (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)
-            RETURNING ID_FILM INTO :id_film
+                INSERT INTO FILM
+                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)
+                VALUES
+                    (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)
+                    RETURNING ID_FILM INTO :id_film
             `,
             {
                 title: newFilm.title,
@@ -200,27 +203,44 @@ app.post('/api/films', async (req: Request, res: Response) => {
                 vote_average: newFilm.vote_average || null,
                 link_poster: newFilm.link_poster || null,
                 link_trailer: newFilm.link_trailer || null,
-                id_film: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+                id_film: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
             }
-        );
+        ) as { outBinds: { id_film: number[] } };
 
-        newFilm.id_film = result.outBinds.id_film[0];
+        // Extraire l'ID généré
+        newFilm.id_film = insertResult.outBinds.id_film[0];
+
+        // Répondre avec le film créé
         res.status(201).json(newFilm);
     } catch (err) {
-        console.error('Erreur lors de la création du film :', err);
+        console.error('Erreur lors de la création du film :', err.message);
         res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
 
-// Initialize Database and Start Server
+
+
+
+
+
+// app.patch()
+
+console.log('starting...');
 (async () => {
     try {
-        await initDB();
+        await initDB(); // Call initDB here
         app.listen(3000, () => {
-            console.log('Serveur démarré sur http://localhost:3000/swagger-ui');
+            console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
         });
     } catch (err) {
-        console.error('Erreur lors de l\'initialisation de la base de données :', err.message);
-        process.exit(1);
+        console.error('Failed to initialize database:', err);
+        process.exit(1); // Exit if DB init fails
     }
 })();
+
+/*
+app.listen(3000, () => {
+    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
+});
+
+*/

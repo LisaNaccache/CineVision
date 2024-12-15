@@ -37,18 +37,16 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
-var swaggerJsdoc = require("swagger-jsdoc");
+var swaggerJsdoc = require("swagger-jsdoc"); // * as swaggerJsdoc from 'swagger-jsdoc'
 var swaggerUi = require("swagger-ui-express");
-var database_1 = require("./database");
-var oracledb = require("oracledb");
+var database_1 = require("./database"); // import the helper from database.ts
 var cors = require('cors');
 var app = express();
-app.use(express.json());
+app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
 app.use(cors());
-// Swagger Documentation Configuration
 var jsDocOptions = {
     definition: {
-        openapi: '3.0.0',
+        openapi: '3.0.0', // Specify the OpenAPI version
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -76,11 +74,11 @@ var jsDocOptions = {
             },
         },
     },
-    apis: ['./app.ts'], // Points to this file for documentation
+    apis: ['app-todo.js'],
 };
 var apiDoc = swaggerJsdoc(jsDocOptions);
+console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
-// Liveness Check Endpoint
 app.get('/api/liveness', function (req, res) {
     res.send('OK !!!');
 });
@@ -172,13 +170,12 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// POST NEW FILM
+// POST NEW FILM (sans ID, génération via séquence)
 /**
  * @openapi
  * /api/films:
  *   post:
- *     summary: Add a new film
- *     description: Create a new film entry in the database.
+ *     description: Add a new film
  *     requestBody:
  *       required: true
  *       content:
@@ -187,22 +184,20 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       201:
- *         description: The created film object
+ *         description: The created Film object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Film'
- *       500:
- *         description: Internal server error
  */
 app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var newFilm, result, err_3;
+    var newFilm, insertResult, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 newFilm = req.body;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            INSERT INTO FILM \n            (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)\n            VALUES \n            (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)\n            RETURNING ID_FILM INTO :id_film\n            ", {
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO FILM\n                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)\n                VALUES\n                    (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)\n                    RETURNING ID_FILM INTO :id_film\n            ", {
                         title: newFilm.title,
                         original_language: newFilm.original_language || null,
                         overview: newFilm.overview || null,
@@ -214,23 +209,26 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
                         vote_average: newFilm.vote_average || null,
                         link_poster: newFilm.link_poster || null,
                         link_trailer: newFilm.link_trailer || null,
-                        id_film: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+                        id_film: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
                     })];
             case 1:
-                result = _a.sent();
-                newFilm.id_film = result.outBinds.id_film[0];
+                insertResult = _a.sent();
+                // Extraire l'ID généré
+                newFilm.id_film = insertResult.outBinds.id_film[0];
+                // Répondre avec le film créé
                 res.status(201).json(newFilm);
                 return [3 /*break*/, 3];
             case 2:
                 err_3 = _a.sent();
-                console.error('Erreur lors de la création du film :', err_3);
+                console.error('Erreur lors de la création du film :', err_3.message);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); });
-// Initialize Database and Start Server
+// app.patch()
+console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     var err_4;
     return __generator(this, function (_a) {
@@ -239,17 +237,23 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, (0, database_1.initDB)()];
             case 1:
-                _a.sent();
+                _a.sent(); // Call initDB here
                 app.listen(3000, function () {
-                    console.log('Serveur démarré sur http://localhost:3000/swagger-ui');
+                    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
                 });
                 return [3 /*break*/, 3];
             case 2:
                 err_4 = _a.sent();
-                console.error('Erreur lors de l\'initialisation de la base de données :', err_4.message);
-                process.exit(1);
+                console.error('Failed to initialize database:', err_4);
+                process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); })();
+/*
+app.listen(3000, () => {
+    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
+});
+
+*/
