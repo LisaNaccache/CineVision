@@ -17,6 +17,7 @@ import {SessionFilmAddComponent} from './Admin/SessionFilm/session-film-add/sess
 import {SessionFilmEditComponent} from './Admin/SessionFilm/session-film-edit/session-film-edit.component';
 import {SessionFilmListComponent} from './Admin/SessionFilm/session-film-list/session-film-list.component';
 import {ReviewListComponent} from './Admin/Review/review-list/review-list.component';
+import {FilmComponent} from './film/film.component';
 
 export const routes: Routes = [
   { path: 'inscription', component: InscriptionComponent },
@@ -24,6 +25,7 @@ export const routes: Routes = [
   { path: 'admin/film/add', component: FilmAddComponent },
   { path: 'admin/film/edit/:id', component: FilmEditComponent }, // Correction ici
   { path: 'admin/film', component: FilmListComponent },
+  { path: 'client/film', component: FilmComponent },
   { path: 'admin/acteur/add', component: ActeurAddComponent },
   { path: 'admin/acteur/edit/:id', component: ActeurEditComponent }, // Correction ici
   { path: 'admin/acteur', component: ActeurListComponent },
