@@ -82,9 +82,6 @@ app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
 app.get('/api/liveness', function (req, res) {
     res.send('OK !!!');
 });
-// ---------------------------------------
-//              CRUD FILM
-// ---------------------------------------
 // GET ALL FILMS
 /**
  * @openapi
@@ -121,6 +118,7 @@ app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); });
+// GET FILM ID
 /**
  * @openapi
  * /api/films/{id}:
@@ -170,7 +168,7 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// POST NEW FILM (sans ID, génération via séquence)
+// POST NEW FILM (sans ID)
 /**
  * @openapi
  * /api/films:
@@ -227,10 +225,121 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// app.patch()
+// PUT (Update a film without specifying id in the path)
+/**
+ * @openapi
+ * /api/films:
+ *   put:
+ *     description: Update an existing film without specifying id in the path
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       200:
+ *         description: The updated Film object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Film not found
+ */
+app.put('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updatedFilm, result, err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                updatedFilm = req.body;
+                if (!updatedFilm.id_film) {
+                    res.status(400).json({ error: 'ID is required in the body to update a film.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE FILM\n                SET TITLE = :title,\n                    ORIGINAL_LANGUAGE = :original_language,\n                    OVERVIEW = :overview,\n                    POPULARITY = :popularity,\n                    RELEASE_DATE = TO_DATE(:release_date, 'YYYY-MM-DD'),\n                    RUNTIME = :runtime,\n                    STATUS = :status,\n                    VOTE_COUNT = :vote_count,\n                    VOTE_AVERAGE = :vote_average,\n                    LINK_POSTER = :link_poster,\n                    LINK_TRAILER = :link_trailer\n                WHERE ID_FILM = :id_film\n            ", {
+                        id_film: updatedFilm.id_film,
+                        title: updatedFilm.title,
+                        original_language: updatedFilm.original_language || null,
+                        overview: updatedFilm.overview || null,
+                        popularity: updatedFilm.popularity || null,
+                        release_date: updatedFilm.release_date || null,
+                        runtime: updatedFilm.runtime || null,
+                        status: updatedFilm.status || null,
+                        vote_count: updatedFilm.vote_count || null,
+                        vote_average: updatedFilm.vote_average || null,
+                        link_poster: updatedFilm.link_poster || null,
+                        link_trailer: updatedFilm.link_trailer || null,
+                    })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Film not found with ID: ".concat(updatedFilm.id_film) });
+                }
+                else {
+                    res.status(200).json({ message: 'Film updated successfully', updatedFilm: updatedFilm });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_4 = _a.sent();
+                console.error('Erreur lors de la mise à jour du film :', err_4);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// DELETE (Delete a film by id)
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   delete:
+ *     description: Delete a film by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to delete
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Film deleted successfully
+ *       404:
+ *         description: Film not found
+ */
+app.delete('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM FILM\n                WHERE ID_FILM = :id\n            ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Film not found with ID: ".concat(id) });
+                }
+                else {
+                    res.status(200).json({ message: 'Film deleted successfully' });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_5 = _a.sent();
+                console.error('Erreur lors de la suppression du film :', err_5);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_4;
+    var err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -243,17 +352,11 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_4 = _a.sent();
-                console.error('Failed to initialize database:', err_4);
+                err_6 = _a.sent();
+                console.error('Failed to initialize database:', err_6);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); })();
-/*
-app.listen(3000, () => {
-    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
-});
-
-*/

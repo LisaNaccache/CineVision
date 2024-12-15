@@ -57,7 +57,6 @@ app.get('/api/liveness', (req: Request, res: Response) => {
 
 
 
-
 // ---------------------------------------
 //                  FILM
 // ---------------------------------------
@@ -95,7 +94,7 @@ interface Film {
  */
 app.get('/api/films', async (req: Request, res: Response) => {
     try {
-        const result = await executeQuery('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM');
+        const result = await executeQuery('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM ORDER BY TITLE');
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des films :', err);
@@ -218,6 +217,131 @@ app.post('/api/films', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
+
+
+// PUT (Update a film without specifying id in the path)
+/**
+ * @openapi
+ * /api/films:
+ *   put:
+ *     description: Update an existing film without specifying id in the path
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Film'
+ *     responses:
+ *       200:
+ *         description: The updated Film object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Film not found
+ */
+app.put('/api/films', async (req: Request, res: Response) => {
+    try {
+        const updatedFilm: Film = req.body;
+
+        if (!updatedFilm.id_film) {
+            res.status(400).json({ error: 'ID is required in the body to update a film.' });
+            return;
+        }
+
+        const result = await executeQuery(
+            `
+                UPDATE FILM
+                SET TITLE = :title,
+                    ORIGINAL_LANGUAGE = :original_language,
+                    OVERVIEW = :overview,
+                    POPULARITY = :popularity,
+                    RELEASE_DATE = TO_DATE(:release_date, 'YYYY-MM-DD'),
+                    RUNTIME = :runtime,
+                    STATUS = :status,
+                    VOTE_COUNT = :vote_count,
+                    VOTE_AVERAGE = :vote_average,
+                    LINK_POSTER = :link_poster,
+                    LINK_TRAILER = :link_trailer
+                WHERE ID_FILM = :id_film
+            `,
+            {
+                id_film: updatedFilm.id_film,
+                title: updatedFilm.title,
+                original_language: updatedFilm.original_language || null,
+                overview: updatedFilm.overview || null,
+                popularity: updatedFilm.popularity || null,
+                release_date: updatedFilm.release_date || null,
+                runtime: updatedFilm.runtime || null,
+                status: updatedFilm.status || null,
+                vote_count: updatedFilm.vote_count || null,
+                vote_average: updatedFilm.vote_average || null,
+                link_poster: updatedFilm.link_poster || null,
+                link_trailer: updatedFilm.link_trailer || null,
+            }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Film not found with ID: ${updatedFilm.id_film}` });
+        } else {
+            res.status(200).json({ message: 'Film updated successfully', updatedFilm });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour du film :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+// DELETE (Delete a film by id)
+/**
+ * @openapi
+ * /api/films/{id}:
+ *   delete:
+ *     description: Delete a film by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to delete
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Film deleted successfully
+ *       404:
+ *         description: Film not found
+ */
+app.delete('/api/films/:id', async (req: Request, res: Response) => {
+    try {
+        const id = +req.params.id;
+
+        const result = await executeQuery(
+            `
+                DELETE FROM FILM
+                WHERE ID_FILM = :id
+            `,
+            { id }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Film not found with ID: ${id}` });
+        } else {
+            res.status(200).json({ message: 'Film deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la suppression du film :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
+
 
 
 
