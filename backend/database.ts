@@ -14,12 +14,12 @@ export async function initDB() {
     });
 }
 
-export async function executeQuery(query: any, params = {}) {
-
+export async function executeQuery(query: string, params = {}) {
     let connection: oracledb.Connection;
     try {
         connection = await pool.getConnection();
-        return await connection.execute(query, params);
+        // Add autoCommit: true here
+        return await connection.execute(query, params, { autoCommit: true });
     } finally {
         if (connection) {
             await connection.close();

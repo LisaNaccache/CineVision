@@ -56,6 +56,12 @@ app.get('/api/liveness', (req: Request, res: Response) => {
 
 
 
+
+
+// ---------------------------------------
+//                  FILM
+// ---------------------------------------
+
 interface Film {
     id_film?: number;
     title: string;
@@ -70,11 +76,6 @@ interface Film {
     link_poster?: string;
     link_trailer?: string;
 }
-
-
-// ---------------------------------------
-//              CRUD FILM
-// ---------------------------------------
 
 // GET ALL FILMS
 /**
@@ -102,6 +103,7 @@ app.get('/api/films', async (req: Request, res: Response) => {
     }
 });
 
+// GET FILM ID
 /**
  * @openapi
  * /api/films/{id}:
@@ -157,8 +159,7 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
     }
 });
 
-
-// POST NEW FILM (sans ID, génération via séquence)
+// POST NEW FILM (sans ID)
 /**
  * @openapi
  * /api/films:
@@ -223,7 +224,9 @@ app.post('/api/films', async (req: Request, res: Response) => {
 
 
 
-// app.patch()
+
+
+
 
 console.log('starting...');
 (async () => {
@@ -237,10 +240,3 @@ console.log('starting...');
         process.exit(1); // Exit if DB init fails
     }
 })();
-
-/*
-app.listen(3000, () => {
-    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
-});
-
-*/

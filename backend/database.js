@@ -70,8 +70,10 @@ function executeQuery(query_1) {
                     return [4 /*yield*/, pool.getConnection()];
                 case 1:
                     connection = _a.sent();
-                    return [4 /*yield*/, connection.execute(query, params)];
-                case 2: return [2 /*return*/, _a.sent()];
+                    return [4 /*yield*/, connection.execute(query, params, { autoCommit: true })];
+                case 2: 
+                // Add autoCommit: true here
+                return [2 /*return*/, _a.sent()];
                 case 3:
                     if (!connection) return [3 /*break*/, 5];
                     return [4 /*yield*/, connection.close()];
