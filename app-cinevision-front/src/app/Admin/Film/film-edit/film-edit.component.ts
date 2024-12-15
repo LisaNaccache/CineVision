@@ -1,7 +1,8 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
+import {FilmService} from '../film.service';
 
 @Component({
   selector: 'app-film-edit',
@@ -14,50 +15,112 @@ import {CommonModule} from '@angular/common';
   templateUrl: './film-edit.component.html',
   styleUrl: './film-edit.component.css'
 })
-export class FilmEditComponent {
-  film: any = null; // Initialisez le modèle du film ici
+export class FilmEditComponent implements OnInit {
+  film: any = null; // Modèle du film
+  isLoading = true;
+  hasError = false;
 
-  constructor(private route: ActivatedRoute, private router: Router) {
+  constructor(
+    private filmService: FilmService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
   }
 
   ngOnInit(): void {
-    // Récupérez l'ID du film à partir de la route
-    const filmId = this.route.snapshot.paramMap.get('id');
+    const filmId = Number(this.route.snapshot.paramMap.get('id'));
     if (filmId) {
-      this.loadFilm(Number(filmId));
+      this.loadFilm(filmId);
     }
   }
 
-  // Charger un film par ID (mocké ici, à remplacer par un appel au backend)
+  // Récupérer les données d'un film
   loadFilm(id: number): void {
-    const mockFilms = [
-      {
-        id: 1,
-        title: 'The Shawshank Redemption',
-        popularity: 9.7,
-        releaseDate: '1994-09-23',
-        voteCount: 10000,
-        voteAverage: 9.3
+    this.filmService.getFilmById(id).subscribe(
+      (data) => {
+        this.film = {
+          id: data[0], // ID_FILM
+          title: data[1], // TITLE
+          language: data[2], // ORIGINAL_LANGUAGE
+          description: data[3], // OVERVIEW
+          popularity: data[4], // POPULARITY
+          releaseDate: data[5], // RELEASE_DATE
+          runtime: data[6], // RUNTIME
+          status: data[7], // STATUS
+          voteCount: data[8], // VOTE_COUNT
+          voteAverage: data[9], // VOTE_AVERAGE
+          posterUrl: data[10], // LINK_POSTER
+          trailerUrl: data[11], // LINK_TRAILER
+        };
+        this.isLoading = false;
       },
-      {id: 2, title: 'The Godfather', popularity: 9.5, releaseDate: '1972-03-24', voteCount: 9500, voteAverage: 9.2},
-      {id: 3, title: 'The Dark Knight', popularity: 9.8, releaseDate: '2008-07-18', voteCount: 12000, voteAverage: 9.0}
-    ];
-    this.film = mockFilms.find(film => film.id === id) || null;
+      (error) => {
+        console.error('Error loading film:', error);
+        this.hasError = true;
+        this.isLoading = false;
+      }
+    );
   }
 
-  // Soumission du formulaire
   onFormSubmit(): void {
-    console.log('Film modifié :', this.film);
-    alert('Film enregistré avec succès !');
-    this.router.navigate(['/admin/film']);
+    // Convertir la date au format 'YYYY-MM-DD'
+    const formatDate = (date: Date | string): string => {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois au format 2 chiffres
+      const day = String(d.getDate()).padStart(2, '0'); // Jour au format 2 chiffres
+      return `${year}-${month}-${day}`;
+    };
+
+    const updatedFilm = {
+      id_film: this.film.id,
+      title: this.film.title,
+      original_language: this.film.language || null,
+      overview: this.film.description || null,
+      popularity: this.film.popularity || null,
+      release_date: formatDate(this.film.releaseDate), // Conversion ici
+      runtime: this.film.runtime || null,
+      status: this.film.status || null,
+      vote_count: this.film.voteCount || null,
+      vote_average: this.film.voteAverage || null,
+      link_poster: this.film.posterUrl || null,
+      link_trailer: this.film.trailerUrl || null,
+    };
+
+    this.filmService.updateFilm(updatedFilm).subscribe(
+      (response) => {
+        alert('Film updated successfully!');
+        console.log('Updated film:', response);
+        this.router.navigate(['/admin/film']);
+      },
+      (error) => {
+        console.error('Error updating film:', error);
+        alert('An error occurred while updating the film.');
+      }
+    );
   }
+
 
   // Suppression du film
   onDelete(): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce film ?')) {
-      console.log('Film supprimé :', this.film.id);
-      alert('Film supprimé avec succès !');
-      this.router.navigate(['/admin/film']);
+    if (!this.film || !this.film.id) {
+      alert('Film ID is required to delete the film.');
+      return;
+    }
+
+    const confirmDelete = confirm(`Are you sure you want to delete the film "${this.film.title}"?`);
+    if (confirmDelete) {
+      this.filmService.deleteFilm(this.film.id).subscribe(
+        (response) => {
+          alert('Film deleted successfully!');
+          console.log('Deleted film:', response);
+          this.router.navigate(['/admin/film']); // Redirigez vers la liste des films
+        },
+        (error) => {
+          console.error('Error deleting film:', error);
+          alert('An error occurred while deleting the film.');
+        }
+      );
     }
   }
 }
