@@ -70,6 +70,15 @@ const jsDocOptions = {
                         language: { type: 'string' },
                     },
                 },
+
+                FilmGenre: {
+                    type: 'object',
+                    properties: {
+                        film_id: { type: 'integer' },
+                        genre_id: { type: 'integer' },
+                    },
+                },
+
             },
         },
     },
@@ -1193,9 +1202,83 @@ app.delete('/api/spoken_languages/:id', async (req: Request, res: Response) => {
 
 
 
+// ---------------------------------------
+//               film_genre
+// ---------------------------------------
+
+interface FilmGenre {
+    film_id: number;
+    genre_id: number;
+}
+
+/**
+ * @openapi
+ * /api/film-genres:
+ *   get:
+ *     description: Get all film-genre relationships
+ *     responses:
+ *       200:
+ *         description: An array of FilmGenre relationships
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FilmGenre'
+ */
+app.get('/api/film-genres', async (req: Request, res: Response) => {
+    try {
+        // Exécution de la requête SQL pour récupérer les films et genres
+        const result = await executeQuery(`
+            SELECT
+                f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,
+                JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre,'id_genre' VALUE g.id_genre))
+                    AS genre
+            FROM film f
+                     JOIN film_genre fg ON f.id_film = fg.film_id
+                     JOIN genre g ON fg.genre_id = g.id_genre
+            GROUP BY
+                f.id_film, f.title, f.original_language, f.overview, f.popularity,
+                f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,
+                f.link_poster, f.link_trailer
+        `);
+
+        // Réponse avec les films et leurs genres associés
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des genres des films :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
 
 
 
+
+// ---------------------------------------
+//         film_production_company
+// ---------------------------------------
+
+
+
+
+// ---------------------------------------
+//         film_production_country
+// ---------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------
+//         film_spoken_languages
+// ---------------------------------------
 
 
 

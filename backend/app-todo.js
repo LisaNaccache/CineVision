@@ -99,6 +99,13 @@ var jsDocOptions = {
                         language: { type: 'string' },
                     },
                 },
+                FilmGenre: {
+                    type: 'object',
+                    properties: {
+                        film_id: { type: 'integer' },
+                        genre_id: { type: 'integer' },
+                    },
+                },
             },
         },
     },
@@ -1202,9 +1209,54 @@ app.delete('/api/spoken_languages/:id', function (req, res) { return __awaiter(v
         }
     });
 }); });
+/**
+ * @openapi
+ * /api/film-genres:
+ *   get:
+ *     description: Get all film-genre relationships
+ *     responses:
+ *       200:
+ *         description: An array of FilmGenre relationships
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FilmGenre'
+ */
+app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_24;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT\n                f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,\n                JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre,'id_genre' VALUE g.id_genre))\n                    AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            GROUP BY\n                f.id_film, f.title, f.original_language, f.overview, f.popularity,\n                f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,\n                f.link_poster, f.link_trailer\n        ")];
+            case 1:
+                result = _a.sent();
+                // Réponse avec les films et leurs genres associés
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_24 = _a.sent();
+                console.error('Erreur lors de la récupération des genres des films :', err_24);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// ---------------------------------------
+//         film_production_company
+// ---------------------------------------
+// ---------------------------------------
+//         film_production_country
+// ---------------------------------------
+// ---------------------------------------
+//         film_spoken_languages
+// ---------------------------------------
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_24;
+    var err_25;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1217,8 +1269,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_24 = _a.sent();
-                console.error('Failed to initialize database:', err_24);
+                err_25 = _a.sent();
+                console.error('Failed to initialize database:', err_25);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
