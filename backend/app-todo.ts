@@ -38,6 +38,14 @@ const jsDocOptions = {
                         link_trailer: { type: 'string' },
                     },
                 },
+
+                Genre: {
+                    type: 'object',
+                    properties: {
+                        id_genre: { type: 'integer' },
+                        name_genre: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -337,6 +345,253 @@ app.delete('/api/films/:id', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+// ---------------------------------------
+//                  GENRE
+// ---------------------------------------
+
+interface Genre {
+    id_genre?: number;
+    name_genre: string;
+}
+
+// GET ALL GENRES
+/**
+ * @openapi
+ * /api/genres:
+ *   get:
+ *     description: Get all genres
+ *     responses:
+ *       200:
+ *         description: An array of Genre
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Genre'
+ */
+app.get('/api/genres', async (req: Request, res: Response) => {
+    try {
+        const result = await executeQuery('SELECT ID_GENRE, NAME_GENRE FROM GENRE');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des genres :', err);
+        res.status(500).json({error: 'Erreur interne du serveur.'});
+    }
+});
+
+
+// GET GENRE ID
+/**
+ * @openapi
+ * /api/genres/{id}:
+ *   get:
+ *     description: Get a genre by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Genre to get
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: The requested Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ *       404:
+ *         description: Genre not found
+ */
+app.get('/api/genres/:id', async (req: Request, res: Response) => {
+    try {
+        const id = +req.params.id;
+
+        const result = await executeQuery(`
+            SELECT ID_GENRE, NAME_GENRE
+            FROM GENRE
+            WHERE ID_GENRE = :id
+        `, {id});
+
+        if (result.rows.length > 0) {
+            res.status(200).json(result.rows[0]);
+        } else {
+            res.status(404).json({error: `Genre not found with ID: ${id}`});
+        }
+    } catch (err) {
+        console.error('Erreur lors de la récupération du genre :', err);
+        res.status(500).json({error: 'Erreur interne du serveur.'});
+    }
+});
+
+
+// POST NEW GENRE
+/**
+ * @openapi
+ * /api/genres:
+ *   post:
+ *     description: Add a new genre
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Genre'
+ *     responses:
+ *       201:
+ *         description: The created Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ */
+app.post('/api/genres', async (req: Request, res: Response) => {
+    try {
+        const newGenre: Genre = req.body;
+
+        const insertResult = await executeQuery(
+            `
+                INSERT INTO GENRE
+                (NAME_GENRE)
+                VALUES
+                    (:name_genre)
+                RETURNING ID_GENRE INTO :id_genre
+            `,
+            {
+                name_genre: newGenre.name_genre,
+                id_genre: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+            }
+        ) as { outBinds: { id_genre: number[] } };
+
+        newGenre.id_genre = insertResult.outBinds.id_genre[0];
+
+        res.status(201).json(newGenre);
+    } catch (err) {
+        console.error('Erreur lors de la création du genre :', err.message);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+// PUT (Update GENRE)
+/**
+ * @openapi
+ * /api/genres:
+ *   put:
+ *     description: Update an existing genre without specifying id in the path
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Genre'
+ *     responses:
+ *       200:
+ *         description: The updated Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Genre not found
+ */
+app.put('/api/genres', async (req: Request, res: Response) => {
+    try {
+        const updatedGenre: Genre = req.body;
+
+        if (!updatedGenre.id_genre) {
+            res.status(400).json({ error: 'ID is required in the body to update a genre.' });
+            return;
+        }
+
+        const result = await executeQuery(
+            `
+                UPDATE GENRE
+                SET NAME_GENRE = :name_genre
+                WHERE ID_GENRE = :id_genre
+            `,
+            {
+                id_genre: updatedGenre.id_genre,
+                name_genre: updatedGenre.name_genre,
+            }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Genre not found with ID: ${updatedGenre.id_genre}` });
+        } else {
+            res.status(200).json({ message: 'Genre updated successfully', updatedGenre });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour du genre :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+// DELETE GENRE by ID
+/**
+ * @openapi
+ * /api/genres/{id}:
+ *   delete:
+ *     description: Delete a genre by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Genre to delete
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Genre deleted successfully
+ *       404:
+ *         description: Genre not found
+ */
+app.delete('/api/genres/:id', async (req: Request, res: Response) => {
+    try {
+        const id = +req.params.id;
+
+        const result = await executeQuery(
+            `
+                DELETE FROM GENRE
+                WHERE ID_GENRE = :id
+            `,
+            { id }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Genre not found with ID: ${id}` });
+        } else {
+            res.status(200).json({ message: 'Genre deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la suppression du genre :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
+
+
+
+
+
 
 
 

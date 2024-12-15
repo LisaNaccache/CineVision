@@ -71,6 +71,13 @@ var jsDocOptions = {
                         link_trailer: { type: 'string' },
                     },
                 },
+                Genre: {
+                    type: 'object',
+                    properties: {
+                        id_genre: { type: 'integer' },
+                        name_genre: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -104,7 +111,7 @@ app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM')];
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM ORDER BY TITLE')];
             case 1:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -337,9 +344,241 @@ app.delete('/api/films/:id', function (req, res) { return __awaiter(void 0, void
         }
     });
 }); });
+// GET ALL GENRES
+/**
+ * @openapi
+ * /api/genres:
+ *   get:
+ *     description: Get all genres
+ *     responses:
+ *       200:
+ *         description: An array of Genre
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Genre'
+ */
+app.get('/api/genres', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_6;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_GENRE, NAME_GENRE FROM GENRE')];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_6 = _a.sent();
+                console.error('Erreur lors de la récupération des genres :', err_6);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// GET GENRE ID
+/**
+ * @openapi
+ * /api/genres/{id}:
+ *   get:
+ *     description: Get a genre by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Genre to get
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: The requested Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ *       404:
+ *         description: Genre not found
+ */
+app.get('/api/genres/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_7;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_GENRE, NAME_GENRE\n            FROM GENRE\n            WHERE ID_GENRE = :id\n        ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rows.length > 0) {
+                    res.status(200).json(result.rows[0]);
+                }
+                else {
+                    res.status(404).json({ error: "Genre not found with ID: ".concat(id) });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_7 = _a.sent();
+                console.error('Erreur lors de la récupération du genre :', err_7);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// POST NEW GENRE
+/**
+ * @openapi
+ * /api/genres:
+ *   post:
+ *     description: Add a new genre
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Genre'
+ *     responses:
+ *       201:
+ *         description: The created Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ */
+app.post('/api/genres', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var newGenre, insertResult, err_8;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                newGenre = req.body;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO GENRE\n                (NAME_GENRE)\n                VALUES\n                    (:name_genre)\n                RETURNING ID_GENRE INTO :id_genre\n            ", {
+                        name_genre: newGenre.name_genre,
+                        id_genre: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+                    })];
+            case 1:
+                insertResult = _a.sent();
+                newGenre.id_genre = insertResult.outBinds.id_genre[0];
+                res.status(201).json(newGenre);
+                return [3 /*break*/, 3];
+            case 2:
+                err_8 = _a.sent();
+                console.error('Erreur lors de la création du genre :', err_8.message);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// PUT (Update GENRE)
+/**
+ * @openapi
+ * /api/genres:
+ *   put:
+ *     description: Update an existing genre without specifying id in the path
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Genre'
+ *     responses:
+ *       200:
+ *         description: The updated Genre object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Genre'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Genre not found
+ */
+app.put('/api/genres', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updatedGenre, result, err_9;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                updatedGenre = req.body;
+                if (!updatedGenre.id_genre) {
+                    res.status(400).json({ error: 'ID is required in the body to update a genre.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE GENRE\n                SET NAME_GENRE = :name_genre\n                WHERE ID_GENRE = :id_genre\n            ", {
+                        id_genre: updatedGenre.id_genre,
+                        name_genre: updatedGenre.name_genre,
+                    })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Genre not found with ID: ".concat(updatedGenre.id_genre) });
+                }
+                else {
+                    res.status(200).json({ message: 'Genre updated successfully', updatedGenre: updatedGenre });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_9 = _a.sent();
+                console.error('Erreur lors de la mise à jour du genre :', err_9);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// DELETE GENRE by ID
+/**
+ * @openapi
+ * /api/genres/{id}:
+ *   delete:
+ *     description: Delete a genre by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Genre to delete
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Genre deleted successfully
+ *       404:
+ *         description: Genre not found
+ */
+app.delete('/api/genres/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_10;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM GENRE\n                WHERE ID_GENRE = :id\n            ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Genre not found with ID: ".concat(id) });
+                }
+                else {
+                    res.status(200).json({ message: 'Genre deleted successfully' });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_10 = _a.sent();
+                console.error('Erreur lors de la suppression du genre :', err_10);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_6;
+    var err_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -352,8 +591,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_6 = _a.sent();
-                console.error('Failed to initialize database:', err_6);
+                err_11 = _a.sent();
+                console.error('Failed to initialize database:', err_11);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
