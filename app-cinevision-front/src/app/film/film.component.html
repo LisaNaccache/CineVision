@@ -1,1 +1,33 @@
-<p>film works!</p>
+<div class="container">
+  <div class="my-5">
+    <div class="row align-items-stretch">
+      <ng-container *ngIf="films && films.length > 0">
+        <div class="col-12 col-md-4 mb-3" *ngFor="let film of films">
+          <div class="card h-100">
+            <img [src]="film.posterUrl" class="card-img-top" [alt]="film.title">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title">
+                {{ film.title }}
+              </h5>
+              <p class="card-text">
+                Les genres ici
+              </p>
+              <div class="mt-auto">
+                <a [routerLink]="['/film', film.id]" class="btn btn-primary">
+                  En savoir plus
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Message si aucun film -->
+      <ng-container *ngIf="films && films.length === 0">
+        <div class="text-center">
+          <p>No films available.</p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+.card-img-top {
+  object-fit: cover; /* Remplit la largeur et ajuste la hauteur en fonction */
+  width: 100%;       /* Prend toute la largeur */
+  height: 200px;     /* Hauteur fixe */
+  max-height: 200px; /* Hauteur maximale */
+}
