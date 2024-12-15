@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FilmService } from '../film.service';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
-import {Film} from '../../../Models/film';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 
@@ -10,66 +10,74 @@ import {RouterLink} from '@angular/router';
   imports: [
     NgFor,
     NgIf,
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
-    RouterLink
+    RouterLink,
   ],
   templateUrl: './film-list.component.html',
-  styleUrl: './film-list.component.css'
+  styleUrls: ['./film-list.component.css'],
 })
 export class FilmListComponent implements OnInit {
+  films: any[] = [];
+  paginatedFilms: any[] = []; // Films affichés dans la page courante
+  isLoading = true;
+  hasError = false;
 
-  //films: Film[] = [];
-  films = [
-    {
-      id: 1,
-      title: 'The Shawshank Redemption',
-      popularity: 9.7,
-      releaseDate: new Date('1994-09-23'),
-      voteCount: 10000,
-      voteAverage: 9.3
-    },
-    {
-      id: 2,
-      title: 'The Godfather',
-      popularity: 9.5,
-      releaseDate: new Date('1972-03-24'),
-      voteCount: 9500,
-      voteAverage: 9.2
-    },
-    {
-      id: 3,
-      title: 'The Dark Knight',
-      popularity: 9.8,
-      releaseDate: new Date('2008-07-18'),
-      voteCount: 12000,
-      voteAverage: 9.0
-    },
-    {
-      id: 4,
-      title: 'Pulp Fiction',
-      popularity: 8.9,
-      releaseDate: new Date('1994-10-14'),
-      voteCount: 8500,
-      voteAverage: 8.9
-    },
-    {
-      id: 5,
-      title: 'Forrest Gump',
-      popularity: 8.8,
-      releaseDate: new Date('1994-07-06'),
-      voteCount: 8000,
-      voteAverage: 8.8
-    }
-  ];
+  // Pagination variables
+  currentPage = 1;
+  itemsPerPage = 10;
 
-  constructor() {
-  }
+  constructor(private filmService: FilmService) {}
 
   ngOnInit(): void {
+    this.loadFilms();
+  }
 
+  loadFilms(): void {
+    this.filmService.getAllFilms().subscribe(
+      (data: any[]) => {
+        this.films = data.map((filmArray) => ({
+          id: filmArray[0],
+          title: filmArray[1],
+          language: filmArray[2],
+          description: filmArray[3],
+          popularity: filmArray[4],
+          releaseDate: filmArray[5],
+          runtime: filmArray[6],
+          status: filmArray[7],
+          voteCount: filmArray[8],
+          voteAverage: filmArray[9],
+          posterUrl: filmArray[10],
+          trailerUrl: filmArray[11],
+        }));
+        this.updatePaginatedFilms();
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error loading films:', error);
+        this.hasError = true;
+        this.isLoading = false;
+      }
+    );
+  }
 
-    //console.log(this.films);
+  // Mettre à jour les films affichés en fonction de la page courante
+  updatePaginatedFilms(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedFilms = this.films.slice(startIndex, endIndex);
+  }
+
+  // Changer de page
+  changePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePaginatedFilms();
+  }
+
+  // Nombre total de pages
+  get totalPages(): number {
+    return Math.ceil(this.films.length / this.itemsPerPage);
   }
 }
