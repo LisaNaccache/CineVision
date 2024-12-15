@@ -78,6 +78,13 @@ var jsDocOptions = {
                         name_genre: { type: 'string' },
                     },
                 },
+                ProductionCompany: {
+                    type: 'object',
+                    properties: {
+                        id_company: { type: 'integer' },
+                        name_company: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -154,7 +161,6 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                console.log('start');
                 id = +req.params.id;
                 return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_FILM,\n                   TITLE,\n                   ORIGINAL_LANGUAGE,\n                   OVERVIEW,\n                   POPULARITY,\n                   RELEASE_DATE,\n                   RUNTIME,\n                   STATUS,\n                   VOTE_COUNT,\n                   VOTE_AVERAGE,\n                   LINK_POSTER,\n                   LINK_TRAILER\n            FROM FILM\n            WHERE ID_FILM = :id\n        ", { id: id })];
             case 1:
@@ -576,9 +582,236 @@ app.delete('/api/genres/:id', function (req, res) { return __awaiter(void 0, voi
         }
     });
 }); });
+/**
+ * @openapi
+ * /api/production-companies:
+ *   get:
+ *     description: Get all production companies
+ *     responses:
+ *       200:
+ *         description: An array of ProductionCompany
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ProductionCompany'
+ */
+app.get('/api/production-companies', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_11;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_COMPANY, NAME_COMPANY FROM PRODUCTION_COMPANY')];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_11 = _a.sent();
+                console.error('Erreur lors de la récupération des sociétés de production :', err_11);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/production-companies/{id}:
+ *   get:
+ *     description: Get a production company by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the production company to get
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: The requested ProductionCompany object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductionCompany'
+ *       404:
+ *         description: Production company not found
+ */
+app.get('/api/production-companies/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_12;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_COMPANY, NAME_COMPANY\n            FROM PRODUCTION_COMPANY\n            WHERE ID_COMPANY = :id\n        ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rows.length > 0) {
+                    res.status(200).json(result.rows[0]);
+                }
+                else {
+                    res.status(404).json({ error: "Production company not found with ID: ".concat(id) });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_12 = _a.sent();
+                console.error('Erreur lors de la récupération de la société de production :', err_12);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/production-companies:
+ *   post:
+ *     description: Add a new production company
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductionCompany'
+ *     responses:
+ *       201:
+ *         description: The created ProductionCompany object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductionCompany'
+ */
+app.post('/api/production-companies', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var newCompany, insertResult, err_13;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                newCompany = req.body;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO PRODUCTION_COMPANY\n                (NAME_COMPANY)\n                VALUES\n                    (:name_company)\n                RETURNING ID_COMPANY INTO :id_company\n            ", {
+                        name_company: newCompany.name_company,
+                        id_company: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+                    })];
+            case 1:
+                insertResult = _a.sent();
+                newCompany.id_company = insertResult.outBinds.id_company[0];
+                res.status(201).json(newCompany);
+                return [3 /*break*/, 3];
+            case 2:
+                err_13 = _a.sent();
+                console.error('Erreur lors de la création de la société de production :', err_13);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/production-companies:
+ *   put:
+ *     description: Update an existing production company
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductionCompany'
+ *     responses:
+ *       200:
+ *         description: The updated ProductionCompany object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductionCompany'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Production company not found
+ */
+app.put('/api/production-companies', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updatedCompany, result, err_14;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                updatedCompany = req.body;
+                if (!updatedCompany.id_company) {
+                    res.status(400).json({ error: 'ID is required in the body to update a production company.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE PRODUCTION_COMPANY\n                SET NAME_COMPANY = :name_company\n                WHERE ID_COMPANY = :id_company\n            ", {
+                        id_company: updatedCompany.id_company,
+                        name_company: updatedCompany.name_company,
+                    })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Production company not found with ID: ".concat(updatedCompany.id_company) });
+                }
+                else {
+                    res.status(200).json({ message: 'Production company updated successfully', updatedCompany: updatedCompany });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_14 = _a.sent();
+                console.error('Erreur lors de la mise à jour de la société de production :', err_14);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/production-companies/{id}:
+ *   delete:
+ *     description: Delete a production company by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the production company to delete
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Production company deleted successfully
+ *       404:
+ *         description: Production company not found
+ */
+app.delete('/api/production-companies/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_15;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM PRODUCTION_COMPANY\n                WHERE ID_COMPANY = :id\n            ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Production company not found with ID: ".concat(id) });
+                }
+                else {
+                    res.status(200).json({ message: 'Production company deleted successfully' });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_15 = _a.sent();
+                console.error('Erreur lors de la suppression de la société de production :', err_15);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_11;
+    var err_16;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -591,8 +824,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_11 = _a.sent();
-                console.error('Failed to initialize database:', err_11);
+                err_16 = _a.sent();
+                console.error('Failed to initialize database:', err_16);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
