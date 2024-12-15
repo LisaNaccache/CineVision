@@ -2,9 +2,8 @@ import * as express from 'express';
 import {Request, Response} from 'express';
 import swaggerJsdoc = require('swagger-jsdoc'); // * as swaggerJsdoc from 'swagger-jsdoc'
 import swaggerUi = require('swagger-ui-express');
+import { executeQuery, initDB } from './database'; // import the helper from database.ts
 
-import LearningPackage from './models/LearningPackage';
-import LearningFact from "./models/LearningFact";
 const cors = require('cors');
 
 const app = express();
@@ -47,107 +46,6 @@ const jsDocOptions = {
                         },
                     },
                 },
-                // Define other schemas as needed
-                LearningPackage: {
-                    type: 'object',
-                    properties: {
-                        id: {
-                            type: 'integer',
-                        },
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                        category: {
-                            type: 'string',
-                        },
-                        targetAudience: {
-                            type: 'string',
-                        },
-                        difficulty: {
-                            type: 'integer',
-                            minimum: 1,
-                            maximum: 20
-                        },
-                    },
-                },
-                LearningPackageNoId: {
-                    type: 'object',
-                    properties: {
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                        category: {
-                            type: 'string',
-                        },
-                        targetAudience: {
-                            type: 'string',
-                        },
-                        difficulty: {
-                            type: 'integer',
-                            minimum: 1,
-                            maximum: 20
-                        },
-                    },
-                },
-                UserPackageLearning: {
-                    type: 'object',
-                    properties: {
-                        startDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                        expectedEndDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                        minutesPerDayObjective: {
-                            type: 'integer',
-                        },
-                    },
-                },
-                UserLearningFact: {
-                    type: 'object',
-                    properties: {
-                        id: {
-                            type: 'integer',
-                        },
-                        reviewCount: {
-                            type: 'integer',
-                        },
-                        confidenceLevel: {
-                            type: 'integer',
-                        },
-                        lastReviewedDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                    },
-                },
-                UserLearningFactNoId: {
-                    type: 'object',
-                    properties: {
-                        reviewCount: {
-                            type: 'integer',
-                        },
-                        confidenceLevel: {
-                            type: 'integer',
-                        },
-                        lastReviewedDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                    },
-                },
-
-
-
-
 
                 Film: {
                     type: 'object',
@@ -162,6 +60,8 @@ const jsDocOptions = {
                         status: { type: 'string' },
                         vote_count: { type: 'integer' },
                         vote_average: { type: 'number' },
+                        link_poster: { type: 'string' },
+                        link_trailer: { type: 'string' },
                     },
                 },
             },
@@ -204,71 +104,6 @@ let todos: Todo[] = [
     {id: newId(), title: 'Learn Express'},
 ];
 
-// The LearningPackage
-interface LearningPackage {
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    targetAudience: string;
-    difficulty: number;
-}
-
-let learningPackages: LearningPackage[] = [
-    {
-        id: 1,
-        title: "Learn TypeScript",
-        description: "An introduction to TypeScript language and its core concepts.",
-        category: "Programming",
-        targetAudience: "Developers",
-        difficulty: 5
-    },
-    {
-        id: 2,
-        title: "Learn NodeJs",
-        description: "Learn the basics of Node.js and how to create a server.",
-        category: "Backend Development",
-        targetAudience: "Web Developers",
-        difficulty: 6
-    },
-    {
-        id: 3,
-        title: "Learn Html",
-        description: "Learn the fundamentals of HTML for web development.",
-        category: "Frontend Development",
-        targetAudience: "Beginners",
-        difficulty: 3
-    },
-    {
-        id: 4,
-        title: "Learn Angular",
-        description: "An introduction to Angular framework for building dynamic web applications.",
-        category: "Frontend Frameworks",
-        targetAudience: "Frontend Developers",
-        difficulty: 7
-    }
-];
-
-
-// Follow activity globally :The UserPackageLearning records that a user has committed to learning a package with a daily time target.
-interface UserPackageLearning {
-    id: number;
-    userId: number;
-    packageId: number;
-    startDate: Date;
-    expectedEndDate: Date;
-    minutesPerDayObjective: number;
-}
-
-// Follow activity in detail : The UserLearningFact tracks the user's progress for each fact in a package.
-interface UserLearningFact {
-    id: number;
-    userId: number;
-    factId: number;
-    reviewCount: number;
-    confidenceLevel: number;
-    lastReviewedDate: Date;
-}
 
 /**
  * @openapi
@@ -414,333 +249,27 @@ app.delete('/api/todos/:id', (req, res) => {
     }
 });
 
-// Endpoint LearningPackage
 
-/**
- * @openapi
- * /api/package:
- *   get:
- *     description: Get all learning packages
- *     responses:
- *       200:
- *         description: An array of LearningPackage
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/LearningPackage'
- */
-app.get('/api/package', async (req: Request, res: Response) => {
-    try {
-        const packages = await LearningPackage.findAll();
-        res.status(200).json(packages);
-    } catch (err) {
-        console.error('Erreur lors de la récupération des packages :', err);
-        res.status(500).json({error: 'Erreur interne du serveur.'});
-    }
-});
-/*app.get('/api/package', (req, res) => {
-    res.status(200).json(learningPackages);
-});*/
-
-/**
- * @openapi
- * /api/package/{id}:
- *   get:
- *     description: Get a learning package by its id
- *     parameters:
- *         - name: id
- *           in: path
- *           required: true
- *           description: The ID of the Learning Package to get
- *           schema:
- *             type: number
- *     responses:
- *       200:
- *         description: the learning package
- *         schema:
- *           $ref: '#/components/schemas/LearningPackage'
- *       404:
- *         description: Learning Package not found
- */
-app.get('/api/package/:id', async (req: Request, res: Response) => {
-    try {
-        const id = +req.params.id;
-        const foundPackage = await LearningPackage.findByPk(id);
-        if (foundPackage) {
-            res.status(200).json(foundPackage);
-        } else {
-            res.status(404).json({error: `Package non trouvé avec l'ID : ${id}`});
-        }
-    } catch (err) {
-        console.error('Erreur lors de la récupération du package :', err);
-        res.status(500).json({error: 'Erreur interne du serveur.'});
-    }
-});
-
-/*app.get('/api/package/:id', (req, res) => {
-    const id = +req.params['id']
-    console.log('handle http GET /api/package/:id', id);
-    const idx = learningPackages.findIndex((x) => x.id === id);
-    if (idx !== -1) {
-        const found = learningPackages[idx];
-        res.send(found);
-    } else {
-        res.status(404).send('Learning Package entity not found by id:' + id);
-    }
-});*/
-
-/**
- * @openapi
- * /api/package:
- *   post:
- *     description: save a new Learning Package
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LearningPackageNoId'
- *     responses:
- *       200:
- *         description: An array of LearningPackages
- *         schema:
- *           $ref: '#/components/schemas/LearningPackage'
- */
-app.post('/api/package', async (req: Request, res: Response) => {
-    try {
-        const newPackage = await LearningPackage.create(req.body);
-        res.status(201).json(newPackage);
-    } catch (err) {
-        console.error('Erreur lors de la création du package :', err);
-        res.status(400).json({error: 'Erreur lors de la validation ou de la création.'});
-    }
-});
-
-/*app.post('/api/package', (req: Request, res: Response) => {
-    let item = <LearningPackage>req.body;
-    console.log('handle http POST /api/package', item);
-    item.id = newId();
-    learningPackages.push(item);
-    res.send(item);
-});*/
-
-/**
- * @openapi
- * /api/package/{id}:
- *   put:
- *     description: Update an existing Learning Package
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Learning Package to update
- *         schema:
- *           type: number
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LearningPackageNoId'
- *     responses:
- *       200:
- *         description: Learning Package updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/LearningPackageNoId'
- *       400:
- *         description: Invalid ID
- *       404:
- *         description: Learning Package not found
- *       500:
- *         description: Server error
- */
-app.put('/api/package/:id', async (req: Request, res: Response) => {
-    const {id} = req.params;
-    const {title, description, category, targetAudience, difficulty} = req.body;
-
-    try {
-        if (!id) {
-            res.status(400).json({error: 'ID invalide ou manquant.'});
-        }
-
-        const learningPackage = await LearningPackage.findByPk(id);
-
-        if (!learningPackage) {
-            res.status(404).json({message: 'Learning package non trouve'});
-        } else {
-            if (learningPackage) {
-                learningPackage.set({
-                    title,
-                    description,
-                    category,
-                    targetAudience,
-                    difficulty,
-                });
-            }
-
-            if (learningPackage) {
-                await learningPackage.save();
-            }
-
-            res.status(200).json({
-                message: 'Learning package mis à jour avec succes',
-                data: learningPackage,
-            });
-        }
-    } catch (error) {
-        console.error('Erreur lors de la mise à jour du learning package', error);
-        res.status(500).json({message: 'Erreur serveur', error: error.message});
-    }
-});
-/*app.put('/api/package', (req: Request, res: Response) => {
-    let item = <LearningPackage>req.body;
-    console.log('handle http PUT /api/package', item);
-    const id = item.id;
-    const idx = learningPackages.findIndex((x) => x.id === id);
-    if (idx !== -1) {
-        const found = learningPackages[idx];
-        if (item.title) {
-            found.title = item.title;
-        }
-        if (item.description) {
-            found.description = item.description;
-        }
-        if (item.category) {
-            found.category = item.category;
-        }
-        if (item.targetAudience) {
-            found.targetAudience = item.targetAudience;
-        }
-        if (item.difficulty) {
-            found.difficulty = item.difficulty;
-        }
-        res.send(found);
-    } else {
-        res.status(404).send('Learning Package entity not found by id:' + id);
-    }
-});
-*/
-
-/**
- * @openapi
- * /api/package-summaries:
- *   get:
- *     description: Get all learning packages with id and title fields only
- *     responses:
- *       200:
- *         description: An array of LearningPackage
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/LearningPackage'
- */
-/*app.get('/api/package-summaries', (req, res) => {
-    const packageSummaries = learningPackages.map(item => ({
-        id: item.id,
-        title: item.title,
-    }));
-    res.status(200).json(packageSummaries);
-});*/
-
-
-// Endpoints Learningfact
-/*app.post('/api/package/:id/fact', async (req: Request, res: Response) => {
-    try {
-        const newFact = await LearningFact.create(req.body);
-        res.status(201).json(newFact);
-    } catch (err) {
-        console.error('Erreur lors de la création du fact :', err);
-        res.status(500).json({error: 'Erreur interne du serveur.'});
-
-        console.error('Erreur lors de la création du package :', err);
-        res.status(400).json({error: 'Erreur lors de la validation ou de la création.'});
-    }
-});*/
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------------------------------------------------
-
-
-// Mock data for testing
 interface Film {
-    id_film: number;
+    id_film?: number;
     title: string;
-    original_language: string;
-    overview: string;
-    popularity: number;
-    release_date: string;
-    runtime: number;
-    status: string;
-    vote_count: number;
-    vote_average: number;
+    original_language?: string;
+    overview?: string;
+    popularity?: number;
+    release_date?: string;
+    runtime?: number;
+    status?: string;
+    vote_count?: number;
+    vote_average?: number;
+    link_poster?: string;
+    link_trailer?: string;
 }
 
+// ---------------------------------------
+//              CRUD FILM
+// ---------------------------------------
 
-let films: Film[] = [
-    {
-        id_film: 1,
-        title: "Inception",
-        original_language: "en",
-        overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
-        popularity: 99.5,
-        release_date: "2010-07-16",
-        runtime: 148,
-        status: "Released",
-        vote_count: 12000,
-        vote_average: 8.8,
-    },
-    {
-        id_film: 2,
-        title: "The Dark Knight",
-        original_language: "en",
-        overview: "When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.",
-        popularity: 98.7,
-        release_date: "2008-07-18",
-        runtime: 152,
-        status: "Released",
-        vote_count: 15000,
-        vote_average: 9.0,
-    },
-];
-
-
-// CRUD Endpoints for Films
-
+// GET ALL FILMS
 /**
  * @openapi
  * /api/films:
@@ -748,7 +277,7 @@ let films: Film[] = [
  *     description: Get all films
  *     responses:
  *       200:
- *         description: An array of Films
+ *         description: An array of Film
  *         content:
  *           application/json:
  *             schema:
@@ -756,16 +285,76 @@ let films: Film[] = [
  *               items:
  *                 $ref: '#/components/schemas/Film'
  */
-app.get('/api/films', (req: Request, res: Response) => {
-    console.log('handle http GET : /api/films');
-    res.send(films);
+app.get('/api/films', async (req: Request, res: Response) => {
+    try {
+        const result = await executeQuery('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE FROM FILM');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des films :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
 });
 
 /**
  * @openapi
- * /api/films:
+ * /api/films/{id}:
+ *   get:
+ *     description: Get a film by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to get
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: The requested Film object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.get('/api/films/:id', async (req: Request, res: Response) => {
+    try {
+        const id = +req.params.id;
+
+        const result = await executeQuery(`
+            SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY,
+                   RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE,
+                   LINK_POSTER, LINK_TAILER
+            FROM FILM
+            WHERE ID_FILM = :id
+        `, { id });
+
+        if (result.rows.length > 0) {
+            res.status(200).json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: `Film not found with ID: ${id}` });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la récupération du film :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
+// POST FILM BY ID (crée ou met à jour)
+/**
+ * @openapi
+ * /api/films/{id}:
  *   post:
- *     description: Save a new Film
+ *     description: Add or update a film by ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: number
  *     requestBody:
  *       required: true
  *       content:
@@ -774,121 +363,80 @@ app.get('/api/films', (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       201:
- *         description: The created Film
+ *         description: The created or updated Film object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Film'
  */
-app.post('/api/films', (req: Request, res: Response) => {
-    let film = req.body as Film;
-    console.log('handle http POST /api/films', film);
-    film.id_film = films.length ? films[films.length - 1].id_film + 1 : 1;
-    films.push(film);
-    res.status(201).send(film);
-});
+app.post('/api/films/:id', async (req: Request, res: Response) => {
+    try {
+        const id = +req.params['id'];
+        const film: Film = req.body;
 
-/**
- * @openapi
- * /api/films:
- *   put:
- *     description: Update an existing Film
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Film'
- *     responses:
- *       200:
- *         description: The updated Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- */
-app.put('/api/films', (req: Request, res: Response) => {
-    let film = req.body as Film;
-    console.log('handle http PUT /api/films', film);
-    const id = film.id_film;
-    const idx = films.findIndex((f) => f.id_film === id);
-    if (idx !== -1) {
-        films[idx] = { ...films[idx], ...film };
-        res.send(films[idx]);
-    } else {
-        res.status(404).send('Film entity not found by id:' + id);
+        // On vérifie si le film existe
+        const check = await executeQuery('SELECT ID_FILM FROM FILM WHERE ID_FILM = :id', { id });
+        if (check.rows.length === 0) {
+            // Insertion
+            const insertResult = await executeQuery(
+                `INSERT INTO FILM (ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TAILER)
+                 VALUES (:id, :title, :original_language, :overview, :popularity, :release_date, :runtime, :status, :vote_count, :vote_average, :link_poster, :link_tailer)`,
+                {
+                    id,
+                    title: film.title,
+                    original_language: film.original_language || null,
+                    overview: film.overview || null,
+                    popularity: film.popularity || null,
+                    release_date: film.release_date || null,
+                    runtime: film.runtime || null,
+                    status: film.status || null,
+                    vote_count: film.vote_count || null,
+                    vote_average: film.vote_average || null,
+                    link_poster: film.link_poster || null,
+                    link_trailer: film.link_trailer || null
+                }
+            );
+            film.id_film = id;
+            res.status(201).json(film);
+        } else {
+            // Mise à jour
+            await executeQuery(
+                `UPDATE FILM SET 
+                   TITLE = :title,
+                   ORIGINAL_LANGUAGE = :original_language,
+                   OVERVIEW = :overview,
+                   POPULARITY = :popularity,
+                   RELEASE_DATE = :release_date,
+                   RUNTIME = :runtime,
+                   STATUS = :status,
+                   VOTE_COUNT = :vote_count,
+                   VOTE_AVERAGE = :vote_average,
+                   LINK_POSTER = :link_poster,
+                   LINK_TAILER = :link_tailer
+                 WHERE ID_FILM = :id`,
+                {
+                    id,
+                    title: film.title,
+                    original_language: film.original_language || null,
+                    overview: film.overview || null,
+                    popularity: film.popularity || null,
+                    release_date: film.release_date || null,
+                    runtime: film.runtime || null,
+                    status: film.status || null,
+                    vote_count: film.vote_count || null,
+                    vote_average: film.vote_average || null,
+                    link_poster: film.link_poster || null,
+                    link_trailer: film.link_trailer || null
+                }
+            );
+            film.id_film = id;
+            res.status(200).json(film);
+        }
+    } catch (err) {
+        console.error('Erreur lors de la création ou mise à jour du film :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
-
-/**
- * @openapi
- * /api/films/{id}:
- *   get:
- *     description: Get a Film by its ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Film to get
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: The Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- *       404:
- *         description: Film not found
- */
-app.get('/api/films/:id', (req: Request, res: Response) => {
-    const id = +req.params['id'];
-    console.log('handle http GET /api/films/:id', id);
-    const film = films.find((f) => f.id_film === id);
-    if (film) {
-        res.send(film);
-    } else {
-        res.status(404).send('Film entity not found by id:' + id);
-    }
-});
-
-/**
- * @openapi
- * /api/films/{id}:
- *   delete:
- *     description: Delete a Film by its ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Film to delete
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: The deleted Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- *       404:
- *         description: Film not found
- */
-app.delete('/api/films/:id', (req: Request, res: Response) => {
-    const id = +req.params['id'];
-    console.log('handle http DELETE /api/films/:id', id);
-    const idx = films.findIndex((f) => f.id_film === id);
-    if (idx !== -1) {
-        const deleted = films.splice(idx, 1)[0];
-        res.send(deleted);
-    } else {
-        res.status(404).send('Film entity not found by id:' + id);
-    }
-});
-
-
-
 
 
 
@@ -896,7 +444,20 @@ app.delete('/api/films/:id', (req: Request, res: Response) => {
 // app.patch()
 
 console.log('starting...');
+(async () => {
+    try {
+        await initDB(); // Call initDB here
+        app.listen(3000, () => {
+            console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
+        });
+    } catch (err) {
+        console.error('Failed to initialize database:', err);
+        process.exit(1); // Exit if DB init fails
+    }
+})();
+/*
 app.listen(3000, () => {
     console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
 });
 
+*/

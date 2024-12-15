@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -50,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var swaggerJsdoc = require("swagger-jsdoc"); // * as swaggerJsdoc from 'swagger-jsdoc'
 var swaggerUi = require("swagger-ui-express");
-var LearningPackage_1 = require("./models/LearningPackage");
+var database_1 = require("./database"); // import the helper from database.ts
 var cors = require('cors');
 var app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
@@ -90,103 +79,6 @@ var jsDocOptions = {
                         },
                     },
                 },
-                // Define other schemas as needed
-                LearningPackage: {
-                    type: 'object',
-                    properties: {
-                        id: {
-                            type: 'integer',
-                        },
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                        category: {
-                            type: 'string',
-                        },
-                        targetAudience: {
-                            type: 'string',
-                        },
-                        difficulty: {
-                            type: 'integer',
-                            minimum: 1,
-                            maximum: 20
-                        },
-                    },
-                },
-                LearningPackageNoId: {
-                    type: 'object',
-                    properties: {
-                        title: {
-                            type: 'string',
-                        },
-                        description: {
-                            type: 'string',
-                        },
-                        category: {
-                            type: 'string',
-                        },
-                        targetAudience: {
-                            type: 'string',
-                        },
-                        difficulty: {
-                            type: 'integer',
-                            minimum: 1,
-                            maximum: 20
-                        },
-                    },
-                },
-                UserPackageLearning: {
-                    type: 'object',
-                    properties: {
-                        startDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                        expectedEndDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                        minutesPerDayObjective: {
-                            type: 'integer',
-                        },
-                    },
-                },
-                UserLearningFact: {
-                    type: 'object',
-                    properties: {
-                        id: {
-                            type: 'integer',
-                        },
-                        reviewCount: {
-                            type: 'integer',
-                        },
-                        confidenceLevel: {
-                            type: 'integer',
-                        },
-                        lastReviewedDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                    },
-                },
-                UserLearningFactNoId: {
-                    type: 'object',
-                    properties: {
-                        reviewCount: {
-                            type: 'integer',
-                        },
-                        confidenceLevel: {
-                            type: 'integer',
-                        },
-                        lastReviewedDate: {
-                            type: 'string',
-                            format: 'date'
-                        },
-                    },
-                },
                 Film: {
                     type: 'object',
                     properties: {
@@ -200,6 +92,8 @@ var jsDocOptions = {
                         status: { type: 'string' },
                         vote_count: { type: 'integer' },
                         vote_average: { type: 'number' },
+                        link_poster: { type: 'string' },
+                        link_trailer: { type: 'string' },
                     },
                 },
             },
@@ -226,40 +120,6 @@ var todos = [
     { id: newId(), title: 'Learn Angular' },
     { id: newId(), title: 'Learn NodeJs' },
     { id: newId(), title: 'Learn Express' },
-];
-var learningPackages = [
-    {
-        id: 1,
-        title: "Learn TypeScript",
-        description: "An introduction to TypeScript language and its core concepts.",
-        category: "Programming",
-        targetAudience: "Developers",
-        difficulty: 5
-    },
-    {
-        id: 2,
-        title: "Learn NodeJs",
-        description: "Learn the basics of Node.js and how to create a server.",
-        category: "Backend Development",
-        targetAudience: "Web Developers",
-        difficulty: 6
-    },
-    {
-        id: 3,
-        title: "Learn Html",
-        description: "Learn the fundamentals of HTML for web development.",
-        category: "Frontend Development",
-        targetAudience: "Beginners",
-        difficulty: 3
-    },
-    {
-        id: 4,
-        title: "Learn Angular",
-        description: "An introduction to Angular framework for building dynamic web applications.",
-        category: "Frontend Frameworks",
-        targetAudience: "Frontend Developers",
-        difficulty: 7
-    }
 ];
 /**
  * @openapi
@@ -402,255 +262,10 @@ app.delete('/api/todos/:id', function (req, res) {
         res.status(404).send('Todo entity not found by id:' + id);
     }
 });
-// Endpoint LearningPackage
-/**
- * @openapi
- * /api/package:
- *   get:
- *     description: Get all learning packages
- *     responses:
- *       200:
- *         description: An array of LearningPackage
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/LearningPackage'
- */
-app.get('/api/package', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var packages, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, LearningPackage_1.default.findAll()];
-            case 1:
-                packages = _a.sent();
-                res.status(200).json(packages);
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                console.error('Erreur lors de la récupération des packages :', err_1);
-                res.status(500).json({ error: 'Erreur interne du serveur.' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
-/*app.get('/api/package', (req, res) => {
-    res.status(200).json(learningPackages);
-});*/
-/**
- * @openapi
- * /api/package/{id}:
- *   get:
- *     description: Get a learning package by its id
- *     parameters:
- *         - name: id
- *           in: path
- *           required: true
- *           description: The ID of the Learning Package to get
- *           schema:
- *             type: number
- *     responses:
- *       200:
- *         description: the learning package
- *         schema:
- *           $ref: '#/components/schemas/LearningPackage'
- *       404:
- *         description: Learning Package not found
- */
-app.get('/api/package/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, foundPackage, err_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                id = +req.params.id;
-                return [4 /*yield*/, LearningPackage_1.default.findByPk(id)];
-            case 1:
-                foundPackage = _a.sent();
-                if (foundPackage) {
-                    res.status(200).json(foundPackage);
-                }
-                else {
-                    res.status(404).json({ error: "Package non trouv\u00E9 avec l'ID : ".concat(id) });
-                }
-                return [3 /*break*/, 3];
-            case 2:
-                err_2 = _a.sent();
-                console.error('Erreur lors de la récupération du package :', err_2);
-                res.status(500).json({ error: 'Erreur interne du serveur.' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
-/*app.get('/api/package/:id', (req, res) => {
-    const id = +req.params['id']
-    console.log('handle http GET /api/package/:id', id);
-    const idx = learningPackages.findIndex((x) => x.id === id);
-    if (idx !== -1) {
-        const found = learningPackages[idx];
-        res.send(found);
-    } else {
-        res.status(404).send('Learning Package entity not found by id:' + id);
-    }
-});*/
-/**
- * @openapi
- * /api/package:
- *   post:
- *     description: save a new Learning Package
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LearningPackageNoId'
- *     responses:
- *       200:
- *         description: An array of LearningPackages
- *         schema:
- *           $ref: '#/components/schemas/LearningPackage'
- */
-app.post('/api/package', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var newPackage, err_3;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, LearningPackage_1.default.create(req.body)];
-            case 1:
-                newPackage = _a.sent();
-                res.status(201).json(newPackage);
-                return [3 /*break*/, 3];
-            case 2:
-                err_3 = _a.sent();
-                console.error('Erreur lors de la création du package :', err_3);
-                res.status(400).json({ error: 'Erreur lors de la validation ou de la création.' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
-/*app.post('/api/package', (req: Request, res: Response) => {
-    let item = <LearningPackage>req.body;
-    console.log('handle http POST /api/package', item);
-    item.id = newId();
-    learningPackages.push(item);
-    res.send(item);
-});*/
-/**
- * @openapi
- * /api/package/{id}:
- *   put:
- *     description: Update an existing Learning Package
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Learning Package to update
- *         schema:
- *           type: number
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/LearningPackageNoId'
- *     responses:
- *       200:
- *         description: Learning Package updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/LearningPackageNoId'
- *       400:
- *         description: Invalid ID
- *       404:
- *         description: Learning Package not found
- *       500:
- *         description: Server error
- */
-app.put('/api/package/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, _a, title, description, category, targetAudience, difficulty, learningPackage, error_1;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                id = req.params.id;
-                _a = req.body, title = _a.title, description = _a.description, category = _a.category, targetAudience = _a.targetAudience, difficulty = _a.difficulty;
-                _b.label = 1;
-            case 1:
-                _b.trys.push([1, 7, , 8]);
-                if (!id) {
-                    res.status(400).json({ error: 'ID invalide ou manquant.' });
-                }
-                return [4 /*yield*/, LearningPackage_1.default.findByPk(id)];
-            case 2:
-                learningPackage = _b.sent();
-                if (!!learningPackage) return [3 /*break*/, 3];
-                res.status(404).json({ message: 'Learning package non trouve' });
-                return [3 /*break*/, 6];
-            case 3:
-                if (learningPackage) {
-                    learningPackage.set({
-                        title: title,
-                        description: description,
-                        category: category,
-                        targetAudience: targetAudience,
-                        difficulty: difficulty,
-                    });
-                }
-                if (!learningPackage) return [3 /*break*/, 5];
-                return [4 /*yield*/, learningPackage.save()];
-            case 4:
-                _b.sent();
-                _b.label = 5;
-            case 5:
-                res.status(200).json({
-                    message: 'Learning package mis à jour avec succes',
-                    data: learningPackage,
-                });
-                _b.label = 6;
-            case 6: return [3 /*break*/, 8];
-            case 7:
-                error_1 = _b.sent();
-                console.error('Erreur lors de la mise à jour du learning package', error_1);
-                res.status(500).json({ message: 'Erreur serveur', error: error_1.message });
-                return [3 /*break*/, 8];
-            case 8: return [2 /*return*/];
-        }
-    });
-}); });
-var films = [
-    {
-        id_film: 1,
-        title: "Inception",
-        original_language: "en",
-        overview: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.",
-        popularity: 99.5,
-        release_date: "2010-07-16",
-        runtime: 148,
-        status: "Released",
-        vote_count: 12000,
-        vote_average: 8.8,
-    },
-    {
-        id_film: 2,
-        title: "The Dark Knight",
-        original_language: "en",
-        overview: "When the menace known as the Joker emerges from his mysterious past, he wreaks havoc and chaos on the people of Gotham.",
-        popularity: 98.7,
-        release_date: "2008-07-18",
-        runtime: 152,
-        status: "Released",
-        vote_count: 15000,
-        vote_average: 9.0,
-    },
-];
-// CRUD Endpoints for Films
+// ---------------------------------------
+//              CRUD FILM
+// ---------------------------------------
+// GET ALL FILMS
 /**
  * @openapi
  * /api/films:
@@ -658,7 +273,7 @@ var films = [
  *     description: Get all films
  *     responses:
  *       200:
- *         description: An array of Films
+ *         description: An array of Film
  *         content:
  *           application/json:
  *             schema:
@@ -666,15 +281,86 @@ var films = [
  *               items:
  *                 $ref: '#/components/schemas/Film'
  */
-app.get('/api/films', function (req, res) {
-    console.log('handle http GET : /api/films');
-    res.send(films);
-});
+app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE FROM FILM')];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_1 = _a.sent();
+                console.error('Erreur lors de la récupération des films :', err_1);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 /**
  * @openapi
- * /api/films:
+ * /api/films/{id}:
+ *   get:
+ *     description: Get a film by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Film to get
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: The requested Film object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Film'
+ *       404:
+ *         description: Film not found
+ */
+app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = +req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY,\n                   RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE,\n                   LINK_POSTER, LINK_TAILER\n            FROM FILM\n            WHERE ID_FILM = :id\n        ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rows.length > 0) {
+                    res.status(200).json(result.rows[0]);
+                }
+                else {
+                    res.status(404).json({ error: "Film not found with ID: ".concat(id) });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_2 = _a.sent();
+                console.error('Erreur lors de la récupération du film :', err_2);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// POST FILM BY ID (crée ou met à jour)
+/**
+ * @openapi
+ * /api/films/{id}:
  *   post:
- *     description: Save a new Film
+ *     description: Add or update a film by ID
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: number
  *     requestBody:
  *       required: true
  *       content:
@@ -683,120 +369,102 @@ app.get('/api/films', function (req, res) {
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       201:
- *         description: The created Film
+ *         description: The created or updated Film object
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Film'
  */
-app.post('/api/films', function (req, res) {
-    var film = req.body;
-    console.log('handle http POST /api/films', film);
-    film.id_film = films.length ? films[films.length - 1].id_film + 1 : 1;
-    films.push(film);
-    res.status(201).send(film);
-});
-/**
- * @openapi
- * /api/films:
- *   put:
- *     description: Update an existing Film
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Film'
- *     responses:
- *       200:
- *         description: The updated Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- */
-app.put('/api/films', function (req, res) {
-    var film = req.body;
-    console.log('handle http PUT /api/films', film);
-    var id = film.id_film;
-    var idx = films.findIndex(function (f) { return f.id_film === id; });
-    if (idx !== -1) {
-        films[idx] = __assign(__assign({}, films[idx]), film);
-        res.send(films[idx]);
-    }
-    else {
-        res.status(404).send('Film entity not found by id:' + id);
-    }
-});
-/**
- * @openapi
- * /api/films/{id}:
- *   get:
- *     description: Get a Film by its ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Film to get
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: The Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- *       404:
- *         description: Film not found
- */
-app.get('/api/films/:id', function (req, res) {
-    var id = +req.params['id'];
-    console.log('handle http GET /api/films/:id', id);
-    var film = films.find(function (f) { return f.id_film === id; });
-    if (film) {
-        res.send(film);
-    }
-    else {
-        res.status(404).send('Film entity not found by id:' + id);
-    }
-});
-/**
- * @openapi
- * /api/films/{id}:
- *   delete:
- *     description: Delete a Film by its ID
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: The ID of the Film to delete
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: The deleted Film
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
- *       404:
- *         description: Film not found
- */
-app.delete('/api/films/:id', function (req, res) {
-    var id = +req.params['id'];
-    console.log('handle http DELETE /api/films/:id', id);
-    var idx = films.findIndex(function (f) { return f.id_film === id; });
-    if (idx !== -1) {
-        var deleted = films.splice(idx, 1)[0];
-        res.send(deleted);
-    }
-    else {
-        res.status(404).send('Film entity not found by id:' + id);
-    }
-});
+app.post('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, film, check, insertResult, err_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 6, , 7]);
+                id = +req.params['id'];
+                film = req.body;
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_FILM FROM FILM WHERE ID_FILM = :id', { id: id })];
+            case 1:
+                check = _a.sent();
+                if (!(check.rows.length === 0)) return [3 /*break*/, 3];
+                return [4 /*yield*/, (0, database_1.executeQuery)("INSERT INTO FILM (ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TAILER)\n                 VALUES (:id, :title, :original_language, :overview, :popularity, :release_date, :runtime, :status, :vote_count, :vote_average, :link_poster, :link_tailer)", {
+                        id: id,
+                        title: film.title,
+                        original_language: film.original_language || null,
+                        overview: film.overview || null,
+                        popularity: film.popularity || null,
+                        release_date: film.release_date || null,
+                        runtime: film.runtime || null,
+                        status: film.status || null,
+                        vote_count: film.vote_count || null,
+                        vote_average: film.vote_average || null,
+                        link_poster: film.link_poster || null,
+                        link_trailer: film.link_trailer || null
+                    })];
+            case 2:
+                insertResult = _a.sent();
+                film.id_film = id;
+                res.status(201).json(film);
+                return [3 /*break*/, 5];
+            case 3: 
+            // Mise à jour
+            return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE FILM SET \n                   TITLE = :title,\n                   ORIGINAL_LANGUAGE = :original_language,\n                   OVERVIEW = :overview,\n                   POPULARITY = :popularity,\n                   RELEASE_DATE = :release_date,\n                   RUNTIME = :runtime,\n                   STATUS = :status,\n                   VOTE_COUNT = :vote_count,\n                   VOTE_AVERAGE = :vote_average,\n                   LINK_POSTER = :link_poster,\n                   LINK_TAILER = :link_tailer\n                 WHERE ID_FILM = :id", {
+                    id: id,
+                    title: film.title,
+                    original_language: film.original_language || null,
+                    overview: film.overview || null,
+                    popularity: film.popularity || null,
+                    release_date: film.release_date || null,
+                    runtime: film.runtime || null,
+                    status: film.status || null,
+                    vote_count: film.vote_count || null,
+                    vote_average: film.vote_average || null,
+                    link_poster: film.link_poster || null,
+                    link_trailer: film.link_trailer || null
+                })];
+            case 4:
+                // Mise à jour
+                _a.sent();
+                film.id_film = id;
+                res.status(200).json(film);
+                _a.label = 5;
+            case 5: return [3 /*break*/, 7];
+            case 6:
+                err_3 = _a.sent();
+                console.error('Erreur lors de la création ou mise à jour du film :', err_3);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 7];
+            case 7: return [2 /*return*/];
+        }
+    });
+}); });
 // app.patch()
 console.log('starting...');
-app.listen(3000, function () {
+(function () { return __awaiter(void 0, void 0, void 0, function () {
+    var err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.initDB)()];
+            case 1:
+                _a.sent(); // Call initDB here
+                app.listen(3000, function () {
+                    console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
+                });
+                return [3 /*break*/, 3];
+            case 2:
+                err_4 = _a.sent();
+                console.error('Failed to initialize database:', err_4);
+                process.exit(1); // Exit if DB init fails
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); })();
+/*
+app.listen(3000, () => {
     console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
 });
+
+*/ 
