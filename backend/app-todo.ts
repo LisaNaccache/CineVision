@@ -54,6 +54,14 @@ const jsDocOptions = {
                         name_company: { type: 'string' },
                     },
                 },
+
+                ProductionCountry: {
+                    type: 'object',
+                    properties: {
+                        id_country: { type: 'string' },
+                        name_country: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -356,13 +364,6 @@ app.delete('/api/films/:id', async (req: Request, res: Response) => {
 
 
 
-
-
-
-
-
-
-
 // ---------------------------------------
 //                  GENRE
 // ---------------------------------------
@@ -594,10 +595,6 @@ app.delete('/api/genres/:id', async (req: Request, res: Response) => {
 
 
 
-
-
-
-
 // ---------------------------------------
 //            production_company
 // ---------------------------------------
@@ -608,6 +605,7 @@ interface ProductionCompany {
 }
 
 
+// GET
 /**
  * @openapi
  * /api/production-companies:
@@ -633,6 +631,7 @@ app.get('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
+// GET id
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -676,6 +675,7 @@ app.get('/api/production-companies/:id', async (req: Request, res: Response) => 
     }
 });
 
+// POST
 /**
  * @openapi
  * /api/production-companies:
@@ -722,6 +722,7 @@ app.post('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
+// PUT
 /**
  * @openapi
  * /api/production-companies:
@@ -777,6 +778,7 @@ app.put('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
+// DELETE
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -817,6 +819,191 @@ app.delete('/api/production-companies/:id', async (req: Request, res: Response) 
         res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
+
+
+
+
+// ---------------------------------------
+//            production_country
+// ---------------------------------------
+
+interface ProductionCountry {
+    id_country: string;
+    name_country: string;
+}
+
+
+// GET ALL PRODUCTION COUNTRIES
+/**
+ * @openapi
+ * /api/production-countries:
+ *   get:
+ *     description: Get all production countries
+ *     responses:
+ *       200:
+ *         description: An array of ProductionCountry
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ProductionCountry'
+ */
+app.get('/api/production-countries', async (req: Request, res: Response) => {
+    try {
+        const result = await executeQuery('SELECT ID_COUNTRY, NAME_COUNTRY FROM PRODUCTION_COUNTRY');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des pays de production :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+// GET PRODUCTION COUNTRY BY ID
+/**
+ * @openapi
+ * /api/production-countries/{id}:
+ *   get:
+ *     description: Get a production country by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Production Country to get
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The requested ProductionCountry object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductionCountry'
+ *       404:
+ *         description: Production Country not found
+ */
+app.get('/api/production-countries/:id', async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        const result = await executeQuery(`
+            SELECT ID_COUNTRY, NAME_COUNTRY
+            FROM PRODUCTION_COUNTRY
+            WHERE ID_COUNTRY = :id
+        `, { id });
+
+        if (result.rows.length > 0) {
+            res.status(200).json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: `Country not found with ID: ${id}` });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la récupération du pays de production :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+// PUT (Update a production country)
+/**
+ * @openapi
+ * /api/production-countries:
+ *   put:
+ *     description: Update an existing production country
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductionCountry'
+ *     responses:
+ *       200:
+ *         description: The updated ProductionCountry object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductionCountry'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: Production country not found
+ */
+app.put('/api/production-countries', async (req: Request, res: Response) => {
+    try {
+        const updatedCountry: ProductionCountry = req.body;
+
+        if (!updatedCountry.id_country) {
+            res.status(400).json({ error: 'ID is required in the body to update a production country.' });
+            return;
+        }
+
+        const result = await executeQuery(
+            `
+                UPDATE PRODUCTION_COUNTRY
+                SET NAME_COUNTRY = :name_country
+                WHERE ID_COUNTRY = :id_country
+            `,
+            {
+                id_country: updatedCountry.id_country,
+                name_country: updatedCountry.name_country,
+            }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Production country not found with ID: ${updatedCountry.id_country}` });
+        } else {
+            res.status(200).json({ message: 'Production country updated successfully', updatedCountry });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour du pays de production :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+// DELETE PRODUCTION COUNTRY BY ID
+/**
+ * @openapi
+ * /api/production-countries/{id}:
+ *   delete:
+ *     description: Delete a production country by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the Production Country to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Production Country deleted successfully
+ *       404:
+ *         description: Production Country not found
+ */
+app.delete('/api/production-countries/:id', async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        const result = await executeQuery(
+            `
+                DELETE FROM PRODUCTION_COUNTRY
+                WHERE ID_COUNTRY = :id
+            `,
+            { id }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Country not found with ID: ${id}` });
+        } else {
+            res.status(200).json({ message: 'Country deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la suppression du pays de production :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
 
 
 
