@@ -62,6 +62,14 @@ const jsDocOptions = {
                         name_country: { type: 'string' },
                     },
                 },
+
+                SpokenLanguage: {
+                    type: 'object',
+                    properties: {
+                        id_spoken_languages: { type: 'string' },
+                        language: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -1004,9 +1012,183 @@ app.delete('/api/production-countries/:id', async (req: Request, res: Response) 
 
 
 
+// ---------------------------------------
+//           spoken_languages
+// ---------------------------------------
+
+interface SpokenLanguage {
+    id_spoken_languages: string;
+    language: string;
+}
 
 
+// GET ALL SPOKEN LANGUAGES
+/**
+ * @openapi
+ * /api/spoken_languages:
+ *   get:
+ *     description: Get all spoken languages
+ *     responses:
+ *       200:
+ *         description: An array of SpokenLanguage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/SpokenLanguage'
+ */
+app.get('/api/spoken_languages', async (req: Request, res: Response) => {
+    try {
+        const result = await executeQuery('SELECT ID_SPOKEN_LANGUAGES, LANGUAGE FROM SPOKEN_LANGUAGES');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des langues parlées :', err);
+        res.status(500).json({error: 'Erreur interne du serveur.'});
+    }
+});
 
+// GET SPOKEN LANGUAGE BY ID
+/**
+ * @openapi
+ * /api/spoken_languages/{id}:
+ *   get:
+ *     description: Get a spoken language by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the SpokenLanguage to get
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The requested SpokenLanguage object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SpokenLanguage'
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.get('/api/spoken_languages/:id', async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        const result = await executeQuery(`
+            SELECT ID_SPOKEN_LANGUAGES, LANGUAGE
+            FROM SPOKEN_LANGUAGES
+            WHERE ID_SPOKEN_LANGUAGES = :id
+        `, { id });
+
+        if (result.rows.length > 0) {
+            res.status(200).json(result.rows[0]);
+        } else {
+            res.status(404).json({ error: `Spoken language not found with ID: ${id}` });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la récupération de la langue parlée :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+// PUT (Update a spoken language)
+/**
+ * @openapi
+ * /api/spoken_languages:
+ *   put:
+ *     description: Update an existing spoken language
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SpokenLanguage'
+ *     responses:
+ *       200:
+ *         description: The updated SpokenLanguage object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SpokenLanguage'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.put('/api/spoken_languages', async (req: Request, res: Response) => {
+    try {
+        const updatedLanguage: SpokenLanguage = req.body;
+
+        if (!updatedLanguage.id_spoken_languages) {
+            res.status(400).json({ error: 'ID is required in the body to update a spoken language.' });
+            return;
+        }
+
+        const result = await executeQuery(
+            `
+                UPDATE SPOKEN_LANGUAGES
+                SET LANGUAGE = :language
+                WHERE ID_SPOKEN_LANGUAGES = :id_spoken_languages
+            `,
+            {
+                id_spoken_languages: updatedLanguage.id_spoken_languages,
+                language: updatedLanguage.language,
+            }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Spoken language not found with ID: ${updatedLanguage.id_spoken_languages}` });
+        } else {
+            res.status(200).json({ message: 'Spoken language updated successfully', updatedLanguage });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour de la langue parlée :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+// DELETE SPOKEN LANGUAGE BY ID
+/**
+ * @openapi
+ * /api/spoken_languages/{id}:
+ *   delete:
+ *     description: Delete a spoken language by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the SpokenLanguage to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Spoken language deleted successfully
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.delete('/api/spoken_languages/:id', async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        const result = await executeQuery(
+            `
+                DELETE FROM SPOKEN_LANGUAGES
+                WHERE ID_SPOKEN_LANGUAGES = :id
+            `,
+            { id }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: `Spoken language not found with ID: ${id}` });
+        } else {
+            res.status(200).json({ message: 'Spoken language deleted successfully' });
+        }
+    } catch (err) {
+        console.error('Erreur lors de la suppression de la langue parlée :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
 
 
 

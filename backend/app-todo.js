@@ -92,6 +92,13 @@ var jsDocOptions = {
                         name_country: { type: 'string' },
                     },
                 },
+                SpokenLanguage: {
+                    type: 'object',
+                    properties: {
+                        id_spoken_languages: { type: 'string' },
+                        language: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -1008,9 +1015,196 @@ app.delete('/api/production-countries/:id', function (req, res) { return __await
         }
     });
 }); });
+// GET ALL SPOKEN LANGUAGES
+/**
+ * @openapi
+ * /api/spoken_languages:
+ *   get:
+ *     description: Get all spoken languages
+ *     responses:
+ *       200:
+ *         description: An array of SpokenLanguage
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/SpokenLanguage'
+ */
+app.get('/api/spoken_languages', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_20;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT ID_SPOKEN_LANGUAGES, LANGUAGE FROM SPOKEN_LANGUAGES')];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_20 = _a.sent();
+                console.error('Erreur lors de la récupération des langues parlées :', err_20);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// GET SPOKEN LANGUAGE BY ID
+/**
+ * @openapi
+ * /api/spoken_languages/{id}:
+ *   get:
+ *     description: Get a spoken language by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the SpokenLanguage to get
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The requested SpokenLanguage object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SpokenLanguage'
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.get('/api/spoken_languages/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_21;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT ID_SPOKEN_LANGUAGES, LANGUAGE\n            FROM SPOKEN_LANGUAGES\n            WHERE ID_SPOKEN_LANGUAGES = :id\n        ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rows.length > 0) {
+                    res.status(200).json(result.rows[0]);
+                }
+                else {
+                    res.status(404).json({ error: "Spoken language not found with ID: ".concat(id) });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_21 = _a.sent();
+                console.error('Erreur lors de la récupération de la langue parlée :', err_21);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// PUT (Update a spoken language)
+/**
+ * @openapi
+ * /api/spoken_languages:
+ *   put:
+ *     description: Update an existing spoken language
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SpokenLanguage'
+ *     responses:
+ *       200:
+ *         description: The updated SpokenLanguage object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SpokenLanguage'
+ *       400:
+ *         description: Bad Request - ID not provided in the body
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.put('/api/spoken_languages', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var updatedLanguage, result, err_22;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                updatedLanguage = req.body;
+                if (!updatedLanguage.id_spoken_languages) {
+                    res.status(400).json({ error: 'ID is required in the body to update a spoken language.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE SPOKEN_LANGUAGES\n                SET LANGUAGE = :language\n                WHERE ID_SPOKEN_LANGUAGES = :id_spoken_languages\n            ", {
+                        id_spoken_languages: updatedLanguage.id_spoken_languages,
+                        language: updatedLanguage.language,
+                    })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Spoken language not found with ID: ".concat(updatedLanguage.id_spoken_languages) });
+                }
+                else {
+                    res.status(200).json({ message: 'Spoken language updated successfully', updatedLanguage: updatedLanguage });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_22 = _a.sent();
+                console.error('Erreur lors de la mise à jour de la langue parlée :', err_22);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+// DELETE SPOKEN LANGUAGE BY ID
+/**
+ * @openapi
+ * /api/spoken_languages/{id}:
+ *   delete:
+ *     description: Delete a spoken language by its id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the SpokenLanguage to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Spoken language deleted successfully
+ *       404:
+ *         description: SpokenLanguage not found
+ */
+app.delete('/api/spoken_languages/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_23;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM SPOKEN_LANGUAGES\n                WHERE ID_SPOKEN_LANGUAGES = :id\n            ", { id: id })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: "Spoken language not found with ID: ".concat(id) });
+                }
+                else {
+                    res.status(200).json({ message: 'Spoken language deleted successfully' });
+                }
+                return [3 /*break*/, 3];
+            case 2:
+                err_23 = _a.sent();
+                console.error('Erreur lors de la suppression de la langue parlée :', err_23);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_20;
+    var err_24;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1023,8 +1217,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_20 = _a.sent();
-                console.error('Failed to initialize database:', err_20);
+                err_24 = _a.sent();
+                console.error('Failed to initialize database:', err_24);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
