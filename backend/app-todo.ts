@@ -2,7 +2,7 @@ import * as express from 'express';
 import {Request, Response} from 'express';
 import swaggerJsdoc = require('swagger-jsdoc'); // * as swaggerJsdoc from 'swagger-jsdoc'
 import swaggerUi = require('swagger-ui-express');
-import { executeQuery, initDB } from './database'; // import the helper from database.ts
+import { executeQuery, initDB } from './database';
 
 const cors = require('cors');
 
@@ -13,7 +13,7 @@ app.use(cors())
 
 const jsDocOptions = {
     definition: {
-        openapi: '3.0.0', // Specify the OpenAPI version
+        openapi: '3.0.0', // OpenAPI version
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -21,6 +21,7 @@ const jsDocOptions = {
         },
         components: {
             schemas: {
+
                 Film: {
                     type: 'object',
                     properties: {
@@ -222,7 +223,6 @@ app.post('/api/films', async (req: Request, res: Response) => {
     try {
         const newFilm: Film = req.body;
 
-        // Exécutez la requête
         const insertResult = await executeQuery(
             `
                 INSERT INTO FILM
@@ -247,10 +247,8 @@ app.post('/api/films', async (req: Request, res: Response) => {
             }
         ) as { outBinds: { id_film: number[] } };
 
-        // Extraire l'ID généré
         newFilm.id_film = insertResult.outBinds.id_film[0];
 
-        // Répondre avec le film créé
         res.status(201).json(newFilm);
     } catch (err) {
         console.error('Erreur lors de la création du film :', err.message);
@@ -259,7 +257,7 @@ app.post('/api/films', async (req: Request, res: Response) => {
 });
 
 
-// PUT (Update a film without specifying id in the path)
+// PUT (without id)
 /**
  * @openapi
  * /api/films:
@@ -336,7 +334,7 @@ app.put('/api/films', async (req: Request, res: Response) => {
 });
 
 
-// DELETE (Delete a film by id)
+// DELETE (with id)
 /**
  * @openapi
  * /api/films/{id}:
@@ -416,7 +414,6 @@ app.get('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-
 // GET GENRE ID
 /**
  * @openapi
@@ -460,7 +457,6 @@ app.get('/api/genres/:id', async (req: Request, res: Response) => {
         res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
 
 // POST NEW GENRE
 /**
@@ -509,8 +505,7 @@ app.post('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-
-// PUT (Update GENRE)
+// PUT
 /**
  * @openapi
  * /api/genres:
@@ -566,8 +561,7 @@ app.put('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-
-// DELETE GENRE by ID
+// DELETE by ID
 /**
  * @openapi
  * /api/genres/{id}:
@@ -620,7 +614,6 @@ interface ProductionCompany {
     id_company?: number;
     name_company: string;
 }
-
 
 // GET
 /**
@@ -849,7 +842,6 @@ interface ProductionCountry {
     name_country: string;
 }
 
-
 // GET ALL PRODUCTION COUNTRIES
 /**
  * @openapi
@@ -920,7 +912,7 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
     }
 });
 
-// PUT (Update a production country)
+// PUT
 /**
  * @openapi
  * /api/production-countries:
@@ -1030,7 +1022,6 @@ interface SpokenLanguage {
     language: string;
 }
 
-
 // GET ALL SPOKEN LANGUAGES
 /**
  * @openapi
@@ -1101,7 +1092,7 @@ app.get('/api/spoken_languages/:id', async (req: Request, res: Response) => {
     }
 });
 
-// PUT (Update a spoken language)
+// PUT
 /**
  * @openapi
  * /api/spoken_languages:
@@ -1228,7 +1219,6 @@ interface FilmGenre {
  */
 app.get('/api/film-genres', async (req: Request, res: Response) => {
     try {
-        // Exécution de la requête SQL pour récupérer les films et genres
         const result = await executeQuery(`
             SELECT
                 f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,
@@ -1243,7 +1233,6 @@ app.get('/api/film-genres', async (req: Request, res: Response) => {
                 f.link_poster, f.link_trailer
         `);
 
-        // Réponse avec les films et leurs genres associés
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des genres des films :', err);
@@ -1268,14 +1257,6 @@ app.get('/api/film-genres', async (req: Request, res: Response) => {
 
 
 
-
-
-
-
-
-
-
-
 // ---------------------------------------
 //         film_spoken_languages
 // ---------------------------------------
@@ -1290,7 +1271,7 @@ app.get('/api/film-genres', async (req: Request, res: Response) => {
 console.log('starting...');
 (async () => {
     try {
-        await initDB(); // Call initDB here
+        await initDB();
         app.listen(3000, () => {
             console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
         });
