@@ -39,14 +39,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var swaggerJsdoc = require("swagger-jsdoc"); // * as swaggerJsdoc from 'swagger-jsdoc'
 var swaggerUi = require("swagger-ui-express");
-var database_1 = require("./database"); // import the helper from database.ts
+var database_1 = require("./database");
 var cors = require('cors');
 var app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
 app.use(cors());
 var jsDocOptions = {
     definition: {
-        openapi: '3.0.0', // Specify the OpenAPI version
+        openapi: '3.0.0', // OpenAPI version
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -245,9 +245,7 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
                     })];
             case 1:
                 insertResult = _a.sent();
-                // Extraire l'ID généré
                 newFilm.id_film = insertResult.outBinds.id_film[0];
-                // Répondre avec le film créé
                 res.status(201).json(newFilm);
                 return [3 /*break*/, 3];
             case 2:
@@ -259,7 +257,7 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// PUT (Update a film without specifying id in the path)
+// PUT (without id)
 /**
  * @openapi
  * /api/films:
@@ -326,7 +324,7 @@ app.put('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); });
-// DELETE (Delete a film by id)
+// DELETE (with id)
 /**
  * @openapi
  * /api/films/{id}:
@@ -501,7 +499,7 @@ app.post('/api/genres', function (req, res) { return __awaiter(void 0, void 0, v
         }
     });
 }); });
-// PUT (Update GENRE)
+// PUT
 /**
  * @openapi
  * /api/genres:
@@ -558,7 +556,7 @@ app.put('/api/genres', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// DELETE GENRE by ID
+// DELETE by ID
 /**
  * @openapi
  * /api/genres/{id}:
@@ -920,7 +918,7 @@ app.get('/api/production-countries/:id', function (req, res) { return __awaiter(
         }
     });
 }); });
-// PUT (Update a production country)
+// PUT
 /**
  * @openapi
  * /api/production-countries:
@@ -1107,7 +1105,7 @@ app.get('/api/spoken_languages/:id', function (req, res) { return __awaiter(void
         }
     });
 }); });
-// PUT (Update a spoken language)
+// PUT
 /**
  * @openapi
  * /api/spoken_languages:
@@ -1233,7 +1231,6 @@ app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 
                 return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT\n                f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,\n                JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre,'id_genre' VALUE g.id_genre))\n                    AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            GROUP BY\n                f.id_film, f.title, f.original_language, f.overview, f.popularity,\n                f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,\n                f.link_poster, f.link_trailer\n        ")];
             case 1:
                 result = _a.sent();
-                // Réponse avec les films et leurs genres associés
                 res.status(200).json(result.rows);
                 return [3 /*break*/, 3];
             case 2:
@@ -1246,31 +1243,276 @@ app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 
     });
 }); });
 // ---------------------------------------
-//         film_production_company
+//            GET Films by Genre
 // ---------------------------------------
+/**
+ * @openapi
+ * /api/films/genre/{name_genre}:
+ *   get:
+ *     description: Get all films associated with a specific genre
+ *     parameters:
+ *       - name: name_genre
+ *         in: path
+ *         required: true
+ *         description: The name of the genre to filter films by
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An array of films with their associated genres
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_film:
+ *                     type: number
+ *                   title:
+ *                     type: string
+ *                   original_language:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   runtime:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   vote_count:
+ *                     type: number
+ *                   vote_average:
+ *                     type: number
+ *                   link_poster:
+ *                     type: string
+ *                   link_trailer:
+ *                     type: string
+ *                   genre:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name_genre:
+ *                           type: string
+ *                         id_genre:
+ *                           type: number
+ */
+app.get('/api/films/genre/:name_genre', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var name_genre, result, err_25;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                name_genre = req.params.name_genre;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE g.name_genre = :name_genre\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { name_genre: name_genre })];
+            case 2:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 4];
+            case 3:
+                err_25 = _a.sent();
+                console.error('Erreur lors de la récupération des films par genre :', err_25);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
 // ---------------------------------------
-//         film_production_country
+//            GET Films by Title
 // ---------------------------------------
+/**
+ * @openapi
+ * /api/films/title/{title}:
+ *   get:
+ *     description: Get all films whose title matches the search string
+ *     parameters:
+ *       - name: title
+ *         in: path
+ *         required: true
+ *         description: Partial or full title of the film to search for
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An array of films with their associated genres
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_film:
+ *                     type: number
+ *                   title:
+ *                     type: string
+ *                   original_language:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   runtime:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   vote_count:
+ *                     type: number
+ *                   vote_average:
+ *                     type: number
+ *                   link_poster:
+ *                     type: string
+ *                   link_trailer:
+ *                     type: string
+ *                   genre:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name_genre:
+ *                           type: string
+ *                         id_genre:
+ *                           type: number
+ */
+app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var title, result, err_26;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                title = req.params.title;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE f.title LIKE :title || '%'\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title })];
+            case 2:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 4];
+            case 3:
+                err_26 = _a.sent();
+                console.error('Erreur lors de la récupération des films par titre :', err_26);
+                res.status(500).json({ error: 'Erreur interne du serveur.' });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
 // ---------------------------------------
-//         film_spoken_languages
+//   GET Films by Title and Genre Name
 // ---------------------------------------
+/**
+ * @openapi
+ * /api/films:
+ *   get:
+ *     description: Get all films by title and genre name
+ *     parameters:
+ *       - name: title
+ *         in: query
+ *         required: true
+ *         description: Partial or full title of the film to search for
+ *         schema:
+ *           type: string
+ *       - name: genre
+ *         in: query
+ *         required: true
+ *         description: Name of the genre
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An array of films matching the title and genre name
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_film:
+ *                     type: number
+ *                   title:
+ *                     type: string
+ *                   original_language:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   runtime:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   vote_count:
+ *                     type: number
+ *                   vote_average:
+ *                     type: number
+ *                   link_poster:
+ *                     type: string
+ *                   link_trailer:
+ *                     type: string
+ *                   genre:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name_genre:
+ *                           type: string
+ *                         id_genre:
+ *                           type: number
+ */
+app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, title, genre, result, err_27;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                _a = req.query, title = _a.title, genre = _a.genre;
+                if (!title || !genre) {
+                    return [2 /*return*/, res.status(400).json({ error: "Les paramètres 'title' et 'genre' sont requis." })];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE g.name_genre = :genre\n              AND f.title LIKE :title || '%'\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title, genre: genre })];
+            case 1:
+                result = _b.sent();
+                return [2 /*return*/, res.status(200).json(result.rows)];
+            case 2:
+                err_27 = _b.sent();
+                console.error('Erreur lors de la récupération des films par titre et genre :', err_27);
+                return [2 /*return*/, res.status(500).json({ error: 'Erreur interne du serveur.' })];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_25;
+    var err_28;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, (0, database_1.initDB)()];
             case 1:
-                _a.sent(); // Call initDB here
+                _a.sent();
                 app.listen(3000, function () {
                     console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_25 = _a.sent();
-                console.error('Failed to initialize database:', err_25);
+                err_28 = _a.sent();
+                console.error('Failed to initialize database:', err_28);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];

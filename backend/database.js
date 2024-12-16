@@ -45,8 +45,8 @@ function initDB() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, oracledb.createPool({
-                        user: 'SYSTEM',
-                        password: 'Poisson86+',
+                        user: 'SYSTEM', // PUT YOUR ORACLE USER
+                        password: 'Poisson86+', // PUT YOUR ORACLE PASSWORD
                         connectString: 'localhost:1521/XE',
                         poolMin: 1,
                         poolMax: 5,
@@ -71,9 +71,7 @@ function executeQuery(query_1) {
                 case 1:
                     connection = _a.sent();
                     return [4 /*yield*/, connection.execute(query, params, { autoCommit: true })];
-                case 2: 
-                // Add autoCommit: true here
-                return [2 /*return*/, _a.sent()];
+                case 2: return [2 /*return*/, _a.sent()];
                 case 3:
                     if (!connection) return [3 /*break*/, 5];
                     return [4 /*yield*/, connection.close()];

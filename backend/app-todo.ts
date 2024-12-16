@@ -1243,6 +1243,237 @@ app.get('/api/film-genres', async (req: Request, res: Response) => {
 
 
 
+// ---------------------------------------
+//            GET Films by Genre
+// ---------------------------------------
+
+/**
+ * @openapi
+ * /api/films/genre/{name_genre}:
+ *   get:
+ *     description: Get all films associated with a specific genre
+ *     parameters:
+ *       - name: name_genre
+ *         in: path
+ *         required: true
+ *         description: The name of the genre to filter films by
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An array of films with their associated genres
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_film:
+ *                     type: number
+ *                   title:
+ *                     type: string
+ *                   original_language:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   runtime:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   vote_count:
+ *                     type: number
+ *                   vote_average:
+ *                     type: number
+ *                   link_poster:
+ *                     type: string
+ *                   link_trailer:
+ *                     type: string
+ *                   genre:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name_genre:
+ *                           type: string
+ *                         id_genre:
+ *                           type: number
+ */
+app.get('/api/films/genre/:name_genre', async (req: Request, res: Response) => {
+    const { name_genre } = req.params;
+
+    try {
+        const result = await executeQuery(`
+            SELECT 
+                f.id_film, 
+                f.title, 
+                f.original_language, 
+                f.overview, 
+                f.popularity, 
+                f.release_date, 
+                f.runtime, 
+                f.status, 
+                f.vote_count, 
+                f.vote_average, 
+                f.link_poster, 
+                f.link_trailer,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'name_genre' VALUE g.name_genre,
+                        'id_genre' VALUE g.id_genre
+                    )
+                ) AS genre
+            FROM film f
+            JOIN film_genre fg ON f.id_film = fg.film_id
+            JOIN genre g ON fg.genre_id = g.id_genre
+            WHERE g.name_genre = :name_genre
+            GROUP BY 
+                f.id_film, 
+                f.title, 
+                f.original_language, 
+                f.overview, 
+                f.popularity, 
+                f.release_date, 
+                f.runtime, 
+                f.status, 
+                f.vote_count, 
+                f.vote_average, 
+                f.link_poster, 
+                f.link_trailer
+        `, { name_genre });
+
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des films par genre :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
+// ---------------------------------------
+//            GET Films by Title
+// ---------------------------------------
+
+/**
+ * @openapi
+ * /api/films/title/{title}:
+ *   get:
+ *     description: Get all films whose title matches the search string
+ *     parameters:
+ *       - name: title
+ *         in: path
+ *         required: true
+ *         description: Partial or full title of the film to search for
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An array of films with their associated genres
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id_film:
+ *                     type: number
+ *                   title:
+ *                     type: string
+ *                   original_language:
+ *                     type: string
+ *                   overview:
+ *                     type: string
+ *                   popularity:
+ *                     type: number
+ *                   release_date:
+ *                     type: string
+ *                     format: date
+ *                   runtime:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   vote_count:
+ *                     type: number
+ *                   vote_average:
+ *                     type: number
+ *                   link_poster:
+ *                     type: string
+ *                   link_trailer:
+ *                     type: string
+ *                   genre:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         name_genre:
+ *                           type: string
+ *                         id_genre:
+ *                           type: number
+ */
+app.get('/api/films/title/:title', async (req: Request, res: Response) => {
+    const { title } = req.params;
+
+    try {
+        const result = await executeQuery(`
+            SELECT 
+                f.id_film, 
+                f.title, 
+                f.original_language, 
+                f.overview, 
+                f.popularity, 
+                f.release_date, 
+                f.runtime, 
+                f.status, 
+                f.vote_count, 
+                f.vote_average, 
+                f.link_poster, 
+                f.link_trailer,
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'name_genre' VALUE g.name_genre,
+                        'id_genre' VALUE g.id_genre
+                    )
+                ) AS genre
+            FROM film f
+            JOIN film_genre fg ON f.id_film = fg.film_id
+            JOIN genre g ON fg.genre_id = g.id_genre
+            WHERE f.title LIKE :title || '%'
+            GROUP BY 
+                f.id_film, 
+                f.title, 
+                f.original_language, 
+                f.overview, 
+                f.popularity, 
+                f.release_date, 
+                f.runtime, 
+                f.status, 
+                f.vote_count, 
+                f.vote_average, 
+                f.link_poster, 
+                f.link_trailer
+        `, { title });
+
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des films par titre :', err);
+        res.status(500).json({ error: 'Erreur interne du serveur.' });
+    }
+});
+
+
+
+
+
+
+
 
 
 
