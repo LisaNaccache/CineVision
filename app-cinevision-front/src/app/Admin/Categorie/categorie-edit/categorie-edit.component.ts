@@ -93,4 +93,8 @@ export class CategorieEditComponent implements OnInit {
       );
     }
   }
+
+  back() {
+    this.router.navigate(['/admin/categorie']);
+  }
 }

@@ -101,7 +101,7 @@ export class FilmComponent {
       );
     } else {
       // Si aucun genre n'est sélectionné, charge tous les films
-      this.filmService.getAllFilms().subscribe(
+      this.filmService.getAllFilmsGenres().subscribe(
         (data: any[]) => {
           this.films = this.mapFilms(data);
           this.applySearchTerm(); // Applique le filtre de recherche par nom

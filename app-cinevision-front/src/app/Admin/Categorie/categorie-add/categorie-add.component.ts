@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {CategorieService} from '../categorie.service';
 import {Router, RouterLink} from '@angular/router';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
@@ -28,7 +28,8 @@ export class CategorieAddComponent {
   isLoading = false;
   hasError = false;
 
-  constructor(private categorieService: CategorieService, private router: Router) {}
+  constructor(private categorieService: CategorieService, private router: Router) {
+  }
 
   onFormSubmit(): void {
     this.isLoading = true;
@@ -51,5 +52,9 @@ export class CategorieAddComponent {
         this.isLoading = false;
       }
     );
+  }
+
+  back() {
+    this.router.navigate(['/admin/categorie']);
   }
 }

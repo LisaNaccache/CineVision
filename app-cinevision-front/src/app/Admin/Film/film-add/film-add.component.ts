@@ -78,4 +78,8 @@ export class FilmAddComponent {
       }
     );
   }
+
+  back() {
+    this.router.navigate(['/admin/film']);
+  }
 }

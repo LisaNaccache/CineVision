@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FilmService} from '../film.service';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {SafeUrlPipe} from './safe-url.pipe';
@@ -27,7 +27,8 @@ export class FilmDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private filmService: FilmService
+    private filmService: FilmService,
+    private router: Router
   ) {
   }
 
@@ -65,5 +66,9 @@ export class FilmDetailComponent implements OnInit {
         this.isLoading = false;
       }
     );
+  }
+
+  back() {
+    this.router.navigate(['/client/film']);
   }
 }

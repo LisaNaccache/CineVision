@@ -123,4 +123,8 @@ export class FilmEditComponent implements OnInit {
       );
     }
   }
+
+  back() {
+    this.router.navigate(['/admin/film']);
+  }
 }
