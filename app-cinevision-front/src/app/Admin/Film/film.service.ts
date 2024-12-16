@@ -16,6 +16,10 @@ export class FilmService {
     return this.http.get(`${this.apiUrl}/films`);
   }
 
+  getAllFilmsGenres(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/film-genres`);
+  }
+
   getFilmById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/films/${id}`);
   }

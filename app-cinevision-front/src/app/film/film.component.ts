@@ -30,7 +30,7 @@ export class FilmComponent {
   }
 
   loadFilms(): void {
-    this.filmService.getAllFilms().subscribe(
+    this.filmService.getAllFilmsGenres().subscribe(
       (data: any[]) => {
         this.films = data.map((filmArray) => ({
           id: filmArray[0],
@@ -45,6 +45,7 @@ export class FilmComponent {
           voteAverage: filmArray[9],
           posterUrl: filmArray[10],
           trailerUrl: filmArray[11],
+          genres: JSON.parse(filmArray[12])
         }));
         this.isLoading = false;
       },

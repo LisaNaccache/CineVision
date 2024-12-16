@@ -10,7 +10,9 @@
                 {{ film.title }}
               </h5>
               <p class="card-text">
-                Les genres ici
+                <span class="badge bg-secondary me-1" *ngFor="let genre of film.genres">
+                  {{ genre.name_genre }}
+                </span>
               </p>
               <div class="mt-auto">
                 <a [routerLink]="['/client/film', film.id]" class="btn btn-primary">
