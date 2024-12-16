@@ -8,9 +8,9 @@ const cors = require('cors');
 
 const app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
-app.use(cors())
+app.use(cors()) // Enable CORS for all routes
 
-
+// Swagger configuration options
 const jsDocOptions = {
     definition: {
         openapi: '3.0.0', // OpenAPI version
@@ -21,7 +21,7 @@ const jsDocOptions = {
         },
         components: {
             schemas: {
-
+                // Define the Film schema
                 Film: {
                     type: 'object',
                     properties: {
@@ -39,7 +39,7 @@ const jsDocOptions = {
                         link_trailer: { type: 'string' },
                     },
                 },
-
+                // Define other schemas for genres, production companies, etc.
                 Genre: {
                     type: 'object',
                     properties: {
@@ -86,12 +86,14 @@ const jsDocOptions = {
     apis: ['app-todo.js'],
 };
 
-
+// generate API documentation JSON
 const apiDoc = swaggerJsdoc(jsDocOptions);
 console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
 
+// Serve Swagger UI at the /swagger-ui endpoint
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
 
+// A check endpoint to verify API is live
 app.get('/api/liveness', (req: Request, res: Response) => {
     res.send('OK !!!');
 });
@@ -118,7 +120,7 @@ interface Film {
     link_trailer?: string;
 }
 
-// GET ALL FILMS
+// GET all films
 /**
  * @openapi
  * /api/films:
@@ -136,6 +138,7 @@ interface Film {
  */
 app.get('/api/films', async (req: Request, res: Response) => {
     try {
+        // Query to fetch all films
         const result = await executeQuery('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM ORDER BY TITLE');
         res.status(200).json(result.rows);
     } catch (err) {
@@ -144,7 +147,7 @@ app.get('/api/films', async (req: Request, res: Response) => {
     }
 });
 
-// GET FILM ID
+// GET film by its id
 /**
  * @openapi
  * /api/films/{id}:
@@ -199,7 +202,7 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
     }
 });
 
-// POST NEW FILM (sans ID)
+// POST NEW FILM
 /**
  * @openapi
  * /api/films:
@@ -257,7 +260,7 @@ app.post('/api/films', async (req: Request, res: Response) => {
 });
 
 
-// PUT (without id)
+// PUT a film
 /**
  * @openapi
  * /api/films:
@@ -334,7 +337,7 @@ app.put('/api/films', async (req: Request, res: Response) => {
 });
 
 
-// DELETE (with id)
+// DELETE a film with its id
 /**
  * @openapi
  * /api/films/{id}:
@@ -414,7 +417,7 @@ app.get('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// GET GENRE ID
+// get genre by its id
 /**
  * @openapi
  * /api/genres/{id}:
@@ -458,7 +461,7 @@ app.get('/api/genres/:id', async (req: Request, res: Response) => {
     }
 });
 
-// POST NEW GENRE
+// post new genre
 /**
  * @openapi
  * /api/genres:
@@ -505,7 +508,7 @@ app.post('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// PUT
+// PUT the genre
 /**
  * @openapi
  * /api/genres:
@@ -561,7 +564,7 @@ app.put('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// DELETE by ID
+// DELETE genre by ID
 /**
  * @openapi
  * /api/genres/{id}:
@@ -615,7 +618,7 @@ interface ProductionCompany {
     name_company: string;
 }
 
-// GET
+// GET the production copanies
 /**
  * @openapi
  * /api/production-companies:
@@ -641,7 +644,7 @@ app.get('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// GET id
+// GET id of the production companies
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -685,7 +688,7 @@ app.get('/api/production-companies/:id', async (req: Request, res: Response) => 
     }
 });
 
-// POST
+// post the produciton companies
 /**
  * @openapi
  * /api/production-companies:
@@ -732,7 +735,7 @@ app.post('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// PUT
+// put the production companies
 /**
  * @openapi
  * /api/production-companies:
@@ -788,7 +791,7 @@ app.put('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// DELETE
+// delete the production companies by it sid
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -842,7 +845,7 @@ interface ProductionCountry {
     name_country: string;
 }
 
-// GET ALL PRODUCTION COUNTRIES
+// Gget all production countries
 /**
  * @openapi
  * /api/production-countries:
@@ -868,7 +871,7 @@ app.get('/api/production-countries', async (req: Request, res: Response) => {
     }
 });
 
-// GET PRODUCTION COUNTRY BY ID
+// get the production country by its id
 /**
  * @openapi
  * /api/production-countries/{id}:
@@ -912,7 +915,7 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
     }
 });
 
-// PUT
+// put the production country
 /**
  * @openapi
  * /api/production-countries:
@@ -968,7 +971,7 @@ app.put('/api/production-countries', async (req: Request, res: Response) => {
     }
 });
 
-// DELETE PRODUCTION COUNTRY BY ID
+// delete production country by its id
 /**
  * @openapi
  * /api/production-countries/{id}:
@@ -1022,7 +1025,7 @@ interface SpokenLanguage {
     language: string;
 }
 
-// GET ALL SPOKEN LANGUAGES
+// get all spoken languages
 /**
  * @openapi
  * /api/spoken_languages:
@@ -1048,7 +1051,7 @@ app.get('/api/spoken_languages', async (req: Request, res: Response) => {
     }
 });
 
-// GET SPOKEN LANGUAGE BY ID
+// get the spoken language by its id
 /**
  * @openapi
  * /api/spoken_languages/{id}:
@@ -1477,11 +1480,11 @@ app.get('/api/films/title/:title', async (req: Request, res: Response) => {
 
 
 
-
+// Start the application
 console.log('starting...');
 (async () => {
     try {
-        await initDB();
+        await initDB(); // Initialize the database connection
         app.listen(3000, () => {
             console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
         });
