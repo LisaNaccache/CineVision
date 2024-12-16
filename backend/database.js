@@ -40,17 +40,18 @@ exports.initDB = initDB;
 exports.executeQuery = executeQuery;
 var oracledb = require("oracledb");
 var pool;
+// Here we initialize the OracleDB connection pool.
 function initDB() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, oracledb.createPool({
-                        user: 'SYSTEM', // PUT YOUR ORACLE USER
-                        password: 'Poisson86+', // PUT YOUR ORACLE PASSWORD
+                        user: 'SYSTEM', // Change accoring to your oracle user
+                        password: 'Poisson86+', // same for oracle password
                         connectString: 'localhost:1521/XE',
                         poolMin: 1,
                         poolMax: 5,
-                        poolIncrement: 1
+                        poolIncrement: 1 // Just in case: number of connections to add when the pool is exhausted
                     })];
                 case 1:
                     pool = _a.sent();
@@ -69,13 +70,16 @@ function executeQuery(query_1) {
                     _a.trys.push([0, , 3, 6]);
                     return [4 /*yield*/, pool.getConnection()];
                 case 1:
+                    //get a connection from the pool
                     connection = _a.sent();
                     return [4 /*yield*/, connection.execute(query, params, { autoCommit: true })];
-                case 2: return [2 /*return*/, _a.sent()];
+                case 2: return [2 /*return*/, _a.sent()]; //Autocommit essential to update the databse
                 case 3:
                     if (!connection) return [3 /*break*/, 5];
+                    //we have to ensure connection is closed
                     return [4 /*yield*/, connection.close()];
                 case 4:
+                    //we have to ensure connection is closed
                     _a.sent();
                     _a.label = 5;
                 case 5: return [7 /*endfinally*/];

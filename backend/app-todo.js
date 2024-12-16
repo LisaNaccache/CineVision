@@ -43,7 +43,8 @@ var database_1 = require("./database");
 var cors = require('cors');
 var app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
-app.use(cors());
+app.use(cors()); // Enable CORS for all routes
+// Swagger configuration options
 var jsDocOptions = {
     definition: {
         openapi: '3.0.0', // OpenAPI version
@@ -54,6 +55,7 @@ var jsDocOptions = {
         },
         components: {
             schemas: {
+                // Define the Film schema
                 Film: {
                     type: 'object',
                     properties: {
@@ -71,6 +73,7 @@ var jsDocOptions = {
                         link_trailer: { type: 'string' },
                     },
                 },
+                // Define other schemas for genres, production companies, etc.
                 Genre: {
                     type: 'object',
                     properties: {
@@ -111,13 +114,16 @@ var jsDocOptions = {
     },
     apis: ['app-todo.js'],
 };
+// generate API documentation JSON
 var apiDoc = swaggerJsdoc(jsDocOptions);
 console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
+// Serve Swagger UI at the /swagger-ui endpoint
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
+// A check endpoint to verify API is live
 app.get('/api/liveness', function (req, res) {
     res.send('OK !!!');
 });
-// GET ALL FILMS
+// GET all films
 /**
  * @openapi
  * /api/films:
@@ -153,7 +159,7 @@ app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); });
-// GET FILM ID
+// GET film by its id
 /**
  * @openapi
  * /api/films/{id}:
@@ -202,7 +208,7 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
         }
     });
 }); });
-// POST NEW FILM (sans ID)
+// POST NEW FILM
 /**
  * @openapi
  * /api/films:
@@ -257,7 +263,7 @@ app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// PUT (without id)
+// PUT a film
 /**
  * @openapi
  * /api/films:
@@ -324,7 +330,7 @@ app.put('/api/films', function (req, res) { return __awaiter(void 0, void 0, voi
         }
     });
 }); });
-// DELETE (with id)
+// DELETE a film with its id
 /**
  * @openapi
  * /api/films/{id}:
@@ -405,7 +411,7 @@ app.get('/api/genres', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// GET GENRE ID
+// get genre by its id
 /**
  * @openapi
  * /api/genres/{id}:
@@ -454,7 +460,7 @@ app.get('/api/genres/:id', function (req, res) { return __awaiter(void 0, void 0
         }
     });
 }); });
-// POST NEW GENRE
+// post new genre
 /**
  * @openapi
  * /api/genres:
@@ -499,7 +505,7 @@ app.post('/api/genres', function (req, res) { return __awaiter(void 0, void 0, v
         }
     });
 }); });
-// PUT
+// PUT the genre
 /**
  * @openapi
  * /api/genres:
@@ -556,7 +562,7 @@ app.put('/api/genres', function (req, res) { return __awaiter(void 0, void 0, vo
         }
     });
 }); });
-// DELETE by ID
+// DELETE genre by ID
 /**
  * @openapi
  * /api/genres/{id}:
@@ -601,7 +607,7 @@ app.delete('/api/genres/:id', function (req, res) { return __awaiter(void 0, voi
         }
     });
 }); });
-// GET
+// GET the production copanies
 /**
  * @openapi
  * /api/production-companies:
@@ -637,7 +643,7 @@ app.get('/api/production-companies', function (req, res) { return __awaiter(void
         }
     });
 }); });
-// GET id
+// GET id of the production companies
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -686,7 +692,7 @@ app.get('/api/production-companies/:id', function (req, res) { return __awaiter(
         }
     });
 }); });
-// POST
+// post the produciton companies
 /**
  * @openapi
  * /api/production-companies:
@@ -731,7 +737,7 @@ app.post('/api/production-companies', function (req, res) { return __awaiter(voi
         }
     });
 }); });
-// PUT
+// put the production companies
 /**
  * @openapi
  * /api/production-companies:
@@ -788,7 +794,7 @@ app.put('/api/production-companies', function (req, res) { return __awaiter(void
         }
     });
 }); });
-// DELETE
+// delete the production companies by it sid
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -833,7 +839,7 @@ app.delete('/api/production-companies/:id', function (req, res) { return __await
         }
     });
 }); });
-// GET ALL PRODUCTION COUNTRIES
+// Gget all production countries
 /**
  * @openapi
  * /api/production-countries:
@@ -869,7 +875,7 @@ app.get('/api/production-countries', function (req, res) { return __awaiter(void
         }
     });
 }); });
-// GET PRODUCTION COUNTRY BY ID
+// get the production country by its id
 /**
  * @openapi
  * /api/production-countries/{id}:
@@ -918,7 +924,7 @@ app.get('/api/production-countries/:id', function (req, res) { return __awaiter(
         }
     });
 }); });
-// PUT
+// put the production country
 /**
  * @openapi
  * /api/production-countries:
@@ -975,7 +981,7 @@ app.put('/api/production-countries', function (req, res) { return __awaiter(void
         }
     });
 }); });
-// DELETE PRODUCTION COUNTRY BY ID
+// delete production country by its id
 /**
  * @openapi
  * /api/production-countries/{id}:
@@ -1020,7 +1026,7 @@ app.delete('/api/production-countries/:id', function (req, res) { return __await
         }
     });
 }); });
-// GET ALL SPOKEN LANGUAGES
+// get all spoken languages
 /**
  * @openapi
  * /api/spoken_languages:
@@ -1056,7 +1062,7 @@ app.get('/api/spoken_languages', function (req, res) { return __awaiter(void 0, 
         }
     });
 }); });
-// GET SPOKEN LANGUAGE BY ID
+// get the spoken language by its id
 /**
  * @openapi
  * /api/spoken_languages/{id}:
@@ -1408,111 +1414,24 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
         }
     });
 }); });
-// ---------------------------------------
-//   GET Films by Title and Genre Name
-// ---------------------------------------
-/**
- * @openapi
- * /api/films:
- *   get:
- *     description: Get all films by title and genre name
- *     parameters:
- *       - name: title
- *         in: query
- *         required: true
- *         description: Partial or full title of the film to search for
- *         schema:
- *           type: string
- *       - name: genre
- *         in: query
- *         required: true
- *         description: Name of the genre
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: An array of films matching the title and genre name
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id_film:
- *                     type: number
- *                   title:
- *                     type: string
- *                   original_language:
- *                     type: string
- *                   overview:
- *                     type: string
- *                   popularity:
- *                     type: number
- *                   release_date:
- *                     type: string
- *                     format: date
- *                   runtime:
- *                     type: number
- *                   status:
- *                     type: string
- *                   vote_count:
- *                     type: number
- *                   vote_average:
- *                     type: number
- *                   link_poster:
- *                     type: string
- *                   link_trailer:
- *                     type: string
- *                   genre:
- *                     type: array
- *                     items:
- *                       type: object
- *                       properties:
- *                         name_genre:
- *                           type: string
- *                         id_genre:
- *                           type: number
- */
-app.get('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, title, genre, result, err_27;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 2, , 3]);
-                _a = req.query, title = _a.title, genre = _a.genre;
-                if (!title || !genre) {
-                    return [2 /*return*/, res.status(400).json({ error: "Les paramètres 'title' et 'genre' sont requis." })];
-                }
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE g.name_genre = :genre\n              AND f.title LIKE :title || '%'\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title, genre: genre })];
-            case 1:
-                result = _b.sent();
-                return [2 /*return*/, res.status(200).json(result.rows)];
-            case 2:
-                err_27 = _b.sent();
-                console.error('Erreur lors de la récupération des films par titre et genre :', err_27);
-                return [2 /*return*/, res.status(500).json({ error: 'Erreur interne du serveur.' })];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
+// Start the application
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_28;
+    var err_27;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 return [4 /*yield*/, (0, database_1.initDB)()];
             case 1:
-                _a.sent();
+                _a.sent(); // Initialize the database connection
                 app.listen(3000, function () {
                     console.log('Ok, started port 3000, please open http://localhost:3000/swagger-ui');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_28 = _a.sent();
-                console.error('Failed to initialize database:', err_28);
+                err_27 = _a.sent();
+                console.error('Failed to initialize database:', err_27);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
