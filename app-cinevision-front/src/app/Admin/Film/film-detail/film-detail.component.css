@@ -1,0 +1,35 @@
+iframe {
+  border-radius: 8px;
+
+}
+
+.banner {
+  position: relative;
+  height: 600px; /* Hauteur de la bannière */
+  overflow: hidden;
+}
+
+.banner img {
+  width: 100%; /* S'étend sur toute la largeur */
+  height: 100%; /* Remplit la hauteur */
+  object-fit: cover; /* Recadre l'image sans distorsion */
+  object-position: center; /* Centrage de l'image */
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.text-muted {
+  font-size: 0.9rem;
+}
+
+.ratio {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+
+
