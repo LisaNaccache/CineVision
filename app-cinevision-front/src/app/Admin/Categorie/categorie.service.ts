@@ -16,19 +16,19 @@ export class CategorieService {
     return this.http.get(`${this.apiUrl}/genres`);
   }
 
-  getGenresById(id: number): Observable<any> {
+  getGenreById(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/genres/${id}`);
   }
 
-  updateGenre(film: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/genres`, film);
+  updateGenre(genre: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/genres`, genre);
   }
 
   deleteGenre(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/genres/${id}`);
   }
 
-  addGenre(newFilm: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/genres`, newFilm);
+  addGenre(newGenre: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/genres`, newGenre);
   }
 }

@@ -24,14 +24,15 @@
       <tr>
         <th>ID</th>
         <th>Name</th>
+        <th>Action</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let genre of paginatedGenres">
-        <td>{{ genre.id }}</td>
-        <td>{{ genre.name }}</td>
+        <td>{{ genre.id_genre }}</td>
+        <td>{{ genre.name_genre }}</td>
         <td>
-          <a class="btn btn-light" [routerLink]="['/admin/categorie/edit', genre.id]">Edit</a>
+          <a class="btn btn-light" [routerLink]="['/admin/categorie/edit', genre.id_genre]">Edit</a>
         </td>
       </tr>
       </tbody>

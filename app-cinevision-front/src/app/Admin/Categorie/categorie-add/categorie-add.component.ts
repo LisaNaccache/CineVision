@@ -15,42 +15,34 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     ReactiveFormsModule,
     RouterLink,
   ],
-  templateUrl: './genre-add.component.html',
-  styleUrl: './genre-add.component.css'
+  templateUrl: './categorie-add.component.html',
+  styleUrl: './categorie-add.component.css'
 })
-export class GenreAddComponent {
+export class CategorieAddComponent {
 
   genre: any = {
     id_genre: '',
-    genre: '',
+    name_genre: '',
   };
 
   isLoading = false;
   hasError = false;
 
-  constructor(private filmService: CategorieService, private router: Router) {}
+  constructor(private categorieService: CategorieService, private router: Router) {}
 
   onFormSubmit(): void {
     this.isLoading = true;
 
-    const formatDate = (date: string): string => {
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois format 2 chiffres
-      const day = String(d.getDate()).padStart(2, '0'); // Jour format 2 chiffres
-      return `${year}-${month}-${day}`;
-    };
-
-    const newFilm = {
-      id_genre: this.id_genre.title,
-      name: this.name.language || null,
+    const newGenre = {
+      id_genre: this.genre.id_genre,
+      name_genre: this.genre.name_genre,
     };
 
     this.categorieService.addGenre(newGenre).subscribe(
       (response) => {
         alert('Genre added successfully!');
         console.log('New genre:', response);
-        this.router.navigate(['/admin/categorie']); // Redirige vers la liste des films
+        this.router.navigate(['/admin/categorie']);
         this.isLoading = false;
       },
       (error) => {
