@@ -2,7 +2,46 @@
   <div class="my-5">
     <div class="row align-items-stretch">
       <ng-container *ngIf="films && films.length > 0">
-        <div class="col-12 col-md-4 mb-3" *ngFor="let film of films">
+
+        <div class="card bg-light-subtle text-white">
+          <div class="card-header">
+            <h5 class="mb-0 text-secondary">Filtre</h5>
+          </div>
+          <div class="card-body">
+            <div class="row align-items-center">
+              <!-- Input pour le nom -->
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="filmName" class="form-label text-dark">Name:</label>
+                <input
+                  id="filmName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter film name"
+                  [(ngModel)]="searchTerm"
+                  (input)="filterFilmsbyTitle()"
+                />
+              </div>
+
+              <!-- Dropdown pour les genres -->
+              <div class="col-md-6">
+                <label for="genreSelect" class="form-label text-dark">Genre:</label>
+                <select
+                  id="genreSelect"
+                  class="form-select"
+                  [(ngModel)]="selectedGenre"
+                  (change)="filterFilmsbyGenre()"
+                >
+                  <option value="">All Genres</option>
+                  <option *ngFor="let genre of genres" [value]="genre.name_genre">
+                    {{ genre.name_genre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4 mb-3 mt-3" *ngFor="let film of films">
           <div class="card h-100">
             <img [src]="film.posterUrl" class="card-img-top" [alt]="film.title">
             <div class="card-body d-flex flex-column">

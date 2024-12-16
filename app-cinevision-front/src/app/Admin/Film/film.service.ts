@@ -35,4 +35,12 @@ export class FilmService {
   addFilm(newFilm: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/films`, newFilm);
   }
+
+  getFilmsByGenre(genreName: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/films/genre/${genreName}`);
+  }
+
+  getFilmsByTitle(title: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/films/title/${title}`);
+  }
 }

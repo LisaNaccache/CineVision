@@ -16,6 +16,15 @@ import {SessionFilmListComponent} from './Admin/SessionFilm/session-film-list/se
 import {ReviewListComponent} from './Admin/Review/review-list/review-list.component';
 import {FilmComponent} from './film/film.component';
 import {FilmDetailComponent} from './Admin/Film/film-detail/film-detail.component';
+import {
+  ProductionCompagnyAddComponent
+} from './Admin/Production-Compagny/production-compagny-add/production-compagny-add.component';
+import {
+  ProductionCompagnyEditComponent
+} from './Admin/Production-Compagny/production-compagny-edit/production-compagny-edit.component';
+import {
+  ProductionCompagnyListComponent
+} from './Admin/Production-Compagny/production-compagny-list/production-compagny-list.component';
 
 export const routes: Routes = [
   { path: 'inscription', component: InscriptionComponent },
@@ -29,6 +38,9 @@ export const routes: Routes = [
   { path: 'admin/categorie/add', component: CategorieAddComponent },
   { path: 'admin/categorie/edit/:id', component: CategorieEditComponent },
   { path: 'admin/categorie', component: CategorieListComponent },
+  { path: 'admin/production-compagny/add', component: ProductionCompagnyAddComponent },
+  { path: 'admin/production-compagny/edit/:id', component: ProductionCompagnyEditComponent },
+  { path: 'admin/production-compagny', component: ProductionCompagnyListComponent },
   { path: 'admin/cinema/add', component: CinemaAddComponent },
   { path: 'admin/cinema/edit/:id', component: CinemaEditComponent },
   { path: 'admin/cinema', component: CinemaListComponent },

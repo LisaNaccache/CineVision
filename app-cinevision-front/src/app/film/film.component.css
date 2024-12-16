@@ -4,3 +4,17 @@
   height: 200px;     /* Hauteur fixe */
   max-height: 200px; /* Hauteur maximale */
 }
+
+.card-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.form-label {
+  color: #e9ecef; /* Couleur texte pour contraster avec le fond */
+}
+
+.form-control, .form-select {
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+}
