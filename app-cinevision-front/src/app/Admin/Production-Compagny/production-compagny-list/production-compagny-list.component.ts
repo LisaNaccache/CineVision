@@ -28,8 +28,7 @@ export class ProductionCompagnyListComponent {
   currentPage = 1;
   itemsPerPage = 10;
 
-  constructor(private productionCompanyService: ProductionCompagnyService) {
-  }
+  constructor(private productionCompanyService: ProductionCompagnyService) {}
 
   ngOnInit(): void {
     this.loadCompanies();
@@ -38,9 +37,9 @@ export class ProductionCompagnyListComponent {
   loadCompanies(): void {
     this.productionCompanyService.getAllCompanies().subscribe(
       (data: any[]) => {
-        this.companies = data.map((companyArray) => ({
-          id_company: companyArray.id_company,
-          name_company: companyArray.name_company,
+        this.companies = data.map((company) => ({
+          id_company: company[0],
+          name_company: company[1],
         }));
         this.updatePaginatedCompanies();
         this.isLoading = false;
@@ -67,5 +66,34 @@ export class ProductionCompagnyListComponent {
 
   get totalPages(): number {
     return Math.ceil(this.companies.length / this.itemsPerPage);
+  }
+
+  // Pagination Helpers
+  get firstPages(): number[] {
+    return Array.from({ length: Math.min(3, this.totalPages) }, (_, i) => i + 1);
+  }
+
+  get lastPages(): number[] {
+    return Array.from(
+      { length: Math.min(3, this.totalPages) },
+      (_, i) => this.totalPages - i
+    ).reverse();
+  }
+
+  get middlePages(): number[] {
+    const middleStart = Math.max(4, this.currentPage - 1);
+    const middleEnd = Math.min(this.totalPages - 3, this.currentPage + 1);
+    return Array.from(
+      { length: Math.max(0, middleEnd - middleStart + 1) },
+      (_, i) => middleStart + i
+    );
+  }
+
+  get showLeftDots(): boolean {
+    return this.currentPage > 4;
+  }
+
+  get showRightDots(): boolean {
+    return this.currentPage < this.totalPages - 3;
   }
 }
