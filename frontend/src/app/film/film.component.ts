@@ -3,7 +3,7 @@ import {FilmService} from '../Admin/Film/film.service';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
-import {CategorieService} from '../Admin/Categorie/categorie.service';
+import {GenreService} from '../Admin/Genre/genre.service';
 
 @Component({
   selector: 'app-film',
@@ -29,7 +29,7 @@ export class FilmComponent {
   searchTerm: string = '';
   selectedGenre: string = '';
 
-  constructor(private filmService: FilmService, private categorieService: CategorieService) {
+  constructor(private filmService: FilmService, private genreService: GenreService) {
   }
 
   ngOnInit(): void {
@@ -67,7 +67,7 @@ export class FilmComponent {
 
 
   loadGenres(): void {
-    this.categorieService.getAllGenres().subscribe(
+    this.genreService.getAllGenres().subscribe(
       (data: any[]) => {
         this.genres = data.map((genreArray) => ({
           id_genre: genreArray[0],

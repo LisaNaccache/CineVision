@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router, RouterModule} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
-import {CategorieService} from '../categorie.service';
+import {GenreService} from '../genre.service';
 
 @Component({
   selector: 'app-genre-edit',
@@ -12,16 +12,16 @@ import {CategorieService} from '../categorie.service';
     RouterModule,
     CommonModule
   ],
-  templateUrl: './categorie-edit.component.html',
-  styleUrl: './categorie-edit.component.css'
+  templateUrl: './genre-edit.component.html',
+  styleUrl: './genre-edit.component.css'
 })
-export class CategorieEditComponent implements OnInit {
+export class GenreEditComponent implements OnInit {
   genre: any = null; // Modèle du film
   isLoading = true;
   hasError = false;
 
   constructor(
-    private categorieService: CategorieService,
+    private genreService: GenreService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -36,7 +36,7 @@ export class CategorieEditComponent implements OnInit {
 
   // Récupérer les données d'un film
   loadGenre(id: number): void {
-    this.categorieService.getGenreById(id).subscribe(
+    this.genreService.getGenreById(id).subscribe(
       (data) => {
         this.genre = {
           id_genre: data[0],
@@ -58,11 +58,11 @@ export class CategorieEditComponent implements OnInit {
       name_genre: this.genre.name_genre,
     };
 
-    this.categorieService.updateGenre(updatedGenre).subscribe(
+    this.genreService.updateGenre(updatedGenre).subscribe(
       (response) => {
         alert('Genre updated successfully!');
         console.log('Updated genre:', response);
-        this.router.navigate(['/admin/categorie']);
+        this.router.navigate(['/admin/genre']);
       },
       (error) => {
         console.error('Error updating genre:', error);
@@ -80,11 +80,11 @@ export class CategorieEditComponent implements OnInit {
 
     const confirmDelete = confirm(`Are you sure you want to delete the genre "${this.genre.name_genre}"?`);
     if (confirmDelete) {
-      this.categorieService.deleteGenre(this.genre.id_genre).subscribe(
+      this.genreService.deleteGenre(this.genre.id_genre).subscribe(
         (response) => {
           alert('Genre deleted successfully!');
           console.log('Deleted genre:', response);
-          this.router.navigate(['/admin/categorie']); // Redirigez vers la liste des genres
+          this.router.navigate(['/admin/genre']); // Redirigez vers la liste des genres
         },
         (error) => {
           console.error('Error deleting genre:', error);
@@ -95,6 +95,6 @@ export class CategorieEditComponent implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/admin/categorie']);
+    this.router.navigate(['/admin/genre']);
   }
 }

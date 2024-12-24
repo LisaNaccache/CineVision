@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {CategorieService} from '../categorie.service';
+import {GenreService} from '../genre.service';
 import {Router, RouterLink} from '@angular/router';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -15,10 +15,10 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
     ReactiveFormsModule,
     RouterLink,
   ],
-  templateUrl: './categorie-add.component.html',
-  styleUrl: './categorie-add.component.css'
+  templateUrl: './genre-add.component.html',
+  styleUrl: './genre-add.component.css'
 })
-export class CategorieAddComponent {
+export class GenreAddComponent {
 
   genre: any = {
     id_genre: '',
@@ -28,7 +28,7 @@ export class CategorieAddComponent {
   isLoading = false;
   hasError = false;
 
-  constructor(private categorieService: CategorieService, private router: Router) {
+  constructor(private genreService: GenreService, private router: Router) {
   }
 
   onFormSubmit(): void {
@@ -39,11 +39,11 @@ export class CategorieAddComponent {
       name_genre: this.genre.name_genre,
     };
 
-    this.categorieService.addGenre(newGenre).subscribe(
+    this.genreService.addGenre(newGenre).subscribe(
       (response) => {
         alert('Genre added successfully!');
         console.log('New genre:', response);
-        this.router.navigate(['/admin/categorie']);
+        this.router.navigate(['/admin/genre']);
         this.isLoading = false;
       },
       (error) => {
@@ -55,6 +55,6 @@ export class CategorieAddComponent {
   }
 
   back() {
-    this.router.navigate(['/admin/categorie']);
+    this.router.navigate(['/admin/genre']);
   }
 }

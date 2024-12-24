@@ -5,7 +5,7 @@ import {Observable} from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class CategorieService {
+export class GenreService {
 
   private apiUrl = 'http://127.0.0.1:3000/api';
 

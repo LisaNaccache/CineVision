@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { CategorieService } from '../categorie.service';
+import { GenreService } from '../genre.service';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 
 @Component({
-  selector: 'app-categorie-list',
+  selector: 'app-genre-list',
   standalone: true,
   imports: [
     NgFor,
@@ -15,10 +15,10 @@ import {RouterLink} from '@angular/router';
     ReactiveFormsModule,
     RouterLink,
   ],
-  templateUrl: './categorie-list.component.html',
-  styleUrls: ['./categorie-list.component.css'],
+  templateUrl: './genre-list.component.html',
+  styleUrls: ['./genre-list.component.css'],
 })
-export class CategorieListComponent implements OnInit {
+export class GenreListComponent implements OnInit {
   genres: any[] = [];
   paginatedGenres: any[] = []; // Genres affichés dans la page courante
   isLoading = true;
@@ -28,14 +28,14 @@ export class CategorieListComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
 
-  constructor(private categorieService: CategorieService) {}
+  constructor(private genreService: GenreService) {}
 
   ngOnInit(): void {
     this.loadGenre();
   }
 
   loadGenre(): void {
-    this.categorieService.getAllGenres().subscribe(
+    this.genreService.getAllGenres().subscribe(
       (data: any[]) => {
         this.genres = data.map((genreArray) => ({
           id_genre: genreArray[0],
@@ -58,7 +58,6 @@ export class CategorieListComponent implements OnInit {
     this.paginatedGenres = this.genres.slice(startIndex, endIndex);
   }
 
-  // Changer de page
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;

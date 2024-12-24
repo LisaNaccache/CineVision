@@ -4,9 +4,9 @@ import {FilmEditComponent} from './Admin/Film/film-edit/film-edit.component';
 import {FilmAddComponent} from './Admin/Film/film-add/film-add.component';
 import {ConnectionComponent} from './connection/connection.component';
 import {FilmListComponent} from './Admin/Film/film-list/film-list.component';
-import {CategorieAddComponent} from './Admin/Categorie/categorie-add/categorie-add.component';
-import {CategorieEditComponent} from './Admin/Categorie/categorie-edit/categorie-edit.component';
-import {CategorieListComponent} from './Admin/Categorie/categorie-list/categorie-list.component';
+import {GenreAddComponent} from './Admin/Genre/genre-add/genre-add.component';
+import {GenreEditComponent} from './Admin/Genre/genre-edit/genre-edit.component';
+import {GenreListComponent} from './Admin/Genre/genre-list/genre-list.component';
 import {CinemaAddComponent} from './Admin/Cinema/cinema-add/cinema-add.component';
 import {CinemaEditComponent} from './Admin/Cinema/cinema-edit/cinema-edit.component';
 import {CinemaListComponent} from './Admin/Cinema/cinema-list/cinema-list.component';
@@ -44,9 +44,9 @@ export const routes: Routes = [
   { path: '', component: FilmComponent },
   { path: 'client/film', component: FilmComponent },
   { path: 'client/film/:id', component: FilmDetailComponent },
-  { path: 'admin/categorie/add', component: CategorieAddComponent },
-  { path: 'admin/categorie/edit/:id', component: CategorieEditComponent },
-  { path: 'admin/categorie', component: CategorieListComponent },
+  { path: 'admin/genre/add', component: GenreAddComponent },
+  { path: 'admin/genre/edit/:id', component: GenreEditComponent },
+  { path: 'admin/genre', component: GenreListComponent },
   { path: 'admin/production-compagny/add', component: ProductionCompagnyAddComponent },
   { path: 'admin/production-compagny/edit/:id', component: ProductionCompagnyEditComponent },
   { path: 'admin/production-compagny', component: ProductionCompagnyListComponent },
