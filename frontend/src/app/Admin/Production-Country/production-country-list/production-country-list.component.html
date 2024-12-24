@@ -1,0 +1,61 @@
+<div class="container" *ngIf="true">
+  <div class="d-flex justify-content-between align-items-center my-3">
+    <h1 class="mt-3">Production Country List</h1>
+    <a class="btn btn-primary" [routerLink]="['/admin/production-country/add']">Add Country</a>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="text-center mt-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="hasError && !isLoading" class="alert alert-danger mt-5">
+    An error occurred while loading countries. Please try again later.
+  </div>
+
+  <!-- Country Table -->
+  <ng-container *ngIf="paginatedCountries.length > 0 && !isLoading">
+    <table class="table table-bordered table-striped table-sm mt-3">
+      <thead class="table-info">
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let country of paginatedCountries">
+        <td>{{ country.id_country }}</td>
+        <td>{{ country.name_country }}</td>
+        <td>
+          <a class="btn btn-light" [routerLink]="['/admin/production-country/edit', country.id_country]">Edit</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination Controls -->
+    <nav aria-label="Page navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
+        </li>
+        <li class="page-item" *ngFor="let page of [].constructor(totalPages); let i = index"
+            [class.active]="currentPage === (i + 1)">
+          <button class="page-link" (click)="changePage(i + 1)">{{ i + 1 }}</button>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
+        </li>
+      </ul>
+    </nav>
+  </ng-container>
+
+  <!-- No Countries -->
+  <div *ngIf="!isLoading && countries.length === 0 && !hasError" class="mt-5 text-center">
+    <p>No countries found.</p>
+  </div>
+</div>
