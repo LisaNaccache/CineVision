@@ -38,11 +38,12 @@ export class FilmEditComponent implements OnInit {
   loadFilm(id: number): void {
     this.filmService.getFilmById(id).subscribe(
       (data) => {
+        console.log(data);
         this.film = {
           id: data[0], // ID_FILM
           title: data[1], // TITLE
           language: data[2], // ORIGINAL_LANGUAGE
-          description: data[3], // OVERVIEW
+          overview: data[3], // OVERVIEW
           popularity: data[4], // POPULARITY
           releaseDate: data[5], // RELEASE_DATE
           runtime: data[6], // RUNTIME

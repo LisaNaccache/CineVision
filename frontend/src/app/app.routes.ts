@@ -25,6 +25,15 @@ import {
 import {
   ProductionCompagnyListComponent
 } from './Admin/Production-Compagny/production-compagny-list/production-compagny-list.component';
+import {
+  ProductionCountryAddComponent
+} from './Admin/Production-Country/production-country-add/production-country-add.component';
+import {
+  ProductionCountryEditComponent
+} from './Admin/Production-Country/production-country-edit/production-country-edit.component';
+import {
+  ProductionCountryListComponent
+} from './Admin/Production-Country/production-country-list/production-country-list.component';
 
 export const routes: Routes = [
   { path: 'inscription', component: InscriptionComponent },
@@ -41,6 +50,9 @@ export const routes: Routes = [
   { path: 'admin/production-compagny/add', component: ProductionCompagnyAddComponent },
   { path: 'admin/production-compagny/edit/:id', component: ProductionCompagnyEditComponent },
   { path: 'admin/production-compagny', component: ProductionCompagnyListComponent },
+  { path: 'admin/production-country/add', component: ProductionCountryAddComponent },
+  { path: 'admin/production-country/edit/:id', component: ProductionCountryEditComponent },
+  { path: 'admin/production-country', component: ProductionCountryListComponent },
   { path: 'admin/cinema/add', component: CinemaAddComponent },
   { path: 'admin/cinema/edit/:id', component: CinemaEditComponent },
   { path: 'admin/cinema', component: CinemaListComponent },

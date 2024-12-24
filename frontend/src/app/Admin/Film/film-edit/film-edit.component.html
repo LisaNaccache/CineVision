@@ -33,6 +33,11 @@
         </div>
 
         <div class="mt-3">
+          <label for="overview" class="form-label">Overview</label>
+          <textarea type="text" id="overview" name="overview" class="form-control" [(ngModel)]="film.overview" rows="2"></textarea>
+        </div>
+
+        <div class="mt-3">
           <label for="posterUrl" class="form-label">Poster URL</label>
           <input type="text" id="posterUrl" name="posterUrl" class="form-control" [(ngModel)]="film.posterUrl">
         </div>

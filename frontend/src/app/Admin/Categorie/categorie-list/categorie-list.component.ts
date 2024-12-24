@@ -31,10 +31,10 @@ export class CategorieListComponent implements OnInit {
   constructor(private categorieService: CategorieService) {}
 
   ngOnInit(): void {
-    this.loadFilms();
+    this.loadGenre();
   }
 
-  loadFilms(): void {
+  loadGenre(): void {
     this.categorieService.getAllGenres().subscribe(
       (data: any[]) => {
         this.genres = data.map((genreArray) => ({
