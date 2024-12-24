@@ -24,7 +24,6 @@ export class FilmListComponent implements OnInit {
   isLoading = true;
   hasError = false;
 
-  // Pagination variables
   currentPage = 1;
   itemsPerPage = 10;
 
@@ -62,21 +61,18 @@ export class FilmListComponent implements OnInit {
     );
   }
 
-  // Mettre à jour les films affichés en fonction de la page courante
   updatePaginatedFilms(): void {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     this.paginatedFilms = this.films.slice(startIndex, endIndex);
   }
 
-  // Changer de page
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.updatePaginatedFilms();
   }
 
-  // Nombre total de pages
   get totalPages(): number {
     return Math.ceil(this.films.length / this.itemsPerPage);
   }

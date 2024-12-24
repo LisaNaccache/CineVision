@@ -20,11 +20,10 @@ import {RouterLink} from '@angular/router';
 })
 export class GenreListComponent implements OnInit {
   genres: any[] = [];
-  paginatedGenres: any[] = []; // Genres affichés dans la page courante
+  paginatedGenres: any[] = [];
   isLoading = true;
   hasError = false;
 
-  // Pagination variables
   currentPage = 1;
   itemsPerPage = 10;
 

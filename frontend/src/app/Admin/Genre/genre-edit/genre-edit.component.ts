@@ -16,7 +16,7 @@ import {GenreService} from '../genre.service';
   styleUrl: './genre-edit.component.css'
 })
 export class GenreEditComponent implements OnInit {
-  genre: any = null; // Modèle du film
+  genre: any = null;
   isLoading = true;
   hasError = false;
 
@@ -34,13 +34,12 @@ export class GenreEditComponent implements OnInit {
     }
   }
 
-  // Récupérer les données d'un film
   loadGenre(id: number): void {
     this.genreService.getGenreById(id).subscribe(
       (data) => {
         this.genre = {
           id_genre: data[0],
-          name_genre: data[1], // NAME
+          name_genre: data[1],
         };
         this.isLoading = false;
       },
@@ -84,7 +83,7 @@ export class GenreEditComponent implements OnInit {
         (response) => {
           alert('Genre deleted successfully!');
           console.log('Deleted genre:', response);
-          this.router.navigate(['/admin/genre']); // Redirigez vers la liste des genres
+          this.router.navigate(['/admin/genre']);
         },
         (error) => {
           console.error('Error deleting genre:', error);

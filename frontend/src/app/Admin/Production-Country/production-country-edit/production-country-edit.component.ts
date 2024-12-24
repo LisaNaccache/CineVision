@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {GenreService} from '../../Genre/genre.service';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ProductionCountryService} from '../production-country.service';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
@@ -65,7 +64,7 @@ export class ProductionCountryEditComponent {
       (response) => {
         alert('Country updated successfully!');
         console.log('Updated country:', response);
-        this.router.navigate(['/admin/genre']);
+        this.router.navigate(['/admin/production-country']);
       },
       (error) => {
         console.error('Error updating country:', error);

@@ -16,7 +16,7 @@ import {FilmService} from '../film.service';
   styleUrl: './film-edit.component.css'
 })
 export class FilmEditComponent implements OnInit {
-  film: any = null; // Modèle du film
+  film: any = null;
   isLoading = true;
   hasError = false;
 
@@ -64,7 +64,6 @@ export class FilmEditComponent implements OnInit {
   }
 
   onFormSubmit(): void {
-    // Convertir la date au format 'YYYY-MM-DD'
     const formatDate = (date: Date | string): string => {
       const d = new Date(date);
       const year = d.getFullYear();
@@ -102,7 +101,6 @@ export class FilmEditComponent implements OnInit {
   }
 
 
-  // Suppression du film
   onDelete(): void {
     if (!this.film || !this.film.id) {
       alert('Film ID is required to delete the film.');

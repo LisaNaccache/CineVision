@@ -4,19 +4,16 @@
     <a class="btn btn-primary" [routerLink]="['/admin/production-country/add']">Add Country</a>
   </div>
 
-  <!-- Loading Spinner -->
   <div *ngIf="isLoading" class="text-center mt-5">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <!-- Error Message -->
   <div *ngIf="hasError && !isLoading" class="alert alert-danger mt-5">
     An error occurred while loading countries. Please try again later.
   </div>
 
-  <!-- Country Table -->
   <ng-container *ngIf="paginatedCountries.length > 0 && !isLoading">
     <table class="table table-bordered table-striped table-sm mt-3">
       <thead class="table-info">
@@ -54,7 +51,6 @@
     </nav>
   </ng-container>
 
-  <!-- No Countries -->
   <div *ngIf="!isLoading && countries.length === 0 && !hasError" class="mt-5 text-center">
     <p>No countries found.</p>
   </div>

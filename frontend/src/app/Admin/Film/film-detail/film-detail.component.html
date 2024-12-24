@@ -1,28 +1,23 @@
 <ng-container *ngIf="film; else loader">
   <div class="container-fluid px-0">
-    <!-- Bannière -->
     <div class="banner">
       <img [src]="film.posterUrl" [alt]="film.title" class="img-fluid w-100">
     </div>
   </div>
 
   <div class="container py-5">
-    <!-- Titre -->
     <h1 class="fw-normal text-center text-dark mb-4">{{ film.title }}</h1>
 
-    <!-- Détails -->
     <div class="d-flex justify-content-between text-muted mb-4">
       <span><strong>Release Date:</strong> {{ film.releaseDate | date:'dd-MM-yyyy' }}</span>
       <span><strong>Popularity:</strong> {{ film.popularity }}</span>
     </div>
 
-    <!-- Description -->
     <div class="mb-4">
       <h5 class="text-secondary">Description</h5>
       <p>{{ film.description }}</p>
     </div>
 
-    <!-- Bande-Annonce -->
     <div class="mb-4">
       <h5 class="text-secondary">Trailer</h5>
       <div class="ratio ratio-16x9">
