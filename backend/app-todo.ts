@@ -80,6 +80,19 @@ const jsDocOptions = {
                     },
                 },
 
+                User: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        first_name: { type: 'string' },
+                        last_name: { type: 'string' },
+                        age: { type: 'integer', nullable: true },
+                        is_admin: { type: 'boolean' },
+                        email: { type: 'string' },
+                        password: { type: 'string' },
+                    },
+                },
+
             },
         },
     },
@@ -1472,6 +1485,197 @@ app.get('/api/films/title/:title', async (req: Request, res: Response) => {
 });
 
 
+// ---------------------------------------
+//              USER MANAGEMENT
+// ---------------------------------------
+
+interface User {
+    id?: number;
+    first_name: string;
+    last_name: string;
+    age?: number;
+    is_admin: boolean;
+    email: string;
+    password: string;
+}
+
+/**
+ * @openapi
+ * /api/users/register:
+ *   post:
+ *     description: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
+app.post('/api/users/register', async (req: Request, res: Response) => {
+    try {
+        const { first_name, last_name, age, email, password, is_admin } = req.body;
+
+        await executeQuery(
+            `
+                INSERT INTO user_roles (first_name, last_name, age, is_admin, email, password)
+                VALUES (:first_name, :last_name, :age, :is_admin, :email, :password)
+            `,
+            { first_name, last_name, age, is_admin, email, password }
+        );
+
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (err) {
+        console.error('Error during registration:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @openapi
+ * /api/users/login:
+ *   post:
+ *     description: Login a user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *       401:
+ *         description: Invalid credentials
+ */
+app.post('/api/users/login', async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        const result = await executeQuery(
+            `SELECT id, first_name, last_name, age, is_admin, email FROM user_roles WHERE email = :email AND password = :password`,
+            { email, password }
+        );
+
+        if (result.rows.length === 0) {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error during login:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     description: Get all users
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+app.get('/api/users', async (req: Request, res: Response) => {
+    try {
+        const result = await executeQuery('SELECT id, first_name, last_name, age, is_admin, email FROM user_roles');
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @openapi
+ * /api/users/{id}/role:
+ *   put:
+ *     description: Update the role of a user
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               is_admin:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       404:
+ *         description: User not found
+ */
+app.put('/api/users/:id/role', async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { is_admin } = req.body;
+
+        const result = await executeQuery(
+            `UPDATE user_roles SET is_admin = :is_admin WHERE id = :id`,
+            { id: +id, is_admin }
+        );
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User role updated successfully' });
+    } catch (err) {
+        console.error('Error updating user role:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   delete:
+ *     description: Delete a user
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ */
+app.delete('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        const result = await executeQuery(`DELETE FROM user_roles WHERE id = :id`, { id: +id });
+
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 
 

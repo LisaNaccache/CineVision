@@ -109,6 +109,18 @@ var jsDocOptions = {
                         genre_id: { type: 'integer' },
                     },
                 },
+                User: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'integer' },
+                        first_name: { type: 'string' },
+                        last_name: { type: 'string' },
+                        age: { type: 'integer', nullable: true },
+                        is_admin: { type: 'boolean' },
+                        email: { type: 'string' },
+                        password: { type: 'string' },
+                    },
+                },
             },
         },
     },
@@ -1414,10 +1426,216 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
         }
     });
 }); });
+/**
+ * @openapi
+ * /api/users/register:
+ *   post:
+ *     description: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ */
+app.post('/api/users/register', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, first_name, last_name, age, email, password, is_admin, err_27;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                _a = req.body, first_name = _a.first_name, last_name = _a.last_name, age = _a.age, email = _a.email, password = _a.password, is_admin = _a.is_admin;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO user_roles (first_name, last_name, age, is_admin, email, password)\n                VALUES (:first_name, :last_name, :age, :is_admin, :email, :password)\n            ", { first_name: first_name, last_name: last_name, age: age, is_admin: is_admin, email: email, password: password })];
+            case 1:
+                _b.sent();
+                res.status(201).json({ message: 'User registered successfully' });
+                return [3 /*break*/, 3];
+            case 2:
+                err_27 = _b.sent();
+                console.error('Error during registration:', err_27);
+                res.status(500).json({ error: 'Internal server error' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/users/login:
+ *   post:
+ *     description: Login a user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *       401:
+ *         description: Invalid credentials
+ */
+app.post('/api/users/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, result, err_28;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                _a = req.body, email = _a.email, password = _a.password;
+                return [4 /*yield*/, (0, database_1.executeQuery)("SELECT id, first_name, last_name, age, is_admin, email FROM user_roles WHERE email = :email AND password = :password", { email: email, password: password })];
+            case 1:
+                result = _b.sent();
+                if (result.rows.length === 0) {
+                    res.status(401).json({ error: 'Invalid credentials' });
+                }
+                res.status(200).json(result.rows[0]);
+                return [3 /*break*/, 3];
+            case 2:
+                err_28 = _b.sent();
+                console.error('Error during login:', err_28);
+                res.status(500).json({ error: 'Internal server error' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/users:
+ *   get:
+ *     description: Get all users
+ *     responses:
+ *       200:
+ *         description: List of all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ */
+app.get('/api/users', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result, err_29;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT id, first_name, last_name, age, is_admin, email FROM user_roles')];
+            case 1:
+                result = _a.sent();
+                res.status(200).json(result.rows);
+                return [3 /*break*/, 3];
+            case 2:
+                err_29 = _a.sent();
+                console.error('Error fetching users:', err_29);
+                res.status(500).json({ error: 'Internal server error' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/users/{id}/role:
+ *   put:
+ *     description: Update the role of a user
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               is_admin:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       404:
+ *         description: User not found
+ */
+app.put('/api/users/:id/role', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, is_admin, result, err_30;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = req.params.id;
+                is_admin = req.body.is_admin;
+                return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE user_roles SET is_admin = :is_admin WHERE id = :id", { id: +id, is_admin: is_admin })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: 'User not found' });
+                }
+                res.status(200).json({ message: 'User role updated successfully' });
+                return [3 /*break*/, 3];
+            case 2:
+                err_30 = _a.sent();
+                console.error('Error updating user role:', err_30);
+                res.status(500).json({ error: 'Internal server error' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
+/**
+ * @openapi
+ * /api/users/{id}:
+ *   delete:
+ *     description: Delete a user
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ */
+app.delete('/api/users/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, result, err_31;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = req.params.id;
+                return [4 /*yield*/, (0, database_1.executeQuery)("DELETE FROM user_roles WHERE id = :id", { id: +id })];
+            case 1:
+                result = _a.sent();
+                if (result.rowsAffected === 0) {
+                    res.status(404).json({ error: 'User not found' });
+                }
+                res.status(200).json({ message: 'User deleted successfully' });
+                return [3 /*break*/, 3];
+            case 2:
+                err_31 = _a.sent();
+                console.error('Error deleting user:', err_31);
+                res.status(500).json({ error: 'Internal server error' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); });
 // Start the application
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_27;
+    var err_32;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1430,8 +1648,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_27 = _a.sent();
-                console.error('Failed to initialize database:', err_27);
+                err_32 = _a.sent();
+                console.error('Failed to initialize database:', err_32);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
