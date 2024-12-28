@@ -15,7 +15,7 @@ export class ProductionCountryService {
     return this.http.get(`${this.apiUrl}/production-countries`);
   }
 
-  getCountryById(id: number): Observable<any> {
+  getCountryById(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/production-countries/${id}`);
   }
 
@@ -24,10 +24,10 @@ export class ProductionCountryService {
   }
 
   updateCountry(country: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/production-countries/${country.id_country}`, country);
+    return this.http.put(`${this.apiUrl}/production-countries`, country);
   }
 
-  deleteCountry(id: number): Observable<any> {
+  deleteCountry(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/production-countries/${id}`);
   }
 }

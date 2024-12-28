@@ -31,13 +31,13 @@ export class ProductionCountryEditComponent {
   }
 
   ngOnInit(): void {
-    const countryId = Number(this.route.snapshot.paramMap.get('id'));
+    const countryId = String(this.route.snapshot.paramMap.get('id'));
     if (countryId) {
       this.loadCountry(countryId);
     }
   }
 
-  loadCountry(id: number): void {
+  loadCountry(id: string): void {
     this.productionCountryService.getCountryById(id).subscribe(
       (data) => {
         this.country = {
