@@ -1,9 +1,10 @@
-import {Component} from '@angular/core';
+import {AfterViewInit, Component} from '@angular/core';
 import {FilmService} from '../Admin/Film/film.service';
 import {CommonModule, NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {GenreService} from '../Admin/Genre/genre.service';
+import { Tooltip } from 'bootstrap';
 
 @Component({
   selector: 'app-film',
@@ -19,7 +20,7 @@ import {GenreService} from '../Admin/Genre/genre.service';
   templateUrl: './film.component.html',
   styleUrl: './film.component.css'
 })
-export class FilmComponent {
+export class FilmComponent implements AfterViewInit {
   films: any[] = [];
   isLoading = true;
   hasError = false;
@@ -35,6 +36,13 @@ export class FilmComponent {
   ngOnInit(): void {
     this.loadFilms();
     this.loadGenres();
+  }
+
+  ngAfterViewInit(): void {
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new Tooltip(tooltipTriggerEl); // Initialise les tooltips de manière basique
+    });
   }
 
   loadFilms(): void {
@@ -162,5 +170,54 @@ export class FilmComponent {
       this.loadFilms();
     }
   }
+
+  formatRuntime(runtime: number): string {
+    if (!runtime || runtime <= 0) {
+      return 'N/A'; // Si aucune durée n'est disponible
+    }
+
+    const hours = Math.floor(runtime / 60); // Calcule les heures
+    const minutes = runtime % 60; // Récupère les minutes restantes
+
+    return `${hours}h${minutes > 0 ? minutes + 'min' : ''}`; // Formate la durée
+  }
+
+  getYear(releaseDate: string): string {
+
+    if (!releaseDate || typeof releaseDate !== 'string') {
+      return 'N/A'; // Si la date n'est pas définie ou n'est pas une chaîne
+    }
+
+    const year = releaseDate.split('-')[0]; // Extraire la partie avant le premier tiret
+    return year && year.length === 4 ? year : 'N/A'; // Vérifie si l'année est valide
+  }
+
+  formatVoteAverage(voteAverage: number): string {
+    if (!voteAverage || voteAverage <= 0) {
+      return 'N/A'; // Si aucune note n'est disponible
+    }
+
+    return voteAverage.toFixed(1); // Arrondit à 1 chiffre après la virgule
+  }
+
+
+  formatVoteCount(voteCount: number): string {
+    if (!voteCount || voteCount <= 0) {
+      return '0'; // Par défaut, affiche 0 si aucun vote
+    }
+
+    return Math.round(voteCount).toString(); // Arrondit au nombre entier et retourne comme chaîne
+  }
+
+  getPopularityCategory(popularity: number): string {
+    if (popularity >= 100) return '🔥 Trending';
+    if (popularity >= 25) return '👍 Popular';
+    return '👎 Low Popularity';
+  }
+
+  formatPopularity(popularity: number): string {
+    return popularity.toFixed(1); // Affiche une seule décimale
+  }
+
 
 }

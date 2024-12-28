@@ -19,3 +19,76 @@
   border: 1px solid #ced4da;
   background-color: #f8f9fa;
 }
+
+
+.film-card .badge.year-badge {
+  position: absolute;
+  top: 10px; /* Position en haut */
+  left: 10px; /* Position à gauche */
+  z-index: 10;
+  padding: 0.4em 0.6em;
+  font-size: 0.9rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.film-card .badge.runtime-badge {
+  position: absolute;
+  top: 10px; /* Position en haut */
+  right: 10px; /* Position à droite */
+  z-index: 10;
+  padding: 0.4em 0.6em;
+  font-size: 0.9rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bi-star-fill {
+  font-size: 1rem;
+  color: #ffc107;
+}
+
+@media (min-width: 768px) {
+  .card-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 767px) {
+  .card-title {
+    white-space: normal; /* Permet au texte de s'étendre sur plusieurs lignes */
+    overflow: visible;   /* Aucun débordement caché */
+  }
+}
+
+.votes-container {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.votes-text,
+.votes-count {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.popularity-badge {
+  position: absolute;
+  bottom: 10px; /* Distance du bas de l'image */
+  right: 10px; /* Distance de la droite de l'image */
+  z-index: 10; /* Toujours au-dessus de l'image */
+  padding: 0.4em 0.6em; /* Ajuste l'espace interne */
+  font-size: 0.9rem; /* Taille de la police */
+  border-radius: 0.25rem; /* Coins légèrement arrondis */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Ombre subtile */
+}
+
+
+[data-bs-toggle="tooltip"] {
+  cursor: pointer;
+}
+
