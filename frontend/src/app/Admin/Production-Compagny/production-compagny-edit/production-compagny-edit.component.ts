@@ -39,7 +39,7 @@ export class ProductionCompagnyEditComponent {
       (data) => {
         this.company = {
           id_company: data[0],
-          name_company: data[1], // NAME
+          name_company: data[1],
         };
         this.isLoading = false;
       },
@@ -83,7 +83,7 @@ export class ProductionCompagnyEditComponent {
         (response) => {
           alert('company deleted successfully!');
           console.log('Deleted company:', response);
-          this.router.navigate(['/admin/production-compagny']); // Redirigez vers la liste des companys
+          this.router.navigate(['/admin/production-compagny']);
         },
         (error) => {
           console.error('Error deleting company:', error);
