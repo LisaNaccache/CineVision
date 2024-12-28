@@ -84,12 +84,11 @@ export class FilmComponent {
     this.isLoading = true;
     this.hasError = false;
 
-    // Si un genre est sélectionné, on appelle l'API pour ce genre
     if (this.selectedGenre) {
       this.filmService.getFilmsByGenre(this.selectedGenre).subscribe(
         (data: any[]) => {
           this.films = this.mapFilms(data);
-          this.applySearchTerm(); // Applique le filtre de recherche par nom
+          this.applySearchTerm();
           this.isLoading = false;
           this.searchTerm = '';
         },
@@ -100,7 +99,6 @@ export class FilmComponent {
         }
       );
     } else {
-      // Si aucun genre n'est sélectionné, charge tous les films
       this.filmService.getAllFilmsGenres().subscribe(
         (data: any[]) => {
           this.films = this.mapFilms(data);
@@ -116,7 +114,6 @@ export class FilmComponent {
     }
   }
 
-  // Mappe les données brutes de l'API en objets utilisables
   private mapFilms(data: any[]): any[] {
     return data.map((filmArray) => ({
       id: filmArray[0],
@@ -135,7 +132,6 @@ export class FilmComponent {
     }));
   }
 
-  // Applique un filtre par nom de film
   applySearchTerm(): void {
     if (this.searchTerm) {
       const searchTermLowerCase = this.searchTerm.toLowerCase();
@@ -163,7 +159,6 @@ export class FilmComponent {
         }
       );
     } else {
-      // Si le champ est vide, recharge tous les films
       this.loadFilms();
     }
   }

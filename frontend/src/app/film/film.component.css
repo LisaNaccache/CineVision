@@ -12,9 +12,10 @@
 
 .form-label {
   color: #e9ecef; /* Couleur texte pour contraster avec le fond */
+  font-weight: 500; /* Rendre les labels plus visibles */
 }
 
 .form-control, .form-select {
-  background-color: #e9ecef;
   border: 1px solid #ced4da;
+  background-color: #f8f9fa;
 }

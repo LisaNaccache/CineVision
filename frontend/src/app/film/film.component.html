@@ -1,16 +1,16 @@
 <div class="container">
   <div class="my-5">
     <div class="row align-items-stretch">
-      <ng-container *ngIf="films && films.length > 0">
-
-        <div class="card bg-light-subtle text-white">
-          <div class="card-header">
-            <h5 class="mb-0 text-secondary">Filter</h5>
+      <ng-container *ngIf="films">
+        <!--*ngIf="films && films.length > 0"--->
+        <div class="card text-white w-100" style="border: none;">
+          <div class="card-header bg-secondary" style="border: 1px solid #ced4da;">
+            <h5 class="mb-0 text-white">Filter</h5>
           </div>
-          <div class="card-body">
-            <div class="row align-items-center">
+          <div class="card-body rounded-bottom bg-light-subtle" style="border: 1px solid #ced4da;">
+            <div class="row g-3 align-items-center">
               <!-- Input pour le nom -->
-              <div class="col-md-6 mb-3 mb-md-0">
+              <div class="col-md-6">
                 <label for="filmName" class="form-label text-dark">Name:</label>
                 <input
                   id="filmName"
@@ -41,30 +41,39 @@
           </div>
         </div>
 
-        <div class="col-12 col-md-4 mb-3 mt-3" *ngFor="let film of films">
-          <div class="card h-100">
-            <img [src]="film.posterUrl" class="card-img-top" [alt]="film.title">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">
-                {{ film.title }}
-              </h5>
-              <p class="card-text">
+        <ng-container *ngIf="films.length > 0">
+          <div class="col-12 col-md-4 mb-3 mt-3" *ngFor="let film of films">
+            <div class="card h-100">
+              <img [src]="film.posterUrl" class="card-img-top" [alt]="film.title">
+              <div class="card-body d-flex flex-column">
+                <h5 class="card-title">
+                  {{ film.title }}
+                </h5>
+                <p class="card-text">
                 <span class="badge bg-secondary me-1" *ngFor="let genre of film.genres">
                   {{ genre.name_genre }}
                 </span>
-              </p>
-              <div class="mt-auto">
-                <a [routerLink]="['/client/film', film.id]" class="btn btn-primary">
-                  More
-                </a>
+                </p>
+                <div class="mt-auto">
+                  <a [routerLink]="['/film', film.id]" class="btn btn-primary">
+                    More
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </ng-container>
+
+        <ng-container *ngIf="films.length === 0">
+          <div class="alert alert-danger mt-3" role="alert">
+            We're sorry, but there are no films available for this search !
+          </div>
+        </ng-container>
+
       </ng-container>
 
       <!-- Message si aucun film -->
-      <ng-container *ngIf="films && films.length === 0">
+      <ng-container *ngIf="!films">
         <div class="text-center">
           <p>No films available.</p>
         </div>
