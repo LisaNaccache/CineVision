@@ -42,6 +42,7 @@ export const routes: Routes = [
   {path: 'login', component: LoginComponent},
   {path: 'film', component: FilmComponent},
   {path: 'film/:id', component: FilmDetailComponent},
+  {path: '', component: FilmComponent},
 
   // Admin Routes
   {path: 'admin/film/add', component: FilmAddComponent, canActivate: [AdminGuard]},
