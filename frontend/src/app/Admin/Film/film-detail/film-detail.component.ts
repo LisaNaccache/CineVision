@@ -69,6 +69,6 @@ export class FilmDetailComponent implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/client/film']);
+    this.router.navigate(['/film']);
   }
 }

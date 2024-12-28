@@ -1,8 +1,6 @@
 import {Routes} from '@angular/router';
-import {InscriptionComponent} from './inscription/inscription.component';
 import {FilmEditComponent} from './Admin/Film/film-edit/film-edit.component';
 import {FilmAddComponent} from './Admin/Film/film-add/film-add.component';
-import {ConnectionComponent} from './connection/connection.component';
 import {FilmListComponent} from './Admin/Film/film-list/film-list.component';
 import {GenreAddComponent} from './Admin/Genre/genre-add/genre-add.component';
 import {GenreEditComponent} from './Admin/Genre/genre-edit/genre-edit.component';
@@ -34,30 +32,37 @@ import {
 import {
   ProductionCountryListComponent
 } from './Admin/Production-Country/production-country-list/production-country-list.component';
+import {LoginComponent} from './login/login.component';
+import {AdminGuard} from './guards/auth.guard';
+import {AuthGuard} from './guards/auth.guard';
+import {RegistrerComponent} from './registrer/registrer.component';
 
 export const routes: Routes = [
-  { path: 'inscription', component: InscriptionComponent },
-  { path: 'connection', component: ConnectionComponent },
-  { path: 'admin/film/add', component: FilmAddComponent },
-  { path: 'admin/film/edit/:id', component: FilmEditComponent },
-  { path: 'admin/film', component: FilmListComponent },
-  { path: '', component: FilmComponent },
-  { path: 'client/film', component: FilmComponent },
-  { path: 'client/film/:id', component: FilmDetailComponent },
-  { path: 'admin/genre/add', component: GenreAddComponent },
-  { path: 'admin/genre/edit/:id', component: GenreEditComponent },
-  { path: 'admin/genre', component: GenreListComponent },
-  { path: 'admin/production-compagny/add', component: ProductionCompagnyAddComponent },
-  { path: 'admin/production-compagny/edit/:id', component: ProductionCompagnyEditComponent },
-  { path: 'admin/production-compagny', component: ProductionCompagnyListComponent },
-  { path: 'admin/production-country/add', component: ProductionCountryAddComponent },
-  { path: 'admin/production-country/edit/:id', component: ProductionCountryEditComponent },
-  { path: 'admin/production-country', component: ProductionCountryListComponent },
-  { path: 'admin/cinema/add', component: CinemaAddComponent },
-  { path: 'admin/cinema/edit/:id', component: CinemaEditComponent },
-  { path: 'admin/cinema', component: CinemaListComponent },
-  { path: 'admin/review', component: ReviewListComponent },
-  { path: 'admin/session-film/add', component: SessionFilmAddComponent },
-  { path: 'admin/session-film/edit/:id', component: SessionFilmEditComponent },
-  { path: 'admin/session-film', component: SessionFilmListComponent },
+  {path: 'register', component: RegistrerComponent},
+  {path: 'login', component: LoginComponent},
+  {path: 'film', component: FilmComponent},
+  {path: 'film/:id', component: FilmDetailComponent},
+
+  // Admin Routes
+  {path: 'admin/film/add', component: FilmAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/film/edit/:id', component: FilmEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/film', component: FilmListComponent, canActivate: [AdminGuard]},
+  {path: 'admin/genre/add', component: GenreAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/genre/edit/:id', component: GenreEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/genre', component: GenreListComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-compagny/add', component: ProductionCompagnyAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-compagny/edit/:id', component: ProductionCompagnyEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-compagny', component: ProductionCompagnyListComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-country/add', component: ProductionCountryAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-country/edit/:id', component: ProductionCountryEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/production-country', component: ProductionCountryListComponent, canActivate: [AdminGuard]},
+
+  // En cours de developpement
+  {path: 'admin/cinema/add', component: CinemaAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/cinema/edit/:id', component: CinemaEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/cinema', component: CinemaListComponent, canActivate: [AdminGuard]},
+  {path: 'admin/review', component: ReviewListComponent, canActivate: [AdminGuard]},
+  {path: 'admin/session-film/add', component: SessionFilmAddComponent, canActivate: [AdminGuard]},
+  {path: 'admin/session-film/edit/:id', component: SessionFilmEditComponent, canActivate: [AdminGuard]},
+  {path: 'admin/session-film', component: SessionFilmListComponent, canActivate: [AdminGuard]},
 ];
