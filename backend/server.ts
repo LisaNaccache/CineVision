@@ -2,7 +2,7 @@ import * as express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import swaggerJsdoc = require('swagger-jsdoc'); // * as swaggerJsdoc from 'swagger-jsdoc'
 import swaggerUi = require('swagger-ui-express');
-import { executeQuery, initDB } from './database';
+import {executeQuery, initDB} from './database';
 import * as jwt from 'jsonwebtoken';
 
 const cors = require('cors');
@@ -42,19 +42,19 @@ interface JwtPayload {
 function verifyToken(req: Request, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-        res.status(401).json({ error: 'No token provided.' });
+        res.status(401).json({error: 'No token provided.'});
         return;
     }
     const token = authHeader.split(' ')[1];
     if (!token) {
-        res.status(401).json({ error: 'No token provided.' });
+        res.status(401).json({error: 'No token provided.'});
         return;
     }
     try {
         (req as any).user = jwt.verify(token, JWT_SECRET) as JwtPayload;
         next();
     } catch (err) {
-        res.status(403).json({ error: 'Invalid token.' });
+        res.status(403).json({error: 'Invalid token.'});
         return;
     }
 }
@@ -63,11 +63,11 @@ function verifyToken(req: Request, res: Response, next: NextFunction): void {
 function isAdmin(req: Request, res: Response, next: NextFunction): void {
     const user = (req as any).user;
     if (!user) {
-        res.status(401).json({ error: 'Not authenticated.' });
+        res.status(401).json({error: 'Not authenticated.'});
         return;
     }
     if (!user.is_admin) {
-        res.status(403).json({ error: 'Admin privileges required.' });
+        res.status(403).json({error: 'Admin privileges required.'});
         return;
     }
     next();
@@ -94,75 +94,75 @@ const jsDocOptions = {
                 Film: {
                     type: 'object',
                     properties: {
-                        id_film: { type: 'integer' },
-                        title: { type: 'string' },
-                        original_language: { type: 'string' },
-                        overview: { type: 'string' },
-                        popularity: { type: 'number' },
-                        release_date: { type: 'string', format: 'date' },
-                        runtime: { type: 'number' },
-                        status: { type: 'string' },
-                        vote_count: { type: 'integer' },
-                        vote_average: { type: 'number' },
-                        link_poster: { type: 'string' },
-                        link_trailer: { type: 'string' },
+                        id_film: {type: 'integer'},
+                        title: {type: 'string'},
+                        original_language: {type: 'string'},
+                        overview: {type: 'string'},
+                        popularity: {type: 'number'},
+                        release_date: {type: 'string', format: 'date'},
+                        runtime: {type: 'number'},
+                        status: {type: 'string'},
+                        vote_count: {type: 'integer'},
+                        vote_average: {type: 'number'},
+                        link_poster: {type: 'string'},
+                        link_trailer: {type: 'string'},
                     },
                 },
                 // Define other schemas for genres, production companies, etc.
                 Genre: {
                     type: 'object',
                     properties: {
-                        id_genre: { type: 'integer' },
-                        name_genre: { type: 'string' },
+                        id_genre: {type: 'integer'},
+                        name_genre: {type: 'string'},
                     },
                 },
 
                 ProductionCompany: {
                     type: 'object',
                     properties: {
-                        id_company: { type: 'integer' },
-                        name_company: { type: 'string' },
+                        id_company: {type: 'integer'},
+                        name_company: {type: 'string'},
                     },
                 },
 
                 ProductionCountry: {
                     type: 'object',
                     properties: {
-                        id_country: { type: 'string' },
-                        name_country: { type: 'string' },
+                        id_country: {type: 'string'},
+                        name_country: {type: 'string'},
                     },
                 },
 
                 SpokenLanguage: {
                     type: 'object',
                     properties: {
-                        id_spoken_languages: { type: 'string' },
-                        language: { type: 'string' },
+                        id_spoken_languages: {type: 'string'},
+                        language: {type: 'string'},
                     },
                 },
 
                 FilmGenre: {
                     type: 'object',
                     properties: {
-                        film_id: { type: 'integer' },
-                        genre_id: { type: 'integer' },
+                        film_id: {type: 'integer'},
+                        genre_id: {type: 'integer'},
                     },
                 },
 
                 User: {
                     type: 'object',
                     properties: {
-                        email: { type: 'string' },
-                        password: { type: 'string' },
-                        first_name: { type: 'string' },
-                        last_name: { type: 'string' },
-                        age: { type: 'integer', nullable: true },
-                        is_admin: { type: 'boolean' },
+                        email: {type: 'string'},
+                        password: {type: 'string'},
+                        first_name: {type: 'string'},
+                        last_name: {type: 'string'},
+                        age: {type: 'integer', nullable: true},
+                        is_admin: {type: 'boolean'},
                     },
                 },
             },
         },
-        security: [{ BearerAuth: [] }],
+        security: [{BearerAuth: []}],
     },
     apis: ['server.js'],
 };
@@ -175,8 +175,6 @@ app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
 app.get('/api/liveness', (req: Request, res: Response) => {
     res.send('OK !!!');
 });
-
-
 
 
 // ---------------------------------------
@@ -299,17 +297,18 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
  *       403:
  *         description: Forbidden, admin access required
  */
-app.post('/api/films', verifyToken, isAdmin,async (req: Request, res: Response) => {
+app.post('/api/films', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const newFilm: Film = req.body;
 
         const insertResult = await executeQuery(
             `
                 INSERT INTO FILM
-                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)
-                VALUES
-                    (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)
-                    RETURNING ID_FILM INTO :id_film
+                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT,
+                 VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)
+                VALUES (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'),
+                        :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer) RETURNING ID_FILM
+                INTO :id_film
             `,
             {
                 title: newFilm.title,
@@ -323,7 +322,7 @@ app.post('/api/films', verifyToken, isAdmin,async (req: Request, res: Response) 
                 vote_average: newFilm.vote_average || null,
                 link_poster: newFilm.link_poster || null,
                 link_trailer: newFilm.link_trailer || null,
-                id_film: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+                id_film: {dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER},
             }
         ) as { outBinds: { id_film: number[] } };
 
@@ -332,7 +331,7 @@ app.post('/api/films', verifyToken, isAdmin,async (req: Request, res: Response) 
         res.status(201).json(newFilm);
     } catch (err) {
         console.error('Erreur lors de la création du film :', err.message);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -365,24 +364,24 @@ app.put('/api/films', verifyToken, isAdmin, async (req: Request, res: Response) 
         const updatedFilm: Film = req.body;
 
         if (!updatedFilm.id_film) {
-            res.status(400).json({ error: 'ID is required in the body to update a film.' });
+            res.status(400).json({error: 'ID is required in the body to update a film.'});
             return;
         }
 
         const result = await executeQuery(
             `
                 UPDATE FILM
-                SET TITLE = :title,
+                SET TITLE             = :title,
                     ORIGINAL_LANGUAGE = :original_language,
-                    OVERVIEW = :overview,
-                    POPULARITY = :popularity,
-                    RELEASE_DATE = TO_DATE(:release_date, 'YYYY-MM-DD'),
-                    RUNTIME = :runtime,
-                    STATUS = :status,
-                    VOTE_COUNT = :vote_count,
-                    VOTE_AVERAGE = :vote_average,
-                    LINK_POSTER = :link_poster,
-                    LINK_TRAILER = :link_trailer
+                    OVERVIEW          = :overview,
+                    POPULARITY        = :popularity,
+                    RELEASE_DATE      = TO_DATE(:release_date, 'YYYY-MM-DD'),
+                    RUNTIME           = :runtime,
+                    STATUS            = :status,
+                    VOTE_COUNT        = :vote_count,
+                    VOTE_AVERAGE      = :vote_average,
+                    LINK_POSTER       = :link_poster,
+                    LINK_TRAILER      = :link_trailer
                 WHERE ID_FILM = :id_film
             `,
             {
@@ -402,13 +401,13 @@ app.put('/api/films', verifyToken, isAdmin, async (req: Request, res: Response) 
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Film not found with ID: ${updatedFilm.id_film}` });
+            res.status(404).json({error: `Film not found with ID: ${updatedFilm.id_film}`});
         } else {
-            res.status(200).json({ message: 'Film updated successfully', updatedFilm });
+            res.status(200).json({message: 'Film updated successfully', updatedFilm});
         }
     } catch (err) {
         console.error('Erreur lors de la mise à jour du film :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -440,24 +439,23 @@ app.delete('/api/films/:id', verifyToken, isAdmin, async (req: Request, res: Res
 
         const result = await executeQuery(
             `
-                DELETE FROM FILM
+                DELETE
+                FROM FILM
                 WHERE ID_FILM = :id
             `,
-            { id }
+            {id}
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Film not found with ID: ${id}` });
+            res.status(404).json({error: `Film not found with ID: ${id}`});
         } else {
-            res.status(200).json({ message: 'Film deleted successfully' });
+            res.status(200).json({message: 'Film deleted successfully'});
         }
     } catch (err) {
         console.error('Erreur lors de la suppression du film :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -564,14 +562,13 @@ app.post('/api/genres', verifyToken, isAdmin, async (req: Request, res: Response
         const insertResult = await executeQuery(
             `
                 INSERT INTO GENRE
-                (NAME_GENRE)
-                VALUES
-                    (:name_genre)
-                RETURNING ID_GENRE INTO :id_genre
+                    (NAME_GENRE)
+                VALUES (:name_genre) RETURNING ID_GENRE
+                INTO :id_genre
             `,
             {
                 name_genre: newGenre.name_genre,
-                id_genre: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+                id_genre: {dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER},
             }
         ) as { outBinds: { id_genre: number[] } };
 
@@ -580,7 +577,7 @@ app.post('/api/genres', verifyToken, isAdmin, async (req: Request, res: Response
         res.status(201).json(newGenre);
     } catch (err) {
         console.error('Erreur lors de la création du genre :', err.message);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -607,12 +604,12 @@ app.post('/api/genres', verifyToken, isAdmin, async (req: Request, res: Response
  *       404:
  *         description: Genre not found
  */
-app.put('/api/genres', verifyToken, isAdmin,async (req: Request, res: Response) => {
+app.put('/api/genres', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedGenre: Genre = req.body;
 
         if (!updatedGenre.id_genre) {
-            res.status(400).json({ error: 'ID is required in the body to update a genre.' });
+            res.status(400).json({error: 'ID is required in the body to update a genre.'});
             return;
         }
 
@@ -629,13 +626,13 @@ app.put('/api/genres', verifyToken, isAdmin,async (req: Request, res: Response) 
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Genre not found with ID: ${updatedGenre.id_genre}` });
+            res.status(404).json({error: `Genre not found with ID: ${updatedGenre.id_genre}`});
         } else {
-            res.status(200).json({ message: 'Genre updated successfully', updatedGenre });
+            res.status(200).json({message: 'Genre updated successfully', updatedGenre});
         }
     } catch (err) {
         console.error('Erreur lors de la mise à jour du genre :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -667,24 +664,23 @@ app.delete('/api/genres/:id', verifyToken, isAdmin, async (req: Request, res: Re
 
         const result = await executeQuery(
             `
-                DELETE FROM GENRE
+                DELETE
+                FROM GENRE
                 WHERE ID_GENRE = :id
             `,
-            { id }
+            {id}
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Genre not found with ID: ${id}` });
+            res.status(404).json({error: `Genre not found with ID: ${id}`});
         } else {
-            res.status(200).json({ message: 'Genre deleted successfully' });
+            res.status(200).json({message: 'Genre deleted successfully'});
         }
     } catch (err) {
         console.error('Erreur lors de la suppression du genre :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -783,21 +779,20 @@ app.get('/api/production-companies/:id', async (req: Request, res: Response) => 
  *       403:
  *         description: Forbidden, admin access required
  */
-app.post('/api/production-companies', verifyToken,isAdmin,async (req: Request, res: Response) => {
+app.post('/api/production-companies', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const newCompany: ProductionCompany = req.body;
 
         const insertResult = await executeQuery(
             `
                 INSERT INTO PRODUCTION_COMPANY
-                (NAME_COMPANY)
-                VALUES
-                    (:name_company)
-                RETURNING ID_COMPANY INTO :id_company
+                    (NAME_COMPANY)
+                VALUES (:name_company) RETURNING ID_COMPANY
+                INTO :id_company
             `,
             {
                 name_company: newCompany.name_company,
-                id_company: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
+                id_company: {dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER},
             }
         ) as { outBinds: { id_company: number[] } };
 
@@ -806,7 +801,7 @@ app.post('/api/production-companies', verifyToken,isAdmin,async (req: Request, r
         res.status(201).json(newCompany);
     } catch (err) {
         console.error('Erreur lors de la création de la société de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -836,7 +831,7 @@ app.put('/api/production-companies', verifyToken, isAdmin, async (req: Request, 
         const updatedCompany: ProductionCompany = req.body;
 
         if (!updatedCompany.id_company) {
-            res.status(400).json({ error: 'ID is required in the body to update a production company.' });
+            res.status(400).json({error: 'ID is required in the body to update a production company.'});
             return;
         }
 
@@ -853,13 +848,13 @@ app.put('/api/production-companies', verifyToken, isAdmin, async (req: Request, 
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Production company not found with ID: ${updatedCompany.id_company}` });
+            res.status(404).json({error: `Production company not found with ID: ${updatedCompany.id_company}`});
         } else {
-            res.status(200).json({ message: 'Production company updated successfully', updatedCompany });
+            res.status(200).json({message: 'Production company updated successfully', updatedCompany});
         }
     } catch (err) {
         console.error('Erreur lors de la mise à jour de la société de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -885,30 +880,29 @@ app.put('/api/production-companies', verifyToken, isAdmin, async (req: Request, 
  *       404:
  *         description: Production company not found
  */
-app.delete('/api/production-companies/:id', verifyToken, isAdmin,async (req: Request, res: Response) => {
+app.delete('/api/production-companies/:id', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const id = +req.params.id;
 
         const result = await executeQuery(
             `
-                DELETE FROM PRODUCTION_COMPANY
+                DELETE
+                FROM PRODUCTION_COMPANY
                 WHERE ID_COMPANY = :id
             `,
-            { id }
+            {id}
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Production company not found with ID: ${id}` });
+            res.status(404).json({error: `Production company not found with ID: ${id}`});
         } else {
-            res.status(200).json({ message: 'Production company deleted successfully' });
+            res.status(200).json({message: 'Production company deleted successfully'});
         }
     } catch (err) {
         console.error('Erreur lors de la suppression de la société de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -941,7 +935,7 @@ app.get('/api/production-countries', async (req: Request, res: Response) => {
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des pays de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -976,16 +970,16 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
             SELECT ID_COUNTRY, NAME_COUNTRY
             FROM PRODUCTION_COUNTRY
             WHERE ID_COUNTRY = :id
-        `, { id });
+        `, {id});
 
         if (result.rows.length > 0) {
             res.status(200).json(result.rows[0]);
         } else {
-            res.status(404).json({ error: `Country not found with ID: ${id}` });
+            res.status(404).json({error: `Country not found with ID: ${id}`});
         }
     } catch (err) {
         console.error('Erreur lors de la récupération du pays de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -1013,12 +1007,12 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
  *       404:
  *         description: Production country not found
  */
-app.put('/api/production-countries', verifyToken,isAdmin, async (req: Request, res: Response) => {
+app.put('/api/production-countries', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedCountry: ProductionCountry = req.body;
 
         if (!updatedCountry.id_country) {
-            res.status(400).json({ error: 'ID is required in the body to update a production country.' });
+            res.status(400).json({error: 'ID is required in the body to update a production country.'});
             return;
         }
 
@@ -1035,13 +1029,13 @@ app.put('/api/production-countries', verifyToken,isAdmin, async (req: Request, r
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Production country not found with ID: ${updatedCountry.id_country}` });
+            res.status(404).json({error: `Production country not found with ID: ${updatedCountry.id_country}`});
         } else {
-            res.status(200).json({ message: 'Production country updated successfully', updatedCountry });
+            res.status(200).json({message: 'Production country updated successfully', updatedCountry});
         }
     } catch (err) {
         console.error('Erreur lors de la mise à jour du pays de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -1073,24 +1067,23 @@ app.delete('/api/production-countries/:id', verifyToken, isAdmin, async (req: Re
 
         const result = await executeQuery(
             `
-                DELETE FROM PRODUCTION_COUNTRY
+                DELETE
+                FROM PRODUCTION_COUNTRY
                 WHERE ID_COUNTRY = :id
             `,
-            { id }
+            {id}
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Country not found with ID: ${id}` });
+            res.status(404).json({error: `Country not found with ID: ${id}`});
         } else {
-            res.status(200).json({ message: 'Country deleted successfully' });
+            res.status(200).json({message: 'Country deleted successfully'});
         }
     } catch (err) {
         console.error('Erreur lors de la suppression du pays de production :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -1157,16 +1150,16 @@ app.get('/api/spoken_languages/:id', async (req: Request, res: Response) => {
             SELECT ID_SPOKEN_LANGUAGES, LANGUAGE
             FROM SPOKEN_LANGUAGES
             WHERE ID_SPOKEN_LANGUAGES = :id
-        `, { id });
+        `, {id});
 
         if (result.rows.length > 0) {
             res.status(200).json(result.rows[0]);
         } else {
-            res.status(404).json({ error: `Spoken language not found with ID: ${id}` });
+            res.status(404).json({error: `Spoken language not found with ID: ${id}`});
         }
     } catch (err) {
         console.error('Erreur lors de la récupération de la langue parlée :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -1199,7 +1192,7 @@ app.put('/api/spoken_languages', verifyToken, isAdmin, async (req: Request, res:
         const updatedLanguage: SpokenLanguage = req.body;
 
         if (!updatedLanguage.id_spoken_languages) {
-            res.status(400).json({ error: 'ID is required in the body to update a spoken language.' });
+            res.status(400).json({error: 'ID is required in the body to update a spoken language.'});
             return;
         }
 
@@ -1216,13 +1209,13 @@ app.put('/api/spoken_languages', verifyToken, isAdmin, async (req: Request, res:
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Spoken language not found with ID: ${updatedLanguage.id_spoken_languages}` });
+            res.status(404).json({error: `Spoken language not found with ID: ${updatedLanguage.id_spoken_languages}`});
         } else {
-            res.status(200).json({ message: 'Spoken language updated successfully', updatedLanguage });
+            res.status(200).json({message: 'Spoken language updated successfully', updatedLanguage});
         }
     } catch (err) {
         console.error('Erreur lors de la mise à jour de la langue parlée :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -1254,24 +1247,23 @@ app.delete('/api/spoken_languages/:id', verifyToken, isAdmin, async (req: Reques
 
         const result = await executeQuery(
             `
-                DELETE FROM SPOKEN_LANGUAGES
+                DELETE
+                FROM SPOKEN_LANGUAGES
                 WHERE ID_SPOKEN_LANGUAGES = :id
             `,
-            { id }
+            {id}
         );
 
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: `Spoken language not found with ID: ${id}` });
+            res.status(404).json({error: `Spoken language not found with ID: ${id}`});
         } else {
-            res.status(200).json({ message: 'Spoken language deleted successfully' });
+            res.status(200).json({message: 'Spoken language deleted successfully'});
         }
     } catch (err) {
         console.error('Erreur lors de la suppression de la langue parlée :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -1301,27 +1293,34 @@ interface FilmGenre {
 app.get('/api/film-genres', async (req: Request, res: Response) => {
     try {
         const result = await executeQuery(`
-            SELECT
-                f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,
-                JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre,'id_genre' VALUE g.id_genre))
-                    AS genre
+            SELECT f.id_film,
+                   f.title,
+                   f.original_language,
+                   f.overview,
+                   f.popularity,
+                   f.release_date,
+                   f.runtime,
+                   f.status,
+                   f.vote_count,
+                   f.vote_average,
+                   f.link_poster,
+                   f.link_trailer,
+                   JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre, 'id_genre' VALUE g.id_genre))
+                       AS genre
             FROM film f
                      JOIN film_genre fg ON f.id_film = fg.film_id
                      JOIN genre g ON fg.genre_id = g.id_genre
-            GROUP BY
-                f.id_film, f.title, f.original_language, f.overview, f.popularity,
-                f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,
-                f.link_poster, f.link_trailer
+            GROUP BY f.id_film, f.title, f.original_language, f.overview, f.popularity,
+                     f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,
+                     f.link_poster, f.link_trailer
         `);
 
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des genres des films :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -1386,56 +1385,52 @@ app.get('/api/film-genres', async (req: Request, res: Response) => {
  *                           type: number
  */
 app.get('/api/films/genre/:name_genre', async (req: Request, res: Response) => {
-    const { name_genre } = req.params;
+    const {name_genre} = req.params;
 
     try {
         const result = await executeQuery(`
-            SELECT 
-                f.id_film, 
-                f.title, 
-                f.original_language, 
-                f.overview, 
-                f.popularity, 
-                f.release_date, 
-                f.runtime, 
-                f.status, 
-                f.vote_count, 
-                f.vote_average, 
-                f.link_poster, 
-                f.link_trailer,
-                JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'name_genre' VALUE g.name_genre,
-                        'id_genre' VALUE g.id_genre
-                    )
-                ) AS genre
+            SELECT f.id_film,
+                   f.title,
+                   f.original_language,
+                   f.overview,
+                   f.popularity,
+                   f.release_date,
+                   f.runtime,
+                   f.status,
+                   f.vote_count,
+                   f.vote_average,
+                   f.link_poster,
+                   f.link_trailer,
+                   JSON_ARRAYAGG(
+                           JSON_OBJECT(
+                                   'name_genre' VALUE g.name_genre,
+                                   'id_genre' VALUE g.id_genre
+                               )
+                       ) AS genre
             FROM film f
-            JOIN film_genre fg ON f.id_film = fg.film_id
-            JOIN genre g ON fg.genre_id = g.id_genre
+                     JOIN film_genre fg ON f.id_film = fg.film_id
+                     JOIN genre g ON fg.genre_id = g.id_genre
             WHERE g.name_genre = :name_genre
-            GROUP BY 
-                f.id_film, 
-                f.title, 
-                f.original_language, 
-                f.overview, 
-                f.popularity, 
-                f.release_date, 
-                f.runtime, 
-                f.status, 
-                f.vote_count, 
-                f.vote_average, 
-                f.link_poster, 
-                f.link_trailer
-        `, { name_genre });
+            GROUP BY f.id_film,
+                     f.title,
+                     f.original_language,
+                     f.overview,
+                     f.popularity,
+                     f.release_date,
+                     f.runtime,
+                     f.status,
+                     f.vote_count,
+                     f.vote_average,
+                     f.link_poster,
+                     f.link_trailer
+        `, {name_genre});
 
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des films par genre :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
-
-
 
 
 // ---------------------------------------
@@ -1500,52 +1495,50 @@ app.get('/api/films/genre/:name_genre', async (req: Request, res: Response) => {
  *                           type: number
  */
 app.get('/api/films/title/:title', async (req: Request, res: Response) => {
-    const { title } = req.params;
+    const {title} = req.params;
 
     try {
         const result = await executeQuery(`
-            SELECT 
-                f.id_film, 
-                f.title, 
-                f.original_language, 
-                f.overview, 
-                f.popularity, 
-                f.release_date, 
-                f.runtime, 
-                f.status, 
-                f.vote_count, 
-                f.vote_average, 
-                f.link_poster, 
-                f.link_trailer,
-                JSON_ARRAYAGG(
-                    JSON_OBJECT(
-                        'name_genre' VALUE g.name_genre,
-                        'id_genre' VALUE g.id_genre
-                    )
-                ) AS genre
+            SELECT f.id_film,
+                   f.title,
+                   f.original_language,
+                   f.overview,
+                   f.popularity,
+                   f.release_date,
+                   f.runtime,
+                   f.status,
+                   f.vote_count,
+                   f.vote_average,
+                   f.link_poster,
+                   f.link_trailer,
+                   JSON_ARRAYAGG(
+                           JSON_OBJECT(
+                                   'name_genre' VALUE g.name_genre,
+                                   'id_genre' VALUE g.id_genre
+                               )
+                       ) AS genre
             FROM film f
-            JOIN film_genre fg ON f.id_film = fg.film_id
-            JOIN genre g ON fg.genre_id = g.id_genre
+                     JOIN film_genre fg ON f.id_film = fg.film_id
+                     JOIN genre g ON fg.genre_id = g.id_genre
             WHERE LOWER(f.title) LIKE LOWER(:title || '%')
-            GROUP BY 
-                f.id_film, 
-                f.title, 
-                f.original_language, 
-                f.overview, 
-                f.popularity, 
-                f.release_date, 
-                f.runtime, 
-                f.status, 
-                f.vote_count, 
-                f.vote_average, 
-                f.link_poster, 
-                f.link_trailer
-        `, { title });
+            GROUP BY f.id_film,
+                     f.title,
+                     f.original_language,
+                     f.overview,
+                     f.popularity,
+                     f.release_date,
+                     f.runtime,
+                     f.status,
+                     f.vote_count,
+                     f.vote_average,
+                     f.link_poster,
+                     f.link_trailer
+        `, {title});
 
         res.status(200).json(result.rows);
     } catch (err) {
         console.error('Erreur lors de la récupération des films par titre :', err);
-        res.status(500).json({ error: 'Erreur interne du serveur.' });
+        res.status(500).json({error: 'Erreur interne du serveur.'});
     }
 });
 
@@ -1581,16 +1574,16 @@ interface User {
 app.post(
     '/api/users/register',
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const { email, password, first_name, last_name, age, is_admin } = req.body;
+        const {email, password, first_name, last_name, age, is_admin} = req.body;
         const numericIsAdmin = is_admin ? 1 : 0;
         await executeQuery(
             `
-      INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)
-      VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)
-      `,
-            { email, password, first_name, last_name, age, is_admin: numericIsAdmin }
+                INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)
+                VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)
+            `,
+            {email, password, first_name, last_name, age, is_admin: numericIsAdmin}
         );
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({message: 'User registered successfully'});
         return;
     })
 );
@@ -1616,17 +1609,18 @@ app.post(
 app.post(
     '/api/users/login',
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const { email, password } = req.body;
+        const {email, password} = req.body;
         const result = await executeQuery(
             `
-      SELECT email, password, first_name, last_name, age, is_admin
-      FROM user_roles
-      WHERE email = :email AND password = :password
-      `,
-            { email, password }
+                SELECT email, password, first_name, last_name, age, is_admin
+                FROM user_roles
+                WHERE email = :email
+                  AND password = :password
+            `,
+            {email, password}
         );
         if (!result.rows || result.rows.length === 0) {
-            res.status(401).json({ error: 'Invalid credentials' });
+            res.status(401).json({error: 'Invalid credentials'});
             return;
         }
 
@@ -1642,12 +1636,12 @@ app.post(
 
         // Generate JWT
         const token = jwt.sign(
-            { email: user.email, is_admin: user.is_admin },
+            {email: user.email, is_admin: user.is_admin},
             JWT_SECRET,
-            { expiresIn: '1h' }
+            {expiresIn: '1h'}
         );
 
-        res.json({ message: 'Login successful', token });
+        res.json({message: 'Login successful', token});
         return;
     })
 );
@@ -1681,9 +1675,9 @@ app.get(
     isAdmin,
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const result = await executeQuery(`
-      SELECT email, password, first_name, last_name, age, is_admin
-      FROM user_roles
-    `);
+            SELECT email, password, first_name, last_name, age, is_admin
+            FROM user_roles
+        `);
         res.status(200).json(result.rows);
         return;
     })
@@ -1722,17 +1716,19 @@ app.put(
     verifyToken,
     isAdmin,
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const { email } = req.params;
-        const { is_admin } = req.body;
+        const {email} = req.params;
+        const {is_admin} = req.body;
         const numericIsAdmin = is_admin ? 1 : 0;
         const result = await executeQuery(
-            `UPDATE user_roles SET is_admin = :is_admin WHERE email = :email`,
-            { email, is_admin: numericIsAdmin }
+            `UPDATE user_roles
+             SET is_admin = :is_admin
+             WHERE email = :email`,
+            {email, is_admin: numericIsAdmin}
         );
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({error: 'User not found'});
         } else {
-            res.status(200).json({ message: 'User role updated successfully' });
+            res.status(200).json({message: 'User role updated successfully'});
         }
         return;
     })
@@ -1761,15 +1757,17 @@ app.delete(
     verifyToken,
     isAdmin,
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const { email } = req.params;
+        const {email} = req.params;
         const result = await executeQuery(
-            `DELETE FROM user_roles WHERE email = :email`,
-            { email }
+            `DELETE
+             FROM user_roles
+             WHERE email = :email`,
+            {email}
         );
         if (result.rowsAffected === 0) {
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({error: 'User not found'});
         } else {
-            res.status(200).json({ message: 'User deleted successfully' });
+            res.status(200).json({message: 'User deleted successfully'});
         }
         return;
     })
@@ -1798,33 +1796,118 @@ app.delete(
 app.get(
     '/api/user_roles/:email',
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        const { email } = req.params;
+        const {email} = req.params;
 
         if (!email) {
-            res.status(400).json({ error: 'Email requis.' });
+            res.status(400).json({error: 'Email requis.'});
             return;
         }
 
         const result = await executeQuery(
             `
-            SELECT email FROM user_roles WHERE email = :email
+                SELECT email
+                FROM user_roles
+                WHERE email = :email
             `,
-            { email }
+            {email}
         );
 
         if (result.rows.length > 0) {
-            res.status(409).json({ error: 'Utilisateur déjà existant.' });
+            res.status(409).json({error: 'Utilisateur déjà existant.'});
         } else {
-            res.status(200).json({ message: 'Email disponible.' });
+            res.status(200).json({message: 'Email disponible.'});
         }
     })
 );
 
+/**
+ * @openapi
+ * /api/films/{id}/rate:
+ *   post:
+ *     description: Rate a film (1-10), updates vote count and average.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the film to rate
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             rating: 8
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 10
+ *     responses:
+ *       200:
+ *         description: Film rating updated successfully.
+ *       400:
+ *         description: Bad request (e.g., invalid rating or missing fields).
+ *       404:
+ *         description: Film not found.
+ *       500:
+ *         description: Internal server error.
+ */
+app.post(
+    '/api/films/:id/rate',
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const id = +req.params.id;
+        const {rating} = req.body;
 
+        if (!rating || rating < 1 || rating > 10) {
+            res.status(400).json({error: 'Invalid rating. Must be between 1 and 10.'});
+            return;
+        }
 
+        const film = await executeQuery(
+            `SELECT vote_count, vote_average
+             FROM FILM
+             WHERE ID_FILM = :id`,
+            {id}
+        );
 
+        if (film.rows.length === 0) {
+            res.status(404).json({error: `Film not found with ID: ${id}`});
+            return;
+        }
 
+        const currentVoteCount = film.rows[0][0];
+        const currentVoteAverage = film.rows[0][1];
 
+        const newVoteCount = currentVoteCount + 1;
+        const newVoteAverage =
+            (currentVoteAverage * currentVoteCount + rating) / newVoteCount;
+
+        await executeQuery(
+            `
+                UPDATE FILM
+                SET VOTE_COUNT   = :vote_count,
+                    VOTE_AVERAGE = :vote_average
+                WHERE ID_FILM = :id
+            `,
+            {
+                vote_count: newVoteCount,
+                vote_average: parseFloat(newVoteAverage.toFixed(1)),
+                id,
+            }
+        );
+
+        res.status(200).json({
+            message: 'Film rated successfully.',
+            updated: {
+                vote_count: newVoteCount,
+                vote_average: newVoteAverage.toFixed(1),
+            },
+        });
+    })
+);
 
 
 // Start the application

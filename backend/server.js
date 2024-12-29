@@ -297,7 +297,7 @@ app.post('/api/films', verifyToken, isAdmin, function (req, res) { return __awai
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 newFilm = req.body;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO FILM\n                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)\n                VALUES\n                    (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'), :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer)\n                    RETURNING ID_FILM INTO :id_film\n            ", {
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO FILM\n                (TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT,\n                 VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER)\n                VALUES (:title, :original_language, :overview, :popularity, TO_DATE(:release_date, 'YYYY-MM-DD'),\n                        :runtime, :status, :vote_count, :vote_average, :link_poster, :link_trailer) RETURNING ID_FILM\n                INTO :id_film\n            ", {
                         title: newFilm.title,
                         original_language: newFilm.original_language || null,
                         overview: newFilm.overview || null,
@@ -359,7 +359,7 @@ app.put('/api/films', verifyToken, isAdmin, function (req, res) { return __await
                     res.status(400).json({ error: 'ID is required in the body to update a film.' });
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE FILM\n                SET TITLE = :title,\n                    ORIGINAL_LANGUAGE = :original_language,\n                    OVERVIEW = :overview,\n                    POPULARITY = :popularity,\n                    RELEASE_DATE = TO_DATE(:release_date, 'YYYY-MM-DD'),\n                    RUNTIME = :runtime,\n                    STATUS = :status,\n                    VOTE_COUNT = :vote_count,\n                    VOTE_AVERAGE = :vote_average,\n                    LINK_POSTER = :link_poster,\n                    LINK_TRAILER = :link_trailer\n                WHERE ID_FILM = :id_film\n            ", {
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE FILM\n                SET TITLE             = :title,\n                    ORIGINAL_LANGUAGE = :original_language,\n                    OVERVIEW          = :overview,\n                    POPULARITY        = :popularity,\n                    RELEASE_DATE      = TO_DATE(:release_date, 'YYYY-MM-DD'),\n                    RUNTIME           = :runtime,\n                    STATUS            = :status,\n                    VOTE_COUNT        = :vote_count,\n                    VOTE_AVERAGE      = :vote_average,\n                    LINK_POSTER       = :link_poster,\n                    LINK_TRAILER      = :link_trailer\n                WHERE ID_FILM = :id_film\n            ", {
                         id_film: updatedFilm.id_film,
                         title: updatedFilm.title,
                         original_language: updatedFilm.original_language || null,
@@ -420,7 +420,7 @@ app.delete('/api/films/:id', verifyToken, isAdmin, function (req, res) { return 
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 id = +req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM FILM\n                WHERE ID_FILM = :id\n            ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE\n                FROM FILM\n                WHERE ID_FILM = :id\n            ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -548,7 +548,7 @@ app.post('/api/genres', verifyToken, isAdmin, function (req, res) { return __awa
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 newGenre = req.body;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO GENRE\n                (NAME_GENRE)\n                VALUES\n                    (:name_genre)\n                RETURNING ID_GENRE INTO :id_genre\n            ", {
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO GENRE\n                    (NAME_GENRE)\n                VALUES (:name_genre) RETURNING ID_GENRE\n                INTO :id_genre\n            ", {
                         name_genre: newGenre.name_genre,
                         id_genre: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
                     })];
@@ -651,7 +651,7 @@ app.delete('/api/genres/:id', verifyToken, isAdmin, function (req, res) { return
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 id = +req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM GENRE\n                WHERE ID_GENRE = :id\n            ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE\n                FROM GENRE\n                WHERE ID_GENRE = :id\n            ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -779,7 +779,7 @@ app.post('/api/production-companies', verifyToken, isAdmin, function (req, res) 
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 newCompany = req.body;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO PRODUCTION_COMPANY\n                (NAME_COMPANY)\n                VALUES\n                    (:name_company)\n                RETURNING ID_COMPANY INTO :id_company\n            ", {
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO PRODUCTION_COMPANY\n                    (NAME_COMPANY)\n                VALUES (:name_company) RETURNING ID_COMPANY\n                INTO :id_company\n            ", {
                         name_company: newCompany.name_company,
                         id_company: { dir: require('oracledb').BIND_OUT, type: require('oracledb').NUMBER },
                     })];
@@ -880,7 +880,7 @@ app.delete('/api/production-companies/:id', verifyToken, isAdmin, function (req,
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 id = +req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM PRODUCTION_COMPANY\n                WHERE ID_COMPANY = :id\n            ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE\n                FROM PRODUCTION_COMPANY\n                WHERE ID_COMPANY = :id\n            ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -1067,7 +1067,7 @@ app.delete('/api/production-countries/:id', verifyToken, isAdmin, function (req,
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 id = req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM PRODUCTION_COUNTRY\n                WHERE ID_COUNTRY = :id\n            ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE\n                FROM PRODUCTION_COUNTRY\n                WHERE ID_COUNTRY = :id\n            ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -1254,7 +1254,7 @@ app.delete('/api/spoken_languages/:id', verifyToken, isAdmin, function (req, res
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 id = req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE FROM SPOKEN_LANGUAGES\n                WHERE ID_SPOKEN_LANGUAGES = :id\n            ", { id: id })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                DELETE\n                FROM SPOKEN_LANGUAGES\n                WHERE ID_SPOKEN_LANGUAGES = :id\n            ", { id: id })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -1294,7 +1294,7 @@ app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT\n                f.id_film, f.title, f.original_language, f.overview, f.popularity, f.release_date, f.runtime, f.status, f.vote_count, f.vote_average, f.link_poster, f.link_trailer,\n                JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre,'id_genre' VALUE g.id_genre))\n                    AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            GROUP BY\n                f.id_film, f.title, f.original_language, f.overview, f.popularity,\n                f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,\n                f.link_poster, f.link_trailer\n        ")];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT f.id_film,\n                   f.title,\n                   f.original_language,\n                   f.overview,\n                   f.popularity,\n                   f.release_date,\n                   f.runtime,\n                   f.status,\n                   f.vote_count,\n                   f.vote_average,\n                   f.link_poster,\n                   f.link_trailer,\n                   JSON_ARRAYAGG(JSON_OBJECT('name_genre' VALUE g.name_genre, 'id_genre' VALUE g.id_genre))\n                       AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            GROUP BY f.id_film, f.title, f.original_language, f.overview, f.popularity,\n                     f.release_date, f.runtime, f.status, f.vote_count, f.vote_average,\n                     f.link_poster, f.link_trailer\n        ")];
             case 1:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -1377,7 +1377,7 @@ app.get('/api/films/genre/:name_genre', function (req, res) { return __awaiter(v
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE g.name_genre = :name_genre\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { name_genre: name_genre })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT f.id_film,\n                   f.title,\n                   f.original_language,\n                   f.overview,\n                   f.popularity,\n                   f.release_date,\n                   f.runtime,\n                   f.status,\n                   f.vote_count,\n                   f.vote_average,\n                   f.link_poster,\n                   f.link_trailer,\n                   JSON_ARRAYAGG(\n                           JSON_OBJECT(\n                                   'name_genre' VALUE g.name_genre,\n                                   'id_genre' VALUE g.id_genre\n                               )\n                       ) AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE g.name_genre = :name_genre\n            GROUP BY f.id_film,\n                     f.title,\n                     f.original_language,\n                     f.overview,\n                     f.popularity,\n                     f.release_date,\n                     f.runtime,\n                     f.status,\n                     f.vote_count,\n                     f.vote_average,\n                     f.link_poster,\n                     f.link_trailer\n        ", { name_genre: name_genre })];
             case 2:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -1460,7 +1460,7 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE LOWER(f.title) LIKE LOWER(:title || '%')\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT f.id_film,\n                   f.title,\n                   f.original_language,\n                   f.overview,\n                   f.popularity,\n                   f.release_date,\n                   f.runtime,\n                   f.status,\n                   f.vote_count,\n                   f.vote_average,\n                   f.link_poster,\n                   f.link_trailer,\n                   JSON_ARRAYAGG(\n                           JSON_OBJECT(\n                                   'name_genre' VALUE g.name_genre,\n                                   'id_genre' VALUE g.id_genre\n                               )\n                       ) AS genre\n            FROM film f\n                     JOIN film_genre fg ON f.id_film = fg.film_id\n                     JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE LOWER(f.title) LIKE LOWER(:title || '%')\n            GROUP BY f.id_film,\n                     f.title,\n                     f.original_language,\n                     f.overview,\n                     f.popularity,\n                     f.release_date,\n                     f.runtime,\n                     f.status,\n                     f.vote_count,\n                     f.vote_average,\n                     f.link_poster,\n                     f.link_trailer\n        ", { title: title })];
             case 2:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -1497,7 +1497,7 @@ app.post('/api/users/register', asyncHandler(function (req, res) { return __awai
             case 0:
                 _a = req.body, email = _a.email, password = _a.password, first_name = _a.first_name, last_name = _a.last_name, age = _a.age, is_admin = _a.is_admin;
                 numericIsAdmin = is_admin ? 1 : 0;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n      INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)\n      VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)\n      ", { email: email, password: password, first_name: first_name, last_name: last_name, age: age, is_admin: numericIsAdmin })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)\n                VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)\n            ", { email: email, password: password, first_name: first_name, last_name: last_name, age: age, is_admin: numericIsAdmin })];
             case 1:
                 _b.sent();
                 res.status(201).json({ message: 'User registered successfully' });
@@ -1529,7 +1529,7 @@ app.post('/api/users/login', asyncHandler(function (req, res) { return __awaiter
         switch (_b.label) {
             case 0:
                 _a = req.body, email = _a.email, password = _a.password;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n      SELECT email, password, first_name, last_name, age, is_admin\n      FROM user_roles\n      WHERE email = :email AND password = :password\n      ", { email: email, password: password })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                SELECT email, password, first_name, last_name, age, is_admin\n                FROM user_roles\n                WHERE email = :email\n                  AND password = :password\n            ", { email: email, password: password })];
             case 1:
                 result = _b.sent();
                 if (!result.rows || result.rows.length === 0) {
@@ -1576,7 +1576,7 @@ app.get('/api/users', verifyToken, isAdmin, asyncHandler(function (req, res) { r
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, database_1.executeQuery)("\n      SELECT email, password, first_name, last_name, age, is_admin\n      FROM user_roles\n    ")];
+            case 0: return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT email, password, first_name, last_name, age, is_admin\n            FROM user_roles\n        ")];
             case 1:
                 result = _a.sent();
                 res.status(200).json(result.rows);
@@ -1620,7 +1620,7 @@ app.put('/api/users/:email/role', verifyToken, isAdmin, asyncHandler(function (r
                 email = req.params.email;
                 is_admin = req.body.is_admin;
                 numericIsAdmin = is_admin ? 1 : 0;
-                return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE user_roles SET is_admin = :is_admin WHERE email = :email", { email: email, is_admin: numericIsAdmin })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE user_roles\n             SET is_admin = :is_admin\n             WHERE email = :email", { email: email, is_admin: numericIsAdmin })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -1657,7 +1657,7 @@ app.delete('/api/users/:email', verifyToken, isAdmin, asyncHandler(function (req
         switch (_a.label) {
             case 0:
                 email = req.params.email;
-                return [4 /*yield*/, (0, database_1.executeQuery)("DELETE FROM user_roles WHERE email = :email", { email: email })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("DELETE\n             FROM user_roles\n             WHERE email = :email", { email: email })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
@@ -1700,7 +1700,7 @@ app.get('/api/user_roles/:email', asyncHandler(function (req, res) { return __aw
                     res.status(400).json({ error: 'Email requis.' });
                     return [2 /*return*/];
                 }
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT email FROM user_roles WHERE email = :email\n            ", { email: email })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                SELECT email\n                FROM user_roles\n                WHERE email = :email\n            ", { email: email })];
             case 1:
                 result = _a.sent();
                 if (result.rows.length > 0) {
@@ -1709,6 +1709,81 @@ app.get('/api/user_roles/:email', asyncHandler(function (req, res) { return __aw
                 else {
                     res.status(200).json({ message: 'Email disponible.' });
                 }
+                return [2 /*return*/];
+        }
+    });
+}); }));
+/**
+ * @openapi
+ * /api/films/{id}/rate:
+ *   post:
+ *     description: Rate a film (1-10), updates vote count and average.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the film to rate
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             rating: 8
+ *           schema:
+ *             type: object
+ *             properties:
+ *               rating:
+ *                 type: number
+ *                 minimum: 1
+ *                 maximum: 10
+ *     responses:
+ *       200:
+ *         description: Film rating updated successfully.
+ *       400:
+ *         description: Bad request (e.g., invalid rating or missing fields).
+ *       404:
+ *         description: Film not found.
+ *       500:
+ *         description: Internal server error.
+ */
+app.post('/api/films/:id/rate', asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, rating, film, currentVoteCount, currentVoteAverage, newVoteCount, newVoteAverage;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                id = +req.params.id;
+                rating = req.body.rating;
+                if (!rating || rating < 1 || rating > 10) {
+                    res.status(400).json({ error: 'Invalid rating. Must be between 1 and 10.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("SELECT vote_count, vote_average\n             FROM FILM\n             WHERE ID_FILM = :id", { id: id })];
+            case 1:
+                film = _a.sent();
+                if (film.rows.length === 0) {
+                    res.status(404).json({ error: "Film not found with ID: ".concat(id) });
+                    return [2 /*return*/];
+                }
+                currentVoteCount = film.rows[0][0];
+                currentVoteAverage = film.rows[0][1];
+                newVoteCount = currentVoteCount + 1;
+                newVoteAverage = (currentVoteAverage * currentVoteCount + rating) / newVoteCount;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                UPDATE FILM\n                SET VOTE_COUNT   = :vote_count,\n                    VOTE_AVERAGE = :vote_average\n                WHERE ID_FILM = :id\n            ", {
+                        vote_count: newVoteCount,
+                        vote_average: parseFloat(newVoteAverage.toFixed(1)),
+                        id: id,
+                    })];
+            case 2:
+                _a.sent();
+                res.status(200).json({
+                    message: 'Film rated successfully.',
+                    updated: {
+                        vote_count: newVoteCount,
+                        vote_average: newVoteAverage.toFixed(1),
+                    },
+                });
                 return [2 /*return*/];
         }
     });
