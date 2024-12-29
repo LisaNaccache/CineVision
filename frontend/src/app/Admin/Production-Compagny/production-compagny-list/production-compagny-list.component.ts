@@ -24,7 +24,6 @@ export class ProductionCompagnyListComponent {
   isLoading = true;
   hasError = false;
 
-  // Pagination variables
   currentPage = 1;
   itemsPerPage = 10;
 

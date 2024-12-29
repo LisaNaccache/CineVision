@@ -23,7 +23,7 @@ export class FilmAddComponent {
   film: any = {
     title: '',
     language: '',
-    description: '',
+    overview: '',
     popularity: null,
     releaseDate: '',
     runtime: null,
@@ -45,15 +45,15 @@ export class FilmAddComponent {
     const formatDate = (date: string): string => {
       const d = new Date(date);
       const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois format 2 chiffres
-      const day = String(d.getDate()).padStart(2, '0'); // Jour format 2 chiffres
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     };
 
     const newFilm = {
       title: this.film.title,
       original_language: this.film.language || null,
-      overview: this.film.description || null,
+      overview: this.film.overview || null,
       popularity: this.film.popularity || null,
       release_date: formatDate(this.film.releaseDate), // Conversion au format attendu
       runtime: this.film.runtime || null,
@@ -68,7 +68,7 @@ export class FilmAddComponent {
       (response) => {
         alert('Film added successfully!');
         console.log('New film:', response);
-        this.router.navigate(['/admin/film']); // Redirige vers la liste des films
+        this.router.navigate(['/admin/film']);
         this.isLoading = false;
       },
       (error) => {

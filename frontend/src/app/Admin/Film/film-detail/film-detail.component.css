@@ -1,35 +1,52 @@
-iframe {
-  border-radius: 8px;
-
-}
-
 .banner {
   position: relative;
-  height: 600px; /* Hauteur de la bannière */
-  overflow: hidden;
 }
 
 .banner img {
-  width: 100%; /* S'étend sur toute la largeur */
-  height: 100%; /* Remplit la hauteur */
-  object-fit: cover; /* Recadre l'image sans distorsion */
-  object-position: center; /* Centrage de l'image */
+  max-height: 500px;
+  object-fit: cover;
 }
 
-h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-top: 1rem;
+.rating label {
+  cursor: pointer;
 }
 
-.text-muted {
+.rating .form-check-input {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.rating span {
+  font-size: 1rem;
+  margin-left: 0.3rem;
+}
+
+.rating i {
+  transition: color 0.2s ease-in-out;
+}
+
+.rating i:hover,
+.rating i:hover ~ i {
+  color: gold !important;
+}
+
+.rating i {
+  cursor: pointer;
+}
+
+.bg-light {
+  border: 1px solid #ddd;
+}
+
+.votes-container {
   font-size: 0.9rem;
+  color: #6c757d;
 }
 
-.ratio {
-  border-radius: 8px;
-  overflow: hidden;
+.votes-text {
+  font-weight: bold;
 }
 
-
-
+.votes-count {
+  font-size: 0.8rem;
+}

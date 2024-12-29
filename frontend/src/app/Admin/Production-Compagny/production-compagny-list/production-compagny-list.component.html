@@ -4,19 +4,16 @@
     <a class="btn btn-primary" [routerLink]="['/admin/production-compagny/add']">Add Production Company</a>
   </div>
 
-  <!-- Loading Spinner -->
   <div *ngIf="isLoading" class="text-center mt-5">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
-  <!-- Error Message -->
   <div *ngIf="hasError && !isLoading" class="alert alert-danger mt-5">
     An error occurred while loading production companies. Please try again later.
   </div>
 
-  <!-- Production Company Table -->
   <ng-container *ngIf="paginatedCompanies.length > 0 && !isLoading">
     <table class="table table-bordered table-striped table-sm mt-3">
       <thead class="table-info">
@@ -37,7 +34,6 @@
       </tbody>
     </table>
 
-    <!-- Pagination Controls -->
     <nav aria-label="Page navigation" class="mt-4">
       <ul class="pagination justify-content-center">
         <!-- Previous Button -->
@@ -45,32 +41,26 @@
           <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
         </li>
 
-        <!-- First 3 Pages -->
         <li class="page-item" *ngFor="let page of firstPages" [class.active]="currentPage === page">
           <button class="page-link" (click)="changePage(page)">{{ page }}</button>
         </li>
 
-        <!-- Dots if necessary -->
         <li class="page-item" *ngIf="showLeftDots">
           <button class="page-link" disabled>...</button>
         </li>
 
-        <!-- Middle Pages -->
         <li class="page-item" *ngFor="let page of middlePages" [class.active]="currentPage === page">
           <button class="page-link" (click)="changePage(page)">{{ page }}</button>
         </li>
 
-        <!-- Dots if necessary -->
         <li class="page-item" *ngIf="showRightDots">
           <button class="page-link" disabled>...</button>
         </li>
 
-        <!-- Last 3 Pages -->
         <li class="page-item" *ngFor="let page of lastPages" [class.active]="currentPage === page">
           <button class="page-link" (click)="changePage(page)">{{ page }}</button>
         </li>
 
-        <!-- Next Button -->
         <li class="page-item" [class.disabled]="currentPage === totalPages">
           <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
         </li>
@@ -78,7 +68,6 @@
     </nav>
   </ng-container>
 
-  <!-- No Companies -->
   <div *ngIf="!isLoading && companies.length === 0 && !hasError" class="mt-5 text-center">
     <p>No production companies found.</p>
   </div>

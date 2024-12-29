@@ -20,7 +20,7 @@ import {RouterLink} from '@angular/router';
 })
 export class FilmListComponent implements OnInit {
   films: any[] = [];
-  paginatedFilms: any[] = []; // Films affichés dans la page courante
+  paginatedFilms: any[] = [];
   isLoading = true;
   hasError = false;
 

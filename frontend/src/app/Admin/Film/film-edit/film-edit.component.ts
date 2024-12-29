@@ -34,24 +34,23 @@ export class FilmEditComponent implements OnInit {
     }
   }
 
-  // Récupérer les données d'un film
   loadFilm(id: number): void {
     this.filmService.getFilmById(id).subscribe(
       (data) => {
         console.log(data);
         this.film = {
-          id: data[0], // ID_FILM
-          title: data[1], // TITLE
-          language: data[2], // ORIGINAL_LANGUAGE
-          overview: data[3], // OVERVIEW
-          popularity: data[4], // POPULARITY
-          releaseDate: data[5], // RELEASE_DATE
-          runtime: data[6], // RUNTIME
-          status: data[7], // STATUS
-          voteCount: data[8], // VOTE_COUNT
-          voteAverage: data[9], // VOTE_AVERAGE
-          posterUrl: data[10], // LINK_POSTER
-          trailerUrl: data[11], // LINK_TRAILER
+          id: data[0],
+          title: data[1],
+          language: data[2],
+          overview: data[3],
+          popularity: data[4],
+          releaseDate: data[5],
+          runtime: data[6],
+          status: data[7],
+          voteCount: data[8],
+          voteAverage: data[9],
+          posterUrl: data[10],
+          trailerUrl: data[11],
         };
         this.isLoading = false;
       },
@@ -67,8 +66,8 @@ export class FilmEditComponent implements OnInit {
     const formatDate = (date: Date | string): string => {
       const d = new Date(date);
       const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0'); // Mois au format 2 chiffres
-      const day = String(d.getDate()).padStart(2, '0'); // Jour au format 2 chiffres
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     };
 
@@ -76,9 +75,9 @@ export class FilmEditComponent implements OnInit {
       id_film: this.film.id,
       title: this.film.title,
       original_language: this.film.language || null,
-      overview: this.film.description || null,
+      overview: this.film.overview || null,
       popularity: this.film.popularity || null,
-      release_date: formatDate(this.film.releaseDate), // Conversion ici
+      release_date: formatDate(this.film.releaseDate),
       runtime: this.film.runtime || null,
       status: this.film.status || null,
       vote_count: this.film.voteCount || null,
@@ -113,7 +112,7 @@ export class FilmEditComponent implements OnInit {
         (response) => {
           alert('Film deleted successfully!');
           console.log('Deleted film:', response);
-          this.router.navigate(['/admin/film']); // Redirigez vers la liste des films
+          this.router.navigate(['/admin/film']);
         },
         (error) => {
           console.error('Error deleting film:', error);

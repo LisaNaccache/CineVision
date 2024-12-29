@@ -25,7 +25,6 @@ export class ProductionCountryListComponent {
   isLoading = true;
   hasError = false;
 
-// Pagination variables
   currentPage = 1;
   itemsPerPage = 10;
 
@@ -59,7 +58,6 @@ export class ProductionCountryListComponent {
     this.paginatedCountries = this.countries.slice(startIndex, endIndex);
   }
 
-// Changer de page
   changePage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;

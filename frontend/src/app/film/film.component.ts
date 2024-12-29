@@ -203,10 +203,10 @@ export class FilmComponent implements AfterViewInit {
 
   formatVoteCount(voteCount: number): string {
     if (!voteCount || voteCount <= 0) {
-      return '0'; // Par défaut, affiche 0 si aucun vote
+      return '0';
     }
 
-    return Math.round(voteCount).toString(); // Arrondit au nombre entier et retourne comme chaîne
+    return Math.round(voteCount).toString();
   }
 
   getPopularityCategory(popularity: number): string {
@@ -216,7 +216,7 @@ export class FilmComponent implements AfterViewInit {
   }
 
   formatPopularity(popularity: number): string {
-    return popularity.toFixed(1); // Affiche une seule décimale
+    return popularity.toFixed(1);
   }
 
 

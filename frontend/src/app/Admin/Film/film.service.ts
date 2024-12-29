@@ -27,17 +27,17 @@ export class FilmService {
 
   updateFilm(film: any): Observable<any> {
     const headers = this.authService.getAuthHeaders();
-    return this.http.put(`${this.apiUrl}/films`, film, { headers });
+    return this.http.put(`${this.apiUrl}/films`, film, {headers});
   }
 
   deleteFilm(id: number): Observable<any> {
     const headers = this.authService.getAuthHeaders();
-    return this.http.delete(`${this.apiUrl}/films/${id}`, { headers });
+    return this.http.delete(`${this.apiUrl}/films/${id}`, {headers});
   }
 
   addFilm(newFilm: any): Observable<any> {
     const headers = this.authService.getAuthHeaders();
-    return this.http.post(`${this.apiUrl}/films`, newFilm, { headers });
+    return this.http.post(`${this.apiUrl}/films`, newFilm, {headers});
   }
 
   getFilmsByGenre(genreName: string): Observable<any> {
@@ -46,5 +46,10 @@ export class FilmService {
 
   getFilmsByTitle(title: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/films/title/${title}`);
+  }
+
+  rateFilm(id: number, rating: any): Observable<any> {
+    const headers = this.authService.getAuthHeaders();
+    return this.http.post(`${this.apiUrl}/films/${id}/rate`, {rating}, {headers});
   }
 }
