@@ -1,58 +1,93 @@
 # App Frontend
 
-This project is the frontend part of a web application designed to manage and display information about movies. The project was built using Angular and follows strict TypeScript conventions. It includes features for user registration, login, and managing movie data.
+This project is the frontend part of a web application designed to manage and display information about movies. The project was built using Angular and TypeScript, leveraging responsive design principles with Bootstrap.
 
 ## Project Structure
 
 - **src/app**: Main directory containing the application modules and components.
   - **Admin**: Components for administrative functionalities.
-  - **Cinema, Film, Genre**: Modules and components to manage cinema, films, and genres.
-  - **SessionFilm**: Manages sessions and related data.
-  - **Review**: Components for handling user reviews.
-  - **Models**: TypeScript models defining the structure of data objects.
-  - **guards**: Contains route guards (`auth.guard.ts`) for protecting specific routes.
-  - **connection**: Handles connection-related functionalities.
-  - **login, register, inscription**: Modules for user authentication and registration.
+  - **Film**: Modules and components to manage movies, genres, production countries, and production companies.
+  - **Login and Register and Guards**: Modules for user authentication and registration.
 
 ## Features
 
-1. **User Registration and Login**:
-  - Components:
-    - `register.component.ts`: Handles user registration.
-    - `login.component.ts`: Manages user login.
-  - Backend integration via REST APIs.
+### 1. **User Roles**
+The application supports two types of user roles:
 
-2. **Movie Management**:
-  - Create, Read, Update, Delete (CRUD) operations for films, genres, and production companies.
+#### **Admin**
+- Can perform CRUD operations on:
+  - **Films**
+  - **Genres**
+  - **Production Countries**
+  - **Production Companies**
+- Has access to all the functionalities available to normal users.
 
-3. **Frontend Libraries**:
-  - **Bootstrap**: For responsive design.
-  - **AG-Grid**: Used for displaying movie data in a grid format.
-  - **HighCharts**: Integrated for data visualization.
+#### **Normal User**
+- Can:
+  - **View the list of movies** with an overview.
+  - **Filter movies** by:
+    - Title (partial or complete match).
+    - Genre (selected from a dropdown).
+  - **View detailed information** about a selected movie, including additional characteristics.
+  - **Rate a movie** (out of 10), which updates the database with their rating.
 
-4. **Localization**:
-  - Multi-language support using Angular’s localization features.
+---
 
+### 2. **User Authentication**
+- **Registration**:
+  - Component: `register.component.ts`
+  - Allows new users to create an account.
+- **Login**:
+  - Component: `login.component.ts`
+  - Enables users to log in to access their respective functionalities based on their role.
+
+---
+
+### 3. **Frontend Libraries**
+- **Bootstrap**: Used extensively for creating a responsive and visually appealing UI.
+- **Angular Forms**: Utilized for handling form validations and input bindings.
+
+---
+
+### 4. **Localization**
+- Supports multi-language functionality using Angular’s localization features.
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-- **Node.js**: Install the latest version of Node.js.
-- **Angular CLI**: Install Angular CLI using the command: `npm install -g @angular/cli`.
+- **Angular CLI**: Ensure Angular CLI is installed by running:
+  ```bash
+  npm install -g @angular/cli
+  ```
+- **Node.js**: Install Node.js
 
-### Installation Steps
+---
 
-## 1. Prepare the Environment
-- Navigate to the frontend directory.
-- Install all necessary dependencies.
+## Project Highlights
 
-## 2. Running the Application
-- Start the development server.
-- Access the application via your browser.
+1. **Role-based Functionality**:
+  - Admins can manage all entities (movies, genres, production countries, and companies).
+  - Normal users can explore and interact with movies.
 
-## 3. Building the Application
-- Build the project for production.
+2. **Dynamic Movie Filtering**:
+  - Users can filter movies by title or genre using intuitive UI elements.
 
-## 4. Testing the Application
-- Run unit tests.
-- Execute end-to-end tests.
+3. **Interactive Movie Rating**:
+  - Users can rate movies on a scale of 1 to 10, updating the backend in real-time.
+
+4. **Responsive Design**:
+  - The application is fully responsive and adapts seamlessly to all screen sizes, providing a consistent user experience.
+
+5. **Scalable Architecture**:
+  - Modular design with separate components for authentication, movie management, and user interaction.
+
+---
+
+### Future Enhancements
+- Integration of user reviews alongside ratings.
+- Advanced movie filtering options (e.g., release year, popularity).
+- Improved localization support with more languages.
+
+---
