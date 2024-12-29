@@ -1,27 +1,30 @@
-# AppCinevisionFront
+# App Backend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.10.
+## Description
+The backend of the Cinevision project provides a REST API for managing movies, genres, production companies, users, and more. Built with **Node.js**, **Express**, and **Sequelize**, it connects to a relational database (we used Oracle in our case). API documentation is generated using Swagger.
 
-## Development server
+## Main Features
+- RESTful API for CRUD operations.
+- Swagger documentation available at `/swagger-ui`.
+- Database integration with automatic table creation and synchronization.
+- User-friendly error handling and robust data validation.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Setup
+1. **Install dependencies**: Run `npm install` in the backend directory.
+2. **Set up environment variables**: Create a `.env` file to configure database access.
+3. **Initialize the database**: Use `node sync-database.js` to set up tables.
 
-## Code scaffolding
+## How It Works
+- **Run the server**: `npm start` to launch the backend. Access the API at `http://localhost:3000`. ("Doesn't work in our case)
+- **Swagger**: Explore the API endpoints via the Swagger interface at `/swagger-ui`.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## What We Implemented
+- Designed an API to handle films, genres, production companies, and users.
+- Added Swagger for automatic API documentation.
+- Used Sequelize to simplify database operations and synchronize models.
+- Focused on clean, maintainable, and well-structured code.
 
-## Build
+---
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+This backend supports all required functionalities and is ready for deployment. 
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

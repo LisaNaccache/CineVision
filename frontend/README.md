@@ -1,27 +1,58 @@
-# AppCinevisionFront
+# App Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.10.
+This project is the frontend part of a web application designed to manage and display information about movies. The project was built using Angular and follows strict TypeScript conventions. It includes features for user registration, login, and managing movie data.
 
-## Development server
+## Project Structure
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- **src/app**: Main directory containing the application modules and components.
+  - **Admin**: Components for administrative functionalities.
+  - **Cinema, Film, Genre**: Modules and components to manage cinema, films, and genres.
+  - **SessionFilm**: Manages sessions and related data.
+  - **Review**: Components for handling user reviews.
+  - **Models**: TypeScript models defining the structure of data objects.
+  - **guards**: Contains route guards (`auth.guard.ts`) for protecting specific routes.
+  - **connection**: Handles connection-related functionalities.
+  - **login, register, inscription**: Modules for user authentication and registration.
 
-## Code scaffolding
+## Features
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+1. **User Registration and Login**:
+  - Components:
+    - `register.component.ts`: Handles user registration.
+    - `login.component.ts`: Manages user login.
+  - Backend integration via REST APIs.
 
-## Build
+2. **Movie Management**:
+  - Create, Read, Update, Delete (CRUD) operations for films, genres, and production companies.
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+3. **Frontend Libraries**:
+  - **Bootstrap**: For responsive design.
+  - **AG-Grid**: Used for displaying movie data in a grid format.
+  - **HighCharts**: Integrated for data visualization.
 
-## Running unit tests
+4. **Localization**:
+  - Multi-language support using Angular’s localization features.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+## Getting Started
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+### Prerequisites
+- **Node.js**: Install the latest version of Node.js.
+- **Angular CLI**: Install Angular CLI using the command: `npm install -g @angular/cli`.
 
-## Further help
+### Installation Steps
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## 1. Prepare the Environment
+- Navigate to the frontend directory.
+- Install all necessary dependencies.
+
+## 2. Running the Application
+- Start the development server.
+- Access the application via your browser.
+
+## 3. Building the Application
+- Build the project for production.
+
+## 4. Testing the Application
+- Run unit tests.
+- Execute end-to-end tests.
