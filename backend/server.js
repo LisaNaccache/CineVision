@@ -40,10 +40,58 @@ var express = require("express");
 var swaggerJsdoc = require("swagger-jsdoc"); // * as swaggerJsdoc from 'swagger-jsdoc'
 var swaggerUi = require("swagger-ui-express");
 var database_1 = require("./database");
+var jwt = require("jsonwebtoken");
 var cors = require('cors');
 var app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
 app.use(cors()); // Enable CORS for all routes
+/**
+ * JWT secret (hard-coded for demo).
+ * In production, use environment variables.
+ */
+var JWT_SECRET = 'mySecretKey';
+/***********************************************************************
+ * Async handler to wrap each route: avoids TS "No overload" issues
+ ***********************************************************************/
+function asyncHandler(fn) {
+    return function (req, res, next) {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+}
+/** verifyToken: checks "Authorization: Bearer <token>", verifies, attaches user to req */
+function verifyToken(req, res, next) {
+    var authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).json({ error: 'No token provided.' });
+        return;
+    }
+    var token = authHeader.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ error: 'No token provided.' });
+        return;
+    }
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        next();
+    }
+    catch (err) {
+        res.status(403).json({ error: 'Invalid token.' });
+        return;
+    }
+}
+/** isAdmin: checks if req.user.is_admin === true */
+function isAdmin(req, res, next) {
+    var user = req.user;
+    if (!user) {
+        res.status(401).json({ error: 'Not authenticated.' });
+        return;
+    }
+    if (!user.is_admin) {
+        res.status(403).json({ error: 'Admin privileges required.' });
+        return;
+    }
+    next();
+}
 // Swagger configuration options
 var jsDocOptions = {
     definition: {
@@ -54,6 +102,13 @@ var jsDocOptions = {
             description: 'API for managing movies in Cinevision',
         },
         components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
             schemas: {
                 // Define the Film schema
                 Film: {
@@ -112,19 +167,19 @@ var jsDocOptions = {
                 User: {
                     type: 'object',
                     properties: {
-                        id: { type: 'integer' },
+                        email: { type: 'string' },
+                        password: { type: 'string' },
                         first_name: { type: 'string' },
                         last_name: { type: 'string' },
                         age: { type: 'integer', nullable: true },
                         is_admin: { type: 'boolean' },
-                        email: { type: 'string' },
-                        password: { type: 'string' },
                     },
                 },
             },
         },
+        security: [{ BearerAuth: [] }],
     },
-    apis: ['app-todo.js'],
+    apis: ['server.js'],
 };
 // generate API documentation JSON
 var apiDoc = swaggerJsdoc(jsDocOptions);
@@ -225,7 +280,9 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
  * @openapi
  * /api/films:
  *   post:
- *     description: Add a new film
+ *     description: Add a new film (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -235,12 +292,12 @@ app.get('/api/films/:id', function (req, res) { return __awaiter(void 0, void 0,
  *     responses:
  *       201:
  *         description: The created Film object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
+ *       401:
+ *         description: Unauthorized, token required
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.post('/api/films', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.post('/api/films', verifyToken, isAdmin, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var newFilm, insertResult, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -851,7 +908,7 @@ app.delete('/api/production-companies/:id', function (req, res) { return __await
         }
     });
 }); });
-// Gget all production countries
+// Get all production countries
 /**
  * @openapi
  * /api/production-countries:
@@ -936,6 +993,62 @@ app.get('/api/production-countries/:id', function (req, res) { return __awaiter(
         }
     });
 }); });
+/**
+ * @openapi
+ * /api/production-countries:
+ *   post:
+ *     description: Add a new production country (Admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductionCountry'
+ *     responses:
+ *       201:
+ *         description: Production country created successfully
+ *       400:
+ *         description: Bad request - Missing required fields
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       500:
+ *         description: Internal server error
+ */
+app.post('/api/production-countries', verifyToken, // Require JWT authentication
+isAdmin, // Admin-only access
+asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, id_country, name_country, result, err_18;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 2, , 3]);
+                _a = req.body, id_country = _a.id_country, name_country = _a.name_country;
+                // Validation: Ensure required fields are provided
+                if (!id_country || !name_country) {
+                    res.status(400).json({ error: 'Both id_country and name_country are required.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO PRODUCTION_COUNTRY (ID_COUNTRY, NAME_COUNTRY)\n                VALUES (:id_country, :name_country)\n                ", { id_country: id_country, name_country: name_country })];
+            case 1:
+                result = _b.sent();
+                // Success response
+                res.status(201).json({
+                    message: 'Production country created successfully',
+                    id_country: id_country,
+                    name_country: name_country,
+                });
+                return [3 /*break*/, 3];
+            case 2:
+                err_18 = _b.sent();
+                console.error('Error creating production country:', err_18);
+                res.status(500).json({ error: 'Internal server error.' });
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); }));
 // put the production country
 /**
  * @openapi
@@ -961,7 +1074,7 @@ app.get('/api/production-countries/:id', function (req, res) { return __awaiter(
  *         description: Production country not found
  */
 app.put('/api/production-countries', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var updatedCountry, result, err_18;
+    var updatedCountry, result, err_19;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -985,8 +1098,8 @@ app.put('/api/production-countries', function (req, res) { return __awaiter(void
                 }
                 return [3 /*break*/, 3];
             case 2:
-                err_18 = _a.sent();
-                console.error('Erreur lors de la mise à jour du pays de production :', err_18);
+                err_19 = _a.sent();
+                console.error('Erreur lors de la mise à jour du pays de production :', err_19);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1013,7 +1126,7 @@ app.put('/api/production-countries', function (req, res) { return __awaiter(void
  *         description: Production Country not found
  */
 app.delete('/api/production-countries/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, result, err_19;
+    var id, result, err_20;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1030,8 +1143,8 @@ app.delete('/api/production-countries/:id', function (req, res) { return __await
                 }
                 return [3 /*break*/, 3];
             case 2:
-                err_19 = _a.sent();
-                console.error('Erreur lors de la suppression du pays de production :', err_19);
+                err_20 = _a.sent();
+                console.error('Erreur lors de la suppression du pays de production :', err_20);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1055,7 +1168,7 @@ app.delete('/api/production-countries/:id', function (req, res) { return __await
  *                 $ref: '#/components/schemas/SpokenLanguage'
  */
 app.get('/api/spoken_languages', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result, err_20;
+    var result, err_21;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1066,8 +1179,8 @@ app.get('/api/spoken_languages', function (req, res) { return __awaiter(void 0, 
                 res.status(200).json(result.rows);
                 return [3 /*break*/, 3];
             case 2:
-                err_20 = _a.sent();
-                console.error('Erreur lors de la récupération des langues parlées :', err_20);
+                err_21 = _a.sent();
+                console.error('Erreur lors de la récupération des langues parlées :', err_21);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1098,7 +1211,7 @@ app.get('/api/spoken_languages', function (req, res) { return __awaiter(void 0, 
  *         description: SpokenLanguage not found
  */
 app.get('/api/spoken_languages/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, result, err_21;
+    var id, result, err_22;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1115,8 +1228,8 @@ app.get('/api/spoken_languages/:id', function (req, res) { return __awaiter(void
                 }
                 return [3 /*break*/, 3];
             case 2:
-                err_21 = _a.sent();
-                console.error('Erreur lors de la récupération de la langue parlée :', err_21);
+                err_22 = _a.sent();
+                console.error('Erreur lors de la récupération de la langue parlée :', err_22);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1148,7 +1261,7 @@ app.get('/api/spoken_languages/:id', function (req, res) { return __awaiter(void
  *         description: SpokenLanguage not found
  */
 app.put('/api/spoken_languages', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var updatedLanguage, result, err_22;
+    var updatedLanguage, result, err_23;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1172,8 +1285,8 @@ app.put('/api/spoken_languages', function (req, res) { return __awaiter(void 0, 
                 }
                 return [3 /*break*/, 3];
             case 2:
-                err_22 = _a.sent();
-                console.error('Erreur lors de la mise à jour de la langue parlée :', err_22);
+                err_23 = _a.sent();
+                console.error('Erreur lors de la mise à jour de la langue parlée :', err_23);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1200,7 +1313,7 @@ app.put('/api/spoken_languages', function (req, res) { return __awaiter(void 0, 
  *         description: SpokenLanguage not found
  */
 app.delete('/api/spoken_languages/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, result, err_23;
+    var id, result, err_24;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1217,8 +1330,8 @@ app.delete('/api/spoken_languages/:id', function (req, res) { return __awaiter(v
                 }
                 return [3 /*break*/, 3];
             case 2:
-                err_23 = _a.sent();
-                console.error('Erreur lors de la suppression de la langue parlée :', err_23);
+                err_24 = _a.sent();
+                console.error('Erreur lors de la suppression de la langue parlée :', err_24);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1241,7 +1354,7 @@ app.delete('/api/spoken_languages/:id', function (req, res) { return __awaiter(v
  *                 $ref: '#/components/schemas/FilmGenre'
  */
 app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result, err_24;
+    var result, err_25;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1252,8 +1365,8 @@ app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 
                 res.status(200).json(result.rows);
                 return [3 /*break*/, 3];
             case 2:
-                err_24 = _a.sent();
-                console.error('Erreur lors de la récupération des genres des films :', err_24);
+                err_25 = _a.sent();
+                console.error('Erreur lors de la récupération des genres des films :', err_25);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
@@ -1321,7 +1434,7 @@ app.get('/api/film-genres', function (req, res) { return __awaiter(void 0, void 
  *                           type: number
  */
 app.get('/api/films/genre/:name_genre', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var name_genre, result, err_25;
+    var name_genre, result, err_26;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1335,8 +1448,8 @@ app.get('/api/films/genre/:name_genre', function (req, res) { return __awaiter(v
                 res.status(200).json(result.rows);
                 return [3 /*break*/, 4];
             case 3:
-                err_25 = _a.sent();
-                console.error('Erreur lors de la récupération des films par genre :', err_25);
+                err_26 = _a.sent();
+                console.error('Erreur lors de la récupération des films par genre :', err_26);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
@@ -1404,7 +1517,7 @@ app.get('/api/films/genre/:name_genre', function (req, res) { return __awaiter(v
  *                           type: number
  */
 app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var title, result, err_26;
+    var title, result, err_27;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1412,14 +1525,14 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE f.title LIKE :title || '%'\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer,\n                JSON_ARRAYAGG(\n                    JSON_OBJECT(\n                        'name_genre' VALUE g.name_genre,\n                        'id_genre' VALUE g.id_genre\n                    )\n                ) AS genre\n            FROM film f\n            JOIN film_genre fg ON f.id_film = fg.film_id\n            JOIN genre g ON fg.genre_id = g.id_genre\n            WHERE LOWER(f.title) LIKE LOWER(:title || '%')\n            GROUP BY \n                f.id_film, \n                f.title, \n                f.original_language, \n                f.overview, \n                f.popularity, \n                f.release_date, \n                f.runtime, \n                f.status, \n                f.vote_count, \n                f.vote_average, \n                f.link_poster, \n                f.link_trailer\n        ", { title: title })];
             case 2:
                 result = _a.sent();
                 res.status(200).json(result.rows);
                 return [3 /*break*/, 4];
             case 3:
-                err_26 = _a.sent();
-                console.error('Erreur lors de la récupération des films par titre :', err_26);
+                err_27 = _a.sent();
+                console.error('Erreur lors de la récupération des films par titre :', err_27);
                 res.status(500).json({ error: 'Erreur interne du serveur.' });
                 return [3 /*break*/, 4];
             case 4: return [2 /*return*/];
@@ -1427,6 +1540,7 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
     });
 }); });
 /**
+ * REGISTER user
  * @openapi
  * /api/users/register:
  *   post:
@@ -1441,28 +1555,23 @@ app.get('/api/films/title/:title', function (req, res) { return __awaiter(void 0
  *       201:
  *         description: User registered successfully
  */
-app.post('/api/users/register', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, first_name, last_name, age, email, password, is_admin, err_27;
+app.post('/api/users/register', asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, first_name, last_name, age, is_admin, numericIsAdmin;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
-                _a = req.body, first_name = _a.first_name, last_name = _a.last_name, age = _a.age, email = _a.email, password = _a.password, is_admin = _a.is_admin;
-                return [4 /*yield*/, (0, database_1.executeQuery)("\n                INSERT INTO user_roles (first_name, last_name, age, is_admin, email, password)\n                VALUES (:first_name, :last_name, :age, :is_admin, :email, :password)\n            ", { first_name: first_name, last_name: last_name, age: age, is_admin: is_admin, email: email, password: password })];
+                _a = req.body, email = _a.email, password = _a.password, first_name = _a.first_name, last_name = _a.last_name, age = _a.age, is_admin = _a.is_admin;
+                numericIsAdmin = is_admin ? 1 : 0;
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n      INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)\n      VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)\n      ", { email: email, password: password, first_name: first_name, last_name: last_name, age: age, is_admin: numericIsAdmin })];
             case 1:
                 _b.sent();
                 res.status(201).json({ message: 'User registered successfully' });
-                return [3 /*break*/, 3];
-            case 2:
-                err_27 = _b.sent();
-                console.error('Error during registration:', err_27);
-                res.status(500).json({ error: 'Internal server error' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [2 /*return*/];
         }
     });
-}); });
+}); }));
 /**
+ * LOGIN user
  * @openapi
  * /api/users/login:
  *   post:
@@ -1479,77 +1588,80 @@ app.post('/api/users/register', function (req, res) { return __awaiter(void 0, v
  *       401:
  *         description: Invalid credentials
  */
-app.post('/api/users/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, email, password, result, err_28;
+app.post('/api/users/login', asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, result, row, user, token;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 2, , 3]);
                 _a = req.body, email = _a.email, password = _a.password;
-                return [4 /*yield*/, (0, database_1.executeQuery)("SELECT id, first_name, last_name, age, is_admin, email FROM user_roles WHERE email = :email AND password = :password", { email: email, password: password })];
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n      SELECT email, password, first_name, last_name, age, is_admin\n      FROM user_roles\n      WHERE email = :email AND password = :password\n      ", { email: email, password: password })];
             case 1:
                 result = _b.sent();
-                if (result.rows.length === 0) {
+                if (!result.rows || result.rows.length === 0) {
                     res.status(401).json({ error: 'Invalid credentials' });
+                    return [2 /*return*/];
                 }
-                res.status(200).json(result.rows[0]);
-                return [3 /*break*/, 3];
-            case 2:
-                err_28 = _b.sent();
-                console.error('Error during login:', err_28);
-                res.status(500).json({ error: 'Internal server error' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                row = result.rows[0];
+                user = {
+                    email: row[0],
+                    password: row[1],
+                    first_name: row[2],
+                    last_name: row[3],
+                    age: row[4],
+                    is_admin: !!row[5],
+                };
+                token = jwt.sign({ email: user.email, is_admin: user.is_admin }, JWT_SECRET, { expiresIn: '1h' });
+                res.json({ message: 'Login successful', token: token });
+                return [2 /*return*/];
         }
     });
-}); });
+}); }));
 /**
  * @openapi
  * /api/users:
  *   get:
- *     description: Get all users
+ *     security:
+ *       - BearerAuth: [] # Explicitly add security here
+ *     description: Get all users (admin only)
  *     responses:
  *       200:
- *         description: List of all users
+ *         description: An array of User
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized, token required
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.get('/api/users', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result, err_29;
+app.get('/api/users', verifyToken, isAdmin, asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, (0, database_1.executeQuery)('SELECT id, first_name, last_name, age, is_admin, email FROM user_roles')];
+            case 0: return [4 /*yield*/, (0, database_1.executeQuery)("\n      SELECT email, password, first_name, last_name, age, is_admin\n      FROM user_roles\n    ")];
             case 1:
                 result = _a.sent();
                 res.status(200).json(result.rows);
-                return [3 /*break*/, 3];
-            case 2:
-                err_29 = _a.sent();
-                console.error('Error fetching users:', err_29);
-                res.status(500).json({ error: 'Internal server error' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                return [2 /*return*/];
         }
     });
-}); });
+}); }));
 /**
+ * Update role
  * @openapi
- * /api/users/{id}/role:
+ * /api/users/{email}/role:
  *   put:
- *     description: Update the role of a user
+ *     description: Update the role of a user (admin only)
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: email
  *         required: true
- *         description: ID of the user
+ *         description: user email
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -1561,81 +1673,119 @@ app.get('/api/users', function (req, res) { return __awaiter(void 0, void 0, voi
  *                 type: boolean
  *     responses:
  *       200:
- *         description: User role updated successfully
+ *         description: User role updated
  *       404:
- *         description: User not found
+ *         description: Not found
  */
-app.put('/api/users/:id/role', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, is_admin, result, err_30;
+app.put('/api/users/:email/role', verifyToken, isAdmin, asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var email, is_admin, numericIsAdmin, result;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                id = req.params.id;
+                email = req.params.email;
                 is_admin = req.body.is_admin;
-                return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE user_roles SET is_admin = :is_admin WHERE id = :id", { id: +id, is_admin: is_admin })];
+                numericIsAdmin = is_admin ? 1 : 0;
+                return [4 /*yield*/, (0, database_1.executeQuery)("UPDATE user_roles SET is_admin = :is_admin WHERE email = :email", { email: email, is_admin: numericIsAdmin })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
                     res.status(404).json({ error: 'User not found' });
                 }
-                res.status(200).json({ message: 'User role updated successfully' });
-                return [3 /*break*/, 3];
-            case 2:
-                err_30 = _a.sent();
-                console.error('Error updating user role:', err_30);
-                res.status(500).json({ error: 'Internal server error' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                else {
+                    res.status(200).json({ message: 'User role updated successfully' });
+                }
+                return [2 /*return*/];
         }
     });
-}); });
+}); }));
 /**
+ * DELETE user
  * @openapi
- * /api/users/{id}:
+ * /api/users/{email}:
  *   delete:
- *     description: Delete a user
+ *     description: Delete a user by email (admin only)
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: email
  *         required: true
- *         description: ID of the user
  *         schema:
- *           type: integer
+ *           type: string
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         description: User deleted
  *       404:
- *         description: User not found
+ *         description: Not found
  */
-app.delete('/api/users/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var id, result, err_31;
+app.delete('/api/users/:email', verifyToken, isAdmin, asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var email, result;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                id = req.params.id;
-                return [4 /*yield*/, (0, database_1.executeQuery)("DELETE FROM user_roles WHERE id = :id", { id: +id })];
+                email = req.params.email;
+                return [4 /*yield*/, (0, database_1.executeQuery)("DELETE FROM user_roles WHERE email = :email", { email: email })];
             case 1:
                 result = _a.sent();
                 if (result.rowsAffected === 0) {
                     res.status(404).json({ error: 'User not found' });
                 }
-                res.status(200).json({ message: 'User deleted successfully' });
-                return [3 /*break*/, 3];
-            case 2:
-                err_31 = _a.sent();
-                console.error('Error deleting user:', err_31);
-                res.status(500).json({ error: 'Internal server error' });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
+                else {
+                    res.status(200).json({ message: 'User deleted successfully' });
+                }
+                return [2 /*return*/];
         }
     });
-}); });
+}); }));
+/**
+ * @openapi
+ * /api/user_roles/{email}:
+ *   get:
+ *     description: Vérifie si un utilisateur existe dans la table user_roles par email.
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email de l'utilisateur à vérifier
+ *     responses:
+ *       400:
+ *         description: Email requis
+ *       404:
+ *         description: Aucun utilisateur trouvé avec cet email
+ *       200:
+ *         description: L'utilisateur existe
+ */
+app.get('/api/user_roles/:email', asyncHandler(function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var email, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                email = req.params.email;
+                // Validation : Vérifier si l'email est fourni
+                if (!email) {
+                    res.status(400).json({ error: 'Email requis.' });
+                    return [2 /*return*/];
+                }
+                return [4 /*yield*/, (0, database_1.executeQuery)("\n            SELECT email FROM user_roles WHERE email = :email\n            ", { email: email })];
+            case 1:
+                result = _a.sent();
+                // Vérifier si un utilisateur est trouvé
+                if (result.rows.length > 0) {
+                    // Utilisateur trouvé -> renvoyer une erreur
+                    res.status(409).json({ error: 'Utilisateur déjà existant.' });
+                }
+                else {
+                    // Aucun utilisateur trouvé -> succès
+                    res.status(200).json({ message: 'Email disponible.' });
+                }
+                return [2 /*return*/];
+        }
+    });
+}); }));
 // Start the application
 console.log('starting...');
 (function () { return __awaiter(void 0, void 0, void 0, function () {
-    var err_32;
+    var err_28;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -1648,8 +1798,8 @@ console.log('starting...');
                 });
                 return [3 /*break*/, 3];
             case 2:
-                err_32 = _a.sent();
-                console.error('Failed to initialize database:', err_32);
+                err_28 = _a.sent();
+                console.error('Failed to initialize database:', err_28);
                 process.exit(1); // Exit if DB init fails
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];

@@ -1,14 +1,77 @@
 import * as express from 'express';
-import {Request, Response} from 'express';
+import {NextFunction, Request, Response} from 'express';
 import swaggerJsdoc = require('swagger-jsdoc'); // * as swaggerJsdoc from 'swagger-jsdoc'
 import swaggerUi = require('swagger-ui-express');
 import { executeQuery, initDB } from './database';
+import * as jwt from 'jsonwebtoken';
 
 const cors = require('cors');
 
 const app = express();
 app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
 app.use(cors()) // Enable CORS for all routes
+
+/**
+ * JWT secret (hard-coded for demo).
+ * In production, use environment variables.
+ */
+const JWT_SECRET = 'mySecretKey';
+
+/***********************************************************************
+ * Async handler to wrap each route: avoids TS "No overload" issues
+ ***********************************************************************/
+function asyncHandler(
+    fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+) {
+    return (req: Request, res: Response, next: NextFunction) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+}
+
+/***********************************************************************
+ * JWT Middleware: verifyToken, isAdmin
+ ***********************************************************************/
+interface JwtPayload {
+    email: string;
+    is_admin: boolean;
+    iat?: number;
+    exp?: number;
+}
+
+/** verifyToken: checks "Authorization: Bearer <token>", verifies, attaches user to req */
+function verifyToken(req: Request, res: Response, next: NextFunction): void {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).json({ error: 'No token provided.' });
+        return;
+    }
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ error: 'No token provided.' });
+        return;
+    }
+    try {
+        (req as any).user = jwt.verify(token, JWT_SECRET) as JwtPayload;
+        next();
+    } catch (err) {
+        res.status(403).json({ error: 'Invalid token.' });
+        return;
+    }
+}
+
+/** isAdmin: checks if req.user.is_admin === true */
+function isAdmin(req: Request, res: Response, next: NextFunction): void {
+    const user = (req as any).user;
+    if (!user) {
+        res.status(401).json({ error: 'Not authenticated.' });
+        return;
+    }
+    if (!user.is_admin) {
+        res.status(403).json({ error: 'Admin privileges required.' });
+        return;
+    }
+    next();
+}
 
 // Swagger configuration options
 const jsDocOptions = {
@@ -20,6 +83,13 @@ const jsDocOptions = {
             description: 'API for managing movies in Cinevision',
         },
         components: {
+            securitySchemes: { //we add a Bearer Token authentication
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
             schemas: {
                 // Define the Film schema
                 Film: {
@@ -83,20 +153,19 @@ const jsDocOptions = {
                 User: {
                     type: 'object',
                     properties: {
-                        id: { type: 'integer' },
+                        email: { type: 'string' },
+                        password: { type: 'string' },
                         first_name: { type: 'string' },
                         last_name: { type: 'string' },
                         age: { type: 'integer', nullable: true },
                         is_admin: { type: 'boolean' },
-                        email: { type: 'string' },
-                        password: { type: 'string' },
                     },
                 },
-
             },
         },
+        security: [{ BearerAuth: [] }],
     },
-    apis: ['app-todo.js'],
+    apis: ['server.js'],
 };
 
 // generate API documentation JSON
@@ -215,12 +284,14 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
     }
 });
 
-// POST NEW FILM
+
 /**
  * @openapi
  * /api/films:
  *   post:
- *     description: Add a new film
+ *     description: Add a new film (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -230,12 +301,12 @@ app.get('/api/films/:id', async (req: Request, res: Response) => {
  *     responses:
  *       201:
  *         description: The created Film object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
+ *       401:
+ *         description: Unauthorized, token required
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.post('/api/films', async (req: Request, res: Response) => {
+app.post('/api/films', verifyToken, isAdmin,async (req: Request, res: Response) => {
     try {
         const newFilm: Film = req.body;
 
@@ -273,12 +344,13 @@ app.post('/api/films', async (req: Request, res: Response) => {
 });
 
 
-// PUT a film
 /**
  * @openapi
  * /api/films:
  *   put:
- *     description: Update an existing film without specifying id in the path
+ *     description: Update a film (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -287,17 +359,15 @@ app.post('/api/films', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/Film'
  *     responses:
  *       200:
- *         description: The updated Film object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Film'
+ *         description: Film updated successfully
  *       400:
- *         description: Bad Request - ID not provided in the body
+ *         description: ID not provided
+ *       403:
+ *         description: Forbidden, admin access required
  *       404:
  *         description: Film not found
  */
-app.put('/api/films', async (req: Request, res: Response) => {
+app.put('/api/films', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedFilm: Film = req.body;
 
@@ -858,7 +928,7 @@ interface ProductionCountry {
     name_country: string;
 }
 
-// Gget all production countries
+// Get all production countries
 /**
  * @openapi
  * /api/production-countries:
@@ -927,6 +997,65 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
         res.status(500).json({ error: 'Erreur interne du serveur.' });
     }
 });
+
+/**
+ * @openapi
+ * /api/production-countries:
+ *   post:
+ *     description: Add a new production country (Admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductionCountry'
+ *     responses:
+ *       201:
+ *         description: Production country created successfully
+ *       400:
+ *         description: Bad request - Missing required fields
+ *       403:
+ *         description: Forbidden - Admin privileges required
+ *       500:
+ *         description: Internal server error
+ */
+app.post(
+    '/api/production-countries',
+    verifyToken, // Require JWT authentication
+    isAdmin,     // Admin-only access
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { id_country, name_country } = req.body;
+
+            // Validation: Ensure required fields are provided
+            if (!id_country || !name_country) {
+                res.status(400).json({ error: 'Both id_country and name_country are required.' });
+                return;
+            }
+
+            // Insert into database
+            const result = await executeQuery(
+                `
+                INSERT INTO PRODUCTION_COUNTRY (ID_COUNTRY, NAME_COUNTRY)
+                VALUES (:id_country, :name_country)
+                `,
+                { id_country, name_country }
+            );
+
+            // Success response
+            res.status(201).json({
+                message: 'Production country created successfully',
+                id_country,
+                name_country,
+            });
+        } catch (err) {
+            console.error('Error creating production country:', err);
+            res.status(500).json({ error: 'Internal server error.' });
+        }
+    })
+);
 
 // put the production country
 /**
@@ -1461,7 +1590,7 @@ app.get('/api/films/title/:title', async (req: Request, res: Response) => {
             FROM film f
             JOIN film_genre fg ON f.id_film = fg.film_id
             JOIN genre g ON fg.genre_id = g.id_genre
-            WHERE f.title LIKE :title || '%'
+            WHERE LOWER(f.title) LIKE LOWER(:title || '%')
             GROUP BY 
                 f.id_film, 
                 f.title, 
@@ -1485,21 +1614,20 @@ app.get('/api/films/title/:title', async (req: Request, res: Response) => {
 });
 
 
-// ---------------------------------------
-//              USER MANAGEMENT
-// ---------------------------------------
-
+/***********************************************************************
+ * USER (EMAIL as PK)
+ ***********************************************************************/
 interface User {
-    id?: number;
+    email: string;      // primary key
+    password: string;
     first_name: string;
     last_name: string;
     age?: number;
-    is_admin: boolean;
-    email: string;
-    password: string;
+    is_admin: boolean;  // Oracle: stored as 0 or 1
 }
 
 /**
+ * REGISTER user
  * @openapi
  * /api/users/register:
  *   post:
@@ -1514,26 +1642,25 @@ interface User {
  *       201:
  *         description: User registered successfully
  */
-app.post('/api/users/register', async (req: Request, res: Response) => {
-    try {
-        const { first_name, last_name, age, email, password, is_admin } = req.body;
-
+app.post(
+    '/api/users/register',
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const { email, password, first_name, last_name, age, is_admin } = req.body;
+        const numericIsAdmin = is_admin ? 1 : 0;
         await executeQuery(
             `
-                INSERT INTO user_roles (first_name, last_name, age, is_admin, email, password)
-                VALUES (:first_name, :last_name, :age, :is_admin, :email, :password)
-            `,
-            { first_name, last_name, age, is_admin, email, password }
+      INSERT INTO user_roles (email, password, first_name, last_name, age, is_admin)
+      VALUES (:email, :password, :first_name, :last_name, :age, :is_admin)
+      `,
+            { email, password, first_name, last_name, age, is_admin: numericIsAdmin }
         );
-
         res.status(201).json({ message: 'User registered successfully' });
-    } catch (err) {
-        console.error('Error during registration:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+        return;
+    })
+);
 
 /**
+ * LOGIN user
  * @openapi
  * /api/users/login:
  *   post:
@@ -1550,62 +1677,96 @@ app.post('/api/users/register', async (req: Request, res: Response) => {
  *       401:
  *         description: Invalid credentials
  */
-app.post('/api/users/login', async (req: Request, res: Response) => {
-    try {
+app.post(
+    '/api/users/login',
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
         const result = await executeQuery(
-            `SELECT id, first_name, last_name, age, is_admin, email FROM user_roles WHERE email = :email AND password = :password`,
+            `
+      SELECT email, password, first_name, last_name, age, is_admin
+      FROM user_roles
+      WHERE email = :email AND password = :password
+      `,
             { email, password }
         );
-
-        if (result.rows.length === 0) {
+        if (!result.rows || result.rows.length === 0) {
             res.status(401).json({ error: 'Invalid credentials' });
+            return;
         }
 
-        res.status(200).json(result.rows[0]);
-    } catch (err) {
-        console.error('Error during login:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+        // row => [email, password, first_name, last_name, age, is_admin]
+        const row = result.rows[0];
+        const user = {
+            email: row[0],
+            password: row[1],
+            first_name: row[2],
+            last_name: row[3],
+            age: row[4],
+            is_admin: !!row[5],
+        };
+
+        // Generate JWT
+        const token = jwt.sign(
+            { email: user.email, is_admin: user.is_admin },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ message: 'Login successful', token });
+        return;
+    })
+);
 
 /**
  * @openapi
  * /api/users:
  *   get:
- *     description: Get all users
+ *     security:
+ *       - BearerAuth: [] # Explicitly add security here
+ *     description: Get all users (admin only)
  *     responses:
  *       200:
- *         description: List of all users
+ *         description: An array of User
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized, token required
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.get('/api/users', async (req: Request, res: Response) => {
-    try {
-        const result = await executeQuery('SELECT id, first_name, last_name, age, is_admin, email FROM user_roles');
+
+
+app.get(
+    '/api/users',
+    verifyToken,
+    isAdmin,
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const result = await executeQuery(`
+      SELECT email, password, first_name, last_name, age, is_admin
+      FROM user_roles
+    `);
         res.status(200).json(result.rows);
-    } catch (err) {
-        console.error('Error fetching users:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+        return;
+    })
+);
 
 /**
+ * Update role
  * @openapi
- * /api/users/{id}/role:
+ * /api/users/{email}/role:
  *   put:
- *     description: Update the role of a user
+ *     description: Update the role of a user (admin only)
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: email
  *         required: true
- *         description: ID of the user
+ *         description: user email
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -1617,65 +1778,118 @@ app.get('/api/users', async (req: Request, res: Response) => {
  *                 type: boolean
  *     responses:
  *       200:
- *         description: User role updated successfully
+ *         description: User role updated
  *       404:
- *         description: User not found
+ *         description: Not found
  */
-app.put('/api/users/:id/role', async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
+app.put(
+    '/api/users/:email/role',
+    verifyToken,
+    isAdmin,
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const { email } = req.params;
         const { is_admin } = req.body;
-
+        const numericIsAdmin = is_admin ? 1 : 0;
         const result = await executeQuery(
-            `UPDATE user_roles SET is_admin = :is_admin WHERE id = :id`,
-            { id: +id, is_admin }
+            `UPDATE user_roles SET is_admin = :is_admin WHERE email = :email`,
+            { email, is_admin: numericIsAdmin }
         );
-
         if (result.rowsAffected === 0) {
             res.status(404).json({ error: 'User not found' });
+        } else {
+            res.status(200).json({ message: 'User role updated successfully' });
         }
+        return;
+    })
+);
 
-        res.status(200).json({ message: 'User role updated successfully' });
-    } catch (err) {
-        console.error('Error updating user role:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+/**
+ * DELETE user
+ * @openapi
+ * /api/users/{email}:
+ *   delete:
+ *     description: Delete a user by email (admin only)
+ *     parameters:
+ *       - in: path
+ *         name: email
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User deleted
+ *       404:
+ *         description: Not found
+ */
+app.delete(
+    '/api/users/:email',
+    verifyToken,
+    isAdmin,
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        const { email } = req.params;
+        const result = await executeQuery(
+            `DELETE FROM user_roles WHERE email = :email`,
+            { email }
+        );
+        if (result.rowsAffected === 0) {
+            res.status(404).json({ error: 'User not found' });
+        } else {
+            res.status(200).json({ message: 'User deleted successfully' });
+        }
+        return;
+    })
+);
 
 /**
  * @openapi
- * /api/users/{id}:
- *   delete:
- *     description: Delete a user
+ * /api/user_roles/{email}:
+ *   get:
+ *     description: Vérifie si un utilisateur existe dans la table user_roles par email.
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: email
  *         required: true
- *         description: ID of the user
  *         schema:
- *           type: integer
+ *           type: string
+ *         description: Email de l'utilisateur à vérifier
  *     responses:
- *       200:
- *         description: User deleted successfully
+ *       400:
+ *         description: Email requis
  *       404:
- *         description: User not found
+ *         description: Aucun utilisateur trouvé avec cet email
+ *       200:
+ *         description: L'utilisateur existe
  */
-app.delete('/api/users/:id', async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
+app.get(
+    '/api/user_roles/:email',
+    asyncHandler(async (req: Request, res: Response): Promise<void> => {
+        // Récupérer l'email depuis le paramètre de l'URL
+        const { email } = req.params;
 
-        const result = await executeQuery(`DELETE FROM user_roles WHERE id = :id`, { id: +id });
-
-        if (result.rowsAffected === 0) {
-            res.status(404).json({ error: 'User not found' });
+        // Validation : Vérifier si l'email est fourni
+        if (!email) {
+            res.status(400).json({ error: 'Email requis.' });
+            return;
         }
 
-        res.status(200).json({ message: 'User deleted successfully' });
-    } catch (err) {
-        console.error('Error deleting user:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
+        // Exécuter la requête SQL
+        const result = await executeQuery(
+            `
+            SELECT email FROM user_roles WHERE email = :email
+            `,
+            { email }
+        );
+
+        // Vérifier si un utilisateur est trouvé
+        if (result.rows.length > 0) {
+            // Utilisateur trouvé -> renvoyer une erreur
+            res.status(409).json({ error: 'Utilisateur déjà existant.' });
+        } else {
+            // Aucun utilisateur trouvé -> succès
+            res.status(200).json({ message: 'Email disponible.' });
+        }
+    })
+);
 
 
 
