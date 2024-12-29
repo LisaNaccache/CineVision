@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Router} from '@angular/router';
 
 @Injectable({
@@ -8,10 +8,10 @@ import {Router} from '@angular/router';
 })
 export class AuthService {
 
-  private userSubject = new BehaviorSubject<any>(null); // Manage the current user
-  user$ = this.userSubject.asObservable(); // Observable to track user changes
+  private userSubject = new BehaviorSubject<any>(null);
+  user$ = this.userSubject.asObservable();
 
-  private apiUrl = 'http://localhost:3000/api'; // Backend API URL
+  private apiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient, private router: Router) {
     const user = this.getCurrentUser();
@@ -20,19 +20,16 @@ export class AuthService {
     }
   }
 
-  /**
-   * Sends a request to log in the user.
-   */
   login(email: string, password: string) {
     return this.http
-      .post(`${this.apiUrl}/users/login`, {email, password})
+      .post(`${this.apiUrl}/users/login`, { email, password })
       .subscribe({
         next: (response: any) => {
-          const {token} = response;
-          localStorage.setItem('jwt', token); // Store the JWT token
-          const payload = this.decodeToken(token); // Decode the JWT token
-          this.userSubject.next(payload); // Update the logged-in user
-          this.router.navigate(['/']); // Redirect after login
+          const { token } = response;
+          localStorage.setItem('jwt', token);
+          const payload = this.decodeToken(token);
+          this.userSubject.next(payload);
+          this.router.navigate(['/']);
         },
         error: (err) => {
           console.error('Login failed:', err);
@@ -41,9 +38,6 @@ export class AuthService {
       });
   }
 
-  /**
-   * Sends a request to register a new user.
-   */
   register(user: any) {
     return this.http.post(`${this.apiUrl}/users/register`, user).subscribe({
       next: () => {
@@ -57,37 +51,33 @@ export class AuthService {
     });
   }
 
-  /**
-   * Logs out the user by removing the token.
-   */
+
   logout() {
-    localStorage.removeItem('jwt'); // Remove the JWT token
-    this.userSubject.next(null); // Reset the user
-    this.router.navigate(['/login']); // Redirect to the login page
+    localStorage.removeItem('jwt');
+    this.userSubject.next(null);
+    this.router.navigate(['/login']);
   }
 
-  /**
-   * Retrieves the current user from the JWT token.
-   */
+  getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('jwt');
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+  }
+
   getCurrentUser() {
     const token = localStorage.getItem('jwt');
     if (token) {
-      return this.decodeToken(token); // Return the decoded payload
+      return this.decodeToken(token);
     }
     return null;
   }
 
-  /**
-   * Checks if the current user is an administrator.
-   */
   isAdmin(): boolean {
     const user = this.getCurrentUser();
     return user ? user.is_admin : false;
   }
 
-  /**
-   * Decodes a JWT token to retrieve the payload.
-   */
   private decodeToken(token: string): any {
     const payload = token.split('.')[1];
     return JSON.parse(atob(payload));
