@@ -5,13 +5,6 @@ import {FilmListComponent} from './Admin/Film/film-list/film-list.component';
 import {GenreAddComponent} from './Admin/Genre/genre-add/genre-add.component';
 import {GenreEditComponent} from './Admin/Genre/genre-edit/genre-edit.component';
 import {GenreListComponent} from './Admin/Genre/genre-list/genre-list.component';
-import {CinemaAddComponent} from './Admin/Cinema/cinema-add/cinema-add.component';
-import {CinemaEditComponent} from './Admin/Cinema/cinema-edit/cinema-edit.component';
-import {CinemaListComponent} from './Admin/Cinema/cinema-list/cinema-list.component';
-import {SessionFilmAddComponent} from './Admin/SessionFilm/session-film-add/session-film-add.component';
-import {SessionFilmEditComponent} from './Admin/SessionFilm/session-film-edit/session-film-edit.component';
-import {SessionFilmListComponent} from './Admin/SessionFilm/session-film-list/session-film-list.component';
-import {ReviewListComponent} from './Admin/Review/review-list/review-list.component';
 import {FilmComponent} from './film/film.component';
 import {FilmDetailComponent} from './Admin/Film/film-detail/film-detail.component';
 import {
@@ -57,13 +50,4 @@ export const routes: Routes = [
   {path: 'admin/production-country/add', component: ProductionCountryAddComponent, canActivate: [AdminGuard]},
   {path: 'admin/production-country/edit/:id', component: ProductionCountryEditComponent, canActivate: [AdminGuard]},
   {path: 'admin/production-country', component: ProductionCountryListComponent, canActivate: [AdminGuard]},
-
-  // En cours de developpement
-  {path: 'admin/cinema/add', component: CinemaAddComponent, canActivate: [AdminGuard]},
-  {path: 'admin/cinema/edit/:id', component: CinemaEditComponent, canActivate: [AdminGuard]},
-  {path: 'admin/cinema', component: CinemaListComponent, canActivate: [AdminGuard]},
-  {path: 'admin/review', component: ReviewListComponent, canActivate: [AdminGuard]},
-  {path: 'admin/session-film/add', component: SessionFilmAddComponent, canActivate: [AdminGuard]},
-  {path: 'admin/session-film/edit/:id', component: SessionFilmEditComponent, canActivate: [AdminGuard]},
-  {path: 'admin/session-film', component: SessionFilmListComponent, canActivate: [AdminGuard]},
 ];

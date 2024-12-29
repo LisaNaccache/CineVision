@@ -13,7 +13,7 @@
           <a class="nav-link" routerLink="/film">Home</a>
         </li>
 
-        <!-- Section Admin visible uniquement pour les administrateurs -->
+        <!-- Admin section visible only to administrators -->
         <li class="nav-item dropdown" *ngIf="isAdmin">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Admin
@@ -23,10 +23,6 @@
             <li><a class="dropdown-item" routerLink="/admin/genre">Genre</a></li>
             <li><a class="dropdown-item" routerLink="/admin/production-compagny">Production Compagny</a></li>
             <li><a class="dropdown-item" routerLink="/admin/production-country">Production Country</a></li>
-            <!--<li><a class="dropdown-item" routerLink="/admin/acteur">Acteur</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/review">Notes des films</a></li>
-            <li><a class="dropdown-item" routerLink="/admin/session-film">Session des films</a></li>-->
-            <!--<li><hr class="dropdown-divider"></li>-->
           </ul>
         </li>
       </ul>
@@ -43,7 +39,6 @@
           </ul>
         </li>
 
-        <!-- Afficher le bouton Logout si l'utilisateur est connecté -->
         <li class="nav-item" *ngIf="isLoggedIn">
           <a class="nav-link" href="#" (click)="logout()">Logout</a>
         </li>
