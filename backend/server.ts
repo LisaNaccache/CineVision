@@ -8,8 +8,8 @@ import * as jwt from 'jsonwebtoken';
 const cors = require('cors');
 
 const app = express();
-app.use(express.json()); // => to parse request body with http header "content-type": "application/json"
-app.use(cors()) // Enable CORS for all routes
+app.use(express.json());
+app.use(cors())
 
 /**
  * JWT secret (hard-coded for demo).
@@ -73,10 +73,9 @@ function isAdmin(req: Request, res: Response, next: NextFunction): void {
     next();
 }
 
-// Swagger configuration options
 const jsDocOptions = {
     definition: {
-        openapi: '3.0.0', // OpenAPI version
+        openapi: '3.0.0',
         info: {
             title: 'Cinevision API',
             version: '1.0.0',
@@ -168,14 +167,11 @@ const jsDocOptions = {
     apis: ['server.js'],
 };
 
-// generate API documentation JSON
 const apiDoc = swaggerJsdoc(jsDocOptions);
 console.log('api-doc json:', JSON.stringify(apiDoc, null, 2));
 
-// Serve Swagger UI at the /swagger-ui endpoint
 app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(apiDoc));
 
-// A check endpoint to verify API is live
 app.get('/api/liveness', (req: Request, res: Response) => {
     res.send('OK !!!');
 });
@@ -202,7 +198,6 @@ interface Film {
     link_trailer?: string;
 }
 
-// GET all films
 /**
  * @openapi
  * /api/films:
@@ -220,7 +215,6 @@ interface Film {
  */
 app.get('/api/films', async (req: Request, res: Response) => {
     try {
-        // Query to fetch all films
         const result = await executeQuery('SELECT ID_FILM, TITLE, ORIGINAL_LANGUAGE, OVERVIEW, POPULARITY, RELEASE_DATE, RUNTIME, STATUS, VOTE_COUNT, VOTE_AVERAGE, LINK_POSTER, LINK_TRAILER FROM FILM ORDER BY TITLE');
         res.status(200).json(result.rows);
     } catch (err) {
@@ -229,7 +223,6 @@ app.get('/api/films', async (req: Request, res: Response) => {
     }
 });
 
-// GET film by its id
 /**
  * @openapi
  * /api/films/{id}:
@@ -419,27 +412,29 @@ app.put('/api/films', verifyToken, isAdmin, async (req: Request, res: Response) 
     }
 });
 
-
-// DELETE a film with its id
 /**
  * @openapi
  * /api/films/{id}:
  *   delete:
- *     description: Delete a film by its id
+ *     description: Delete a film by ID (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: The ID of the Film to delete
  *         schema:
  *           type: number
+ *         description: ID of the film
  *     responses:
  *       200:
  *         description: Film deleted successfully
+ *       403:
+ *         description: Forbidden, admin access required
  *       404:
  *         description: Film not found
  */
-app.delete('/api/films/:id', async (req: Request, res: Response) => {
+app.delete('/api/films/:id', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const id = +req.params.id;
 
@@ -474,7 +469,6 @@ interface Genre {
     name_genre: string;
 }
 
-// GET ALL GENRES
 /**
  * @openapi
  * /api/genres:
@@ -500,7 +494,7 @@ app.get('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// get genre by its id
+
 /**
  * @openapi
  * /api/genres/{id}:
@@ -544,12 +538,13 @@ app.get('/api/genres/:id', async (req: Request, res: Response) => {
     }
 });
 
-// post new genre
 /**
  * @openapi
  * /api/genres:
  *   post:
- *     description: Add a new genre
+ *     description: Add a new genre (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -558,13 +553,11 @@ app.get('/api/genres/:id', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/Genre'
  *     responses:
  *       201:
- *         description: The created Genre object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Genre'
+ *         description: Genre created successfully
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.post('/api/genres', async (req: Request, res: Response) => {
+app.post('/api/genres', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const newGenre: Genre = req.body;
 
@@ -591,12 +584,13 @@ app.post('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// PUT the genre
 /**
  * @openapi
  * /api/genres:
  *   put:
- *     description: Update an existing genre without specifying id in the path
+ *     description: Update a genre (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -605,17 +599,15 @@ app.post('/api/genres', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/Genre'
  *     responses:
  *       200:
- *         description: The updated Genre object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Genre'
+ *         description: Genre updated successfully
  *       400:
- *         description: Bad Request - ID not provided in the body
+ *         description: ID not provided
+ *       403:
+ *         description: Forbidden, admin access required
  *       404:
  *         description: Genre not found
  */
-app.put('/api/genres', async (req: Request, res: Response) => {
+app.put('/api/genres', verifyToken, isAdmin,async (req: Request, res: Response) => {
     try {
         const updatedGenre: Genre = req.body;
 
@@ -647,26 +639,29 @@ app.put('/api/genres', async (req: Request, res: Response) => {
     }
 });
 
-// DELETE genre by ID
 /**
  * @openapi
  * /api/genres/{id}:
  *   delete:
- *     description: Delete a genre by its id
+ *     description: Delete a genre by ID (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: The ID of the Genre to delete
  *         schema:
- *           type: number
+ *           type: integer
+ *         description: ID of the genre
  *     responses:
  *       200:
  *         description: Genre deleted successfully
+ *       403:
+ *         description: Forbidden, admin access required
  *       404:
  *         description: Genre not found
  */
-app.delete('/api/genres/:id', async (req: Request, res: Response) => {
+app.delete('/api/genres/:id', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const id = +req.params.id;
 
@@ -701,7 +696,6 @@ interface ProductionCompany {
     name_company: string;
 }
 
-// GET the production copanies
 /**
  * @openapi
  * /api/production-companies:
@@ -727,7 +721,6 @@ app.get('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// GET id of the production companies
 /**
  * @openapi
  * /api/production-companies/{id}:
@@ -771,12 +764,13 @@ app.get('/api/production-companies/:id', async (req: Request, res: Response) => 
     }
 });
 
-// post the produciton companies
 /**
  * @openapi
  * /api/production-companies:
  *   post:
- *     description: Add a new production company
+ *     description: Add a new production company (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -785,13 +779,11 @@ app.get('/api/production-companies/:id', async (req: Request, res: Response) => 
  *             $ref: '#/components/schemas/ProductionCompany'
  *     responses:
  *       201:
- *         description: The created ProductionCompany object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProductionCompany'
+ *         description: Production company created successfully
+ *       403:
+ *         description: Forbidden, admin access required
  */
-app.post('/api/production-companies', async (req: Request, res: Response) => {
+app.post('/api/production-companies', verifyToken,isAdmin,async (req: Request, res: Response) => {
     try {
         const newCompany: ProductionCompany = req.body;
 
@@ -818,12 +810,13 @@ app.post('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// put the production companies
 /**
  * @openapi
  * /api/production-companies:
  *   put:
- *     description: Update an existing production company
+ *     description: Update a production company (admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -832,17 +825,13 @@ app.post('/api/production-companies', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/ProductionCompany'
  *     responses:
  *       200:
- *         description: The updated ProductionCompany object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProductionCompany'
- *       400:
- *         description: Bad Request - ID not provided in the body
+ *         description: Production company updated successfully
+ *       403:
+ *         description: Forbidden, admin access required
  *       404:
  *         description: Production company not found
  */
-app.put('/api/production-companies', async (req: Request, res: Response) => {
+app.put('/api/production-companies', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedCompany: ProductionCompany = req.body;
 
@@ -874,26 +863,29 @@ app.put('/api/production-companies', async (req: Request, res: Response) => {
     }
 });
 
-// delete the production companies by it sid
 /**
  * @openapi
  * /api/production-companies/{id}:
  *   delete:
- *     description: Delete a production company by its id
+ *     security:
+ *       - BearerAuth: [] # Requires Bearer Token
+ *     description: Delete a production company by its ID (Admin only)
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
- *         description: The ID of the production company to delete
+ *         description: ID of the production company to delete
  *         schema:
- *           type: number
+ *           type: integer
  *     responses:
  *       200:
  *         description: Production company deleted successfully
+ *       403:
+ *         description: Forbidden - Admin privileges required
  *       404:
  *         description: Production company not found
  */
-app.delete('/api/production-companies/:id', async (req: Request, res: Response) => {
+app.delete('/api/production-companies/:id', verifyToken, isAdmin,async (req: Request, res: Response) => {
     try {
         const id = +req.params.id;
 
@@ -928,7 +920,6 @@ interface ProductionCountry {
     name_country: string;
 }
 
-// Get all production countries
 /**
  * @openapi
  * /api/production-countries:
@@ -954,7 +945,7 @@ app.get('/api/production-countries', async (req: Request, res: Response) => {
     }
 });
 
-// get the production country by its id
+
 /**
  * @openapi
  * /api/production-countries/{id}:
@@ -998,11 +989,12 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
     }
 });
 
+
 /**
  * @openapi
  * /api/production-countries:
- *   post:
- *     description: Add a new production country (Admin only)
+ *   put:
+ *     description: Update an existing production country (Admin only)
  *     security:
  *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
@@ -1012,76 +1004,16 @@ app.get('/api/production-countries/:id', async (req: Request, res: Response) => 
  *           schema:
  *             $ref: '#/components/schemas/ProductionCountry'
  *     responses:
- *       201:
- *         description: Production country created successfully
+ *       200:
+ *         description: Production country updated successfully
  *       400:
- *         description: Bad request - Missing required fields
+ *         description: Bad request - ID is required in the body
  *       403:
  *         description: Forbidden - Admin privileges required
- *       500:
- *         description: Internal server error
- */
-app.post(
-    '/api/production-countries',
-    verifyToken, // Require JWT authentication
-    isAdmin,     // Admin-only access
-    asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        try {
-            const { id_country, name_country } = req.body;
-
-            // Validation: Ensure required fields are provided
-            if (!id_country || !name_country) {
-                res.status(400).json({ error: 'Both id_country and name_country are required.' });
-                return;
-            }
-
-            // Insert into database
-            const result = await executeQuery(
-                `
-                INSERT INTO PRODUCTION_COUNTRY (ID_COUNTRY, NAME_COUNTRY)
-                VALUES (:id_country, :name_country)
-                `,
-                { id_country, name_country }
-            );
-
-            // Success response
-            res.status(201).json({
-                message: 'Production country created successfully',
-                id_country,
-                name_country,
-            });
-        } catch (err) {
-            console.error('Error creating production country:', err);
-            res.status(500).json({ error: 'Internal server error.' });
-        }
-    })
-);
-
-// put the production country
-/**
- * @openapi
- * /api/production-countries:
- *   put:
- *     description: Update an existing production country
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ProductionCountry'
- *     responses:
- *       200:
- *         description: The updated ProductionCountry object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProductionCountry'
- *       400:
- *         description: Bad Request - ID not provided in the body
  *       404:
  *         description: Production country not found
  */
-app.put('/api/production-countries', async (req: Request, res: Response) => {
+app.put('/api/production-countries', verifyToken,isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedCountry: ProductionCountry = req.body;
 
@@ -1113,26 +1045,29 @@ app.put('/api/production-countries', async (req: Request, res: Response) => {
     }
 });
 
-// delete production country by its id
 /**
  * @openapi
  * /api/production-countries/{id}:
  *   delete:
- *     description: Delete a production country by its id
+ *     description: Delete a production country by its ID (Admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
- *         description: The ID of the Production Country to delete
  *         schema:
  *           type: string
+ *         description: ID of the production country
  *     responses:
  *       200:
- *         description: Production Country deleted successfully
+ *         description: Production country deleted successfully
+ *       403:
+ *         description: Forbidden - Admin privileges required
  *       404:
- *         description: Production Country not found
+ *         description: Production country not found
  */
-app.delete('/api/production-countries/:id', async (req: Request, res: Response) => {
+app.delete('/api/production-countries/:id', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
 
@@ -1167,7 +1102,6 @@ interface SpokenLanguage {
     language: string;
 }
 
-// get all spoken languages
 /**
  * @openapi
  * /api/spoken_languages:
@@ -1193,7 +1127,6 @@ app.get('/api/spoken_languages', async (req: Request, res: Response) => {
     }
 });
 
-// get the spoken language by its id
 /**
  * @openapi
  * /api/spoken_languages/{id}:
@@ -1237,12 +1170,14 @@ app.get('/api/spoken_languages/:id', async (req: Request, res: Response) => {
     }
 });
 
-// PUT
+
 /**
  * @openapi
  * /api/spoken_languages:
  *   put:
- *     description: Update an existing spoken language
+ *     description: Update an existing spoken language (Admin only)
+ *     security:
+ *       - BearerAuth: [] # Requires admin authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -1251,17 +1186,15 @@ app.get('/api/spoken_languages/:id', async (req: Request, res: Response) => {
  *             $ref: '#/components/schemas/SpokenLanguage'
  *     responses:
  *       200:
- *         description: The updated SpokenLanguage object
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SpokenLanguage'
+ *         description: Spoken language updated successfully
  *       400:
- *         description: Bad Request - ID not provided in the body
+ *         description: ID is required in the body
+ *       403:
+ *         description: Forbidden - Admin privileges required
  *       404:
- *         description: SpokenLanguage not found
+ *         description: Spoken language not found
  */
-app.put('/api/spoken_languages', async (req: Request, res: Response) => {
+app.put('/api/spoken_languages', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const updatedLanguage: SpokenLanguage = req.body;
 
@@ -1293,26 +1226,29 @@ app.put('/api/spoken_languages', async (req: Request, res: Response) => {
     }
 });
 
-// DELETE SPOKEN LANGUAGE BY ID
 /**
  * @openapi
  * /api/spoken_languages/{id}:
  *   delete:
- *     description: Delete a spoken language by its id
+ *     description: Delete a spoken language by ID (Admin only)
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - name: id
  *         in: path
  *         required: true
- *         description: The ID of the SpokenLanguage to delete
+ *         description: ID of the spoken language to delete
  *         schema:
  *           type: string
  *     responses:
  *       200:
  *         description: Spoken language deleted successfully
  *       404:
- *         description: SpokenLanguage not found
+ *         description: Spoken language not found
+ *       500:
+ *         description: Internal server error
  */
-app.delete('/api/spoken_languages/:id', async (req: Request, res: Response) => {
+app.delete('/api/spoken_languages/:id', verifyToken, isAdmin, async (req: Request, res: Response) => {
     try {
         const id = req.params.id;
 
@@ -1623,7 +1559,7 @@ interface User {
     first_name: string;
     last_name: string;
     age?: number;
-    is_admin: boolean;  // Oracle: stored as 0 or 1
+    is_admin: boolean;
 }
 
 /**
@@ -1694,7 +1630,6 @@ app.post(
             return;
         }
 
-        // row => [email, password, first_name, last_name, age, is_admin]
         const row = result.rows[0];
         const user = {
             email: row[0],
@@ -1863,16 +1798,13 @@ app.delete(
 app.get(
     '/api/user_roles/:email',
     asyncHandler(async (req: Request, res: Response): Promise<void> => {
-        // Récupérer l'email depuis le paramètre de l'URL
         const { email } = req.params;
 
-        // Validation : Vérifier si l'email est fourni
         if (!email) {
             res.status(400).json({ error: 'Email requis.' });
             return;
         }
 
-        // Exécuter la requête SQL
         const result = await executeQuery(
             `
             SELECT email FROM user_roles WHERE email = :email
@@ -1880,12 +1812,9 @@ app.get(
             { email }
         );
 
-        // Vérifier si un utilisateur est trouvé
         if (result.rows.length > 0) {
-            // Utilisateur trouvé -> renvoyer une erreur
             res.status(409).json({ error: 'Utilisateur déjà existant.' });
         } else {
-            // Aucun utilisateur trouvé -> succès
             res.status(200).json({ message: 'Email disponible.' });
         }
     })
