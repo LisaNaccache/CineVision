@@ -18,6 +18,17 @@ The backend of the Cinevision project provides a REST API for managing movies, g
 - **Run the server**: `npm start` to launch the backend. Access the API at `http://localhost:3000`. ("Doesn't work in our case)
 - **Swagger**: Explore the API endpoints via the Swagger interface at `/swagger-ui`.
 
+## Screenshots
+
+### API Endpoints Overview
+![img.png](img.png)
+
+### Get All Films API Endpoint
+![img_1.png](img_1.png)
+
+### Bearer Token Authorization
+![img_2.png](img_2.png)
+
 ## What We Implemented
 - Designed an API to handle films, genres, production companies, and users.
 - Added Swagger for automatic API documentation.
