@@ -29,6 +29,9 @@ The backend of the Cinevision project provides a REST API for managing movies, g
 ### Bearer Token Authorization
 ![img_2.png](img_2.png)
 
+### Conceptual Data Model
+![img_4.png](img_4.png)
+
 ## What We Implemented
 - Designed an API to handle films, genres, production companies, and users.
 - Added Swagger for automatic API documentation.
