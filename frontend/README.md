@@ -65,6 +65,30 @@ The application supports two types of user roles:
 
 ---
 
+## Here are some screencshots of the application :
+
+
+## Registration page
+![img_3.png](img_3.png)
+
+## Authentification page
+![img_7.png](img_7.png)
+
+## The page for viewing all films
+![img_8.png](img_8.png)
+
+## The page for viewing a particular film 
+![img_9.png](img_9.png)
+
+## The page for all table-related actions
+![img_10.png](img_10.png)
+
+## Add Film
+![img_11.png](img_11.png)
+
+## The page for editing or deleting a film
+![img_12.png](img_12.png)
+
 ## Project Highlights
 
 1. **Role-based Functionality**:
