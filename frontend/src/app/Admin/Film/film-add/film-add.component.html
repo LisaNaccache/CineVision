@@ -1,0 +1,64 @@
+<div class="container">
+  <h1 class="mt-3">Add Film</h1>
+
+  <form #form="ngForm" (ngSubmit)="onFormSubmit()">
+    <div class="mt-2 mb-5">
+      <div class="mt-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" id="title" name="title" class="form-control" [(ngModel)]="film.title" required>
+      </div>
+
+      <div class="mt-3">
+        <label for="popularity" class="form-label">Popularity</label>
+        <input type="number" id="popularity" name="popularity" class="form-control" [(ngModel)]="film.popularity"
+               step="0.1">
+      </div>
+
+      <div class="mt-3">
+        <label for="releaseDate" class="form-label">Release Date</label>
+        <input type="date" id="releaseDate" name="releaseDate" class="form-control" [(ngModel)]="film.releaseDate">
+      </div>
+
+      <div class="mt-3">
+        <label for="voteCount" class="form-label">Number of Votes</label>
+        <input type="number" id="voteCount" name="voteCount" class="form-control" [(ngModel)]="film.voteCount">
+      </div>
+
+      <div class="mt-3">
+        <label for="voteAverage" class="form-label">Vote Average</label>
+        <input type="number" id="voteAverage" name="voteAverage" class="form-control" [(ngModel)]="film.voteAverage"
+               step="0.1">
+      </div>
+
+      <div class="mt-3">
+        <label for="overview" class="form-label">Overview</label>
+        <input type="text" id="overview" name="overview" class="form-control" [(ngModel)]="film.overview">
+      </div>
+
+      <div class="mt-3">
+        <label for="posterUrl" class="form-label">Poster URL</label>
+        <input type="text" id="posterUrl" name="posterUrl" class="form-control" [(ngModel)]="film.posterUrl">
+      </div>
+
+      <div class="mt-3">
+        <label for="trailerUrl" class="form-label">Trailer URL</label>
+        <input type="text" id="trailerUrl" name="trailerUrl" class="form-control" [(ngModel)]="film.trailerUrl">
+      </div>
+
+      <div class="mt-3 d-flex">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">Save</button>
+        <button type="submit" class="btn btn-outline-primary ms-3" (click)="back()">Back</button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="isLoading" class="text-center mt-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="hasError && !isLoading" class="alert alert-danger mt-5">
+    An error occurred while adding the film. Please try again later.
+  </div>
+</div>

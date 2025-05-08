@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="my-5">
+    <div class="row align-items-stretch">
+      <ng-container *ngIf="films">
+        <div class="card text-white w-100" style="border: none;">
+          <div class="card-header bg-secondary" style="border: 1px solid #ced4da;">
+            <h5 class="mb-0 text-white">Filter</h5>
+          </div>
+          <div class="card-body rounded-bottom bg-light-subtle" style="border: 1px solid #ced4da;">
+            <div class="row g-3 align-items-center">
+              <!-- Input pour le nom -->
+              <div class="col-md-6">
+                <label for="filmName" class="form-label text-dark">Name:</label>
+                <input
+                  id="filmName"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter film name"
+                  [(ngModel)]="searchTerm"
+                  (input)="filterFilmsbyTitle()"
+                />
+              </div>
+
+              <!-- Dropdown pour les genres -->
+              <div class="col-md-6">
+                <label for="genreSelect" class="form-label text-dark">Genre:</label>
+                <select
+                  id="genreSelect"
+                  class="form-select"
+                  [(ngModel)]="selectedGenre"
+                  (change)="filterFilmsbyGenre()"
+                >
+                  <option value="">All Genres</option>
+                  <option *ngFor="let genre of genres" [value]="genre.name_genre">
+                    {{ genre.name_genre }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-container *ngIf="films.length > 0">
+
+          <div class="col-12 col-md-4 mb-3 mt-3 film-card" *ngFor="let film of films">
+            <div class="card h-100 position-relative">
+              <!-- Badge pour l'année -->
+              <span
+                class="badge year-badge bg-success-subtle text-secondary-emphasis position-absolute top-0 start-0 m-2">
+                {{ getYear(film.releaseDate) }}
+              </span>
+
+              <!-- Badge pour la durée -->
+              <span class="badge runtime-badge bg-info text-info-emphasis position-absolute top-0 end-0 m-2">
+                {{ formatRuntime(film.runtime) }}
+              </span>
+
+              <div class="position-relative">
+                <!-- Image du film -->
+                <img [src]="film.posterUrl" class="card-img-top" [alt]="film.title">
+
+                <!-- Badge pour la popularité -->
+                <span class="badge popularity-badge bg-warning-subtle text-dark position-absolute bottom-0 end-0 m-2">
+                  {{ getPopularityCategory(film.popularity) }}
+                </span>
+              </div>
+
+
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="card-title mb-0 text-truncate" title="{{ film.title }}">
+                    {{ film.title }}
+                  </h5>
+                  <div *ngIf="formatVoteAverage(film.voteAverage) !== 'N/A'"
+                       class="d-flex align-items-center ms-2 votes-container">
+                    <i class="bi bi-star-fill text-warning me-1"></i>
+                    <span class="votes-text">{{ formatVoteAverage(film.voteAverage) }}</span>
+                    <small class="text-muted ms-1 votes-count">({{ formatVoteCount(film.voteCount) }} votes)</small>
+                  </div>
+                </div>
+                <p class="card-text mt-2">
+        <span class="badge bg-secondary me-1" *ngFor="let genre of film.genres">
+          {{ genre.name_genre }}
+        </span>
+                </p>
+                <div class="mt-auto">
+                  <a [routerLink]="['/film', film.id]" class="btn btn-primary">
+                    More
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </ng-container>
+
+        <ng-container *ngIf="films.length === 0">
+          <div class="alert alert-danger mt-3" role="alert">
+            We're sorry, but there are no films available for this search !
+          </div>
+        </ng-container>
+
+      </ng-container>
+
+      <ng-container *ngIf="!films">
+        <div class="text-center">
+          <p>No films available.</p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

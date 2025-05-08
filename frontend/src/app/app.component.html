@@ -1,0 +1,50 @@
+<nav class="navbar bg-warning navbar-expand-lg fixed-top">
+  <div class="container-fluid">
+    <img src="assets/cinevision.png" alt="Logo" class="navbar-logo" />
+    <a class="navbar-brand text-uppercase fw-bold text-light" routerLink="/film">{{ title }}</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/film">Home</a>
+        </li>
+
+        <!-- Admin section visible only to administrators -->
+        <li class="nav-item dropdown" *ngIf="isAdmin">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/admin/film">Film</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/genre">Genre</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/production-compagny">Production Compagny</a></li>
+            <li><a class="dropdown-item" routerLink="/admin/production-country">Production Country</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Section My Account -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown" *ngIf="!isLoggedIn">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            My Account
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" routerLink="/register">Sign up</a></li>
+            <li><a class="dropdown-item" routerLink="/login">Sign in</a></li>
+          </ul>
+        </li>
+
+        <li class="nav-item" *ngIf="isLoggedIn">
+          <a class="nav-link" href="#" (click)="logout()">Logout</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<router-outlet></router-outlet>

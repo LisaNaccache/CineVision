@@ -1,0 +1,52 @@
+.banner {
+  position: relative;
+}
+
+.banner img {
+  max-height: 500px;
+  object-fit: cover;
+}
+
+.rating label {
+  cursor: pointer;
+}
+
+.rating .form-check-input {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.rating span {
+  font-size: 1rem;
+  margin-left: 0.3rem;
+}
+
+.rating i {
+  transition: color 0.2s ease-in-out;
+}
+
+.rating i:hover,
+.rating i:hover ~ i {
+  color: gold !important;
+}
+
+.rating i {
+  cursor: pointer;
+}
+
+.bg-light {
+  border: 1px solid #ddd;
+}
+
+.votes-container {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.votes-text {
+  font-weight: bold;
+}
+
+.votes-count {
+  font-size: 0.8rem;
+}
