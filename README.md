@@ -13,6 +13,18 @@
 - [`backend/README.md`](./backend/README.md)
 - [`frontend/README.md`](./frontend/README.md)
 
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)  
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)  
+![SQL](https://img.shields.io/badge/SQL-4479A1?logo=postgresql&logoColor=white)  
+![Angular](https://img.shields.io/badge/Angular-DD0031?logo=angular&logoColor=white)  
+![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?logo=bootstrap&logoColor=white)  
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)  
+![Express](https://img.shields.io/badge/Express-000000?logo=express&logoColor=white)  
+![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?logo=sequelize&logoColor=white)  
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=white)  
+![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)  
+![Oracle](https://img.shields.io/badge/Oracle-FF0000?logo=oracle&logoColor=white)  
+
 ---
 
 ## 🌟 Main Features
